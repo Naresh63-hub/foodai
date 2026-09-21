@@ -1,0 +1,898 @@
+[
+  {
+    "barcode": "8901063371040",
+    "product_name": "Britannia Glucose / Tiger Biscuits",
+    "brands": "Britannia Industries Ltd.",
+    "ingredients_text": "Refined Wheat Flour (Maida), Sugar, Refined Palm Oil, Invert Sugar Syrup, Milk Solids, Iodised Salt, Minerals, Emulsifier (E322 Lecithin), Raising Agents (E500ii, E503ii), Dough Conditioner (E223 Sodium Metabisulphite), Caramel Colour (E150d), Artificial Vanilla Flavour.",
+    "serving_size": "36.6 g",
+    "serving_size_g": 36.6,
+    "product_weight_g": 36.6,
+    "categories_tags": [
+      "en:biscuits",
+      "en:sweet-biscuits"
+    ],
+    "nutriments": {
+      "sugars_100g": 26.5,
+      "fat_100g": 13.5,
+      "salt_100g": 0.65,
+      "proteins_100g": 7.0,
+      "fiber_100g": 1.5,
+      "energy_kcal_100g": 450
+    }
+  },
+  {
+    "barcode": "8901719101076",
+    "product_name": "Parle-G Original Glucose Biscuits",
+    "brands": "Parle Products",
+    "ingredients_text": "Refined Wheat Flour (Maida), Sugar, Refined Palm Oil, Invert Sugar Syrup, Raising Agents (E500ii, E503ii), Iodised Salt, Milk Solids, Emulsifier (E322), Dough Conditioner (E223).",
+    "serving_size": "50 g",
+    "serving_size_g": 50.0,
+    "product_weight_g": 100.0,
+    "categories_tags": [
+      "en:biscuits",
+      "en:sweet-biscuits"
+    ],
+    "nutriments": {
+      "sugars_100g": 27.0,
+      "fat_100g": 13.0,
+      "salt_100g": 0.6,
+      "proteins_100g": 6.5,
+      "fiber_100g": 1.2,
+      "energy_kcal_100g": 454
+    }
+  },
+  {
+    "barcode": "8901063012213",
+    "product_name": "Britannia Good Day Butter Cookies",
+    "brands": "Britannia",
+    "ingredients_text": "Refined Wheat Flour (Maida), Sugar, Butter (2%), Refined Palm Oil, Milk Solids, Raising Agents (E503ii, E500ii), Iodised Salt, Emulsifiers (E322, E471), Artificial Flavoring.",
+    "serving_size": "30 g",
+    "serving_size_g": 30.0,
+    "product_weight_g": 100.0,
+    "categories_tags": [
+      "en:biscuits",
+      "en:butter-cookies"
+    ],
+    "nutriments": {
+      "sugars_100g": 23.0,
+      "fat_100g": 21.0,
+      "salt_100g": 0.7,
+      "proteins_100g": 7.0,
+      "fiber_100g": 1.5,
+      "energy_kcal_100g": 490
+    }
+  },
+  {
+    "barcode": "8901719112461",
+    "product_name": "Parle Monaco Salted Biscuits",
+    "brands": "Parle Products",
+    "ingredients_text": "Refined Wheat Flour (Maida), Refined Palm Oil, Sugar, Leavening Agents (E503ii, E500ii), Invert Sugar, Iodised Salt, Yeast, Dough Conditioner (E223).",
+    "serving_size": "30 g",
+    "serving_size_g": 30.0,
+    "product_weight_g": 75.0,
+    "categories_tags": [
+      "en:biscuits",
+      "en:crackers",
+      "en:salted-biscuits"
+    ],
+    "nutriments": {
+      "sugars_100g": 8.0,
+      "fat_100g": 22.0,
+      "salt_100g": 1.8,
+      "proteins_100g": 8.5,
+      "fiber_100g": 1.5,
+      "energy_kcal_100g": 485
+    }
+  },
+  {
+    "barcode": "8901063141128",
+    "product_name": "Britannia Bourbon Chocolate Cream Biscuits",
+    "brands": "Britannia",
+    "ingredients_text": "Refined Wheat Flour (Maida), Sugar, Refined Palm Oil, Cocoa Solids (3%), Invert Sugar, Leavening Agents (E500ii, E503ii), Emulsifier (E322), Iodised Salt, Caramel Colour (E150d).",
+    "serving_size": "30 g",
+    "serving_size_g": 30.0,
+    "product_weight_g": 120.0,
+    "categories_tags": [
+      "en:biscuits",
+      "en:chocolate-biscuits"
+    ],
+    "nutriments": {
+      "sugars_100g": 34.0,
+      "fat_100g": 18.0,
+      "salt_100g": 0.8,
+      "proteins_100g": 6.0,
+      "fiber_100g": 2.0,
+      "energy_kcal_100g": 480
+    }
+  },
+  {
+    "barcode": "8901063092215",
+    "product_name": "Britannia Marie Gold Biscuits",
+    "brands": "Britannia",
+    "ingredients_text": "Refined Wheat Flour (Maida), Sugar, Refined Palm Oil, Invert Sugar, Milk Solids, Leavening Agents (E500ii, E503ii), Salt, Dough Conditioner (E223).",
+    "serving_size": "30 g",
+    "serving_size_g": 30.0,
+    "product_weight_g": 120.0,
+    "categories_tags": [
+      "en:biscuits",
+      "en:marie-biscuits"
+    ],
+    "nutriments": {
+      "sugars_100g": 21.0,
+      "fat_100g": 10.5,
+      "salt_100g": 0.7,
+      "proteins_100g": 8.0,
+      "fiber_100g": 2.0,
+      "energy_kcal_100g": 440
+    }
+  },
+  {
+    "barcode": "8901233024018",
+    "product_name": "Oreo Original Vanilla Cream Sandwich Cookies",
+    "brands": "Cadbury / Mondelez",
+    "ingredients_text": "Refined Wheat Flour, Sugar, Fractionated Fat, Cocoa Solids (4.5%), Invert Sugar, Leavening Agents (E500ii, E503ii), Iodised Salt, Emulsifier (E322), Vanilla Flavour.",
+    "serving_size": "28.8 g (3 cookies)",
+    "serving_size_g": 28.8,
+    "product_weight_g": 120.0,
+    "categories_tags": [
+      "en:biscuits",
+      "en:sandwich-cookies"
+    ],
+    "nutriments": {
+      "sugars_100g": 38.5,
+      "fat_100g": 19.5,
+      "salt_100g": 1.1,
+      "proteins_100g": 5.0,
+      "fiber_100g": 2.5,
+      "energy_kcal_100g": 485
+    }
+  },
+  {
+    "barcode": "8901725121402",
+    "product_name": "Sunfeast Dark Fantasy Choco Fills",
+    "brands": "ITC Sunfeast",
+    "ingredients_text": "Choco Cr\u00e8me (Sugar, Refined Palm Oil, Cocoa Solids, Emulsifier E322), Refined Wheat Flour, Hydrogenated Vegetable Oil, Sugar, Cocoa Solids, Invert Syrup, Raising Agents (E500ii, E503ii), Salt.",
+    "serving_size": "25 g (2 cookies)",
+    "serving_size_g": 25.0,
+    "product_weight_g": 75.0,
+    "categories_tags": [
+      "en:biscuits",
+      "en:filled-cookies"
+    ],
+    "nutriments": {
+      "sugars_100g": 37.0,
+      "fat_100g": 27.0,
+      "salt_100g": 0.6,
+      "proteins_100g": 5.5,
+      "fiber_100g": 2.8,
+      "energy_kcal_100g": 515
+    }
+  },
+  {
+    "barcode": "8906009070014",
+    "product_name": "Unibic Butter Cookies",
+    "brands": "Unibic",
+    "ingredients_text": "Refined Wheat Flour, Sugar, Butter (14%), Margarine, Milk Solids, Leavening Agent (E503ii, E500ii), Salt, Emulsifier (E322).",
+    "serving_size": "30 g",
+    "serving_size_g": 30.0,
+    "product_weight_g": 150.0,
+    "categories_tags": [
+      "en:biscuits",
+      "en:butter-cookies"
+    ],
+    "nutriments": {
+      "sugars_100g": 25.0,
+      "fat_100g": 24.0,
+      "salt_100g": 0.75,
+      "proteins_100g": 6.8,
+      "fiber_100g": 1.5,
+      "energy_kcal_100g": 505
+    }
+  },
+  {
+    "barcode": "8901063015023",
+    "product_name": "Britannia NutriChoice Digestive High Fibre Biscuits",
+    "brands": "Britannia",
+    "ingredients_text": "Refined Wheat Flour (Maida 42%), Whole Wheat Flour (Atta 20%), Refined Palm Oil, Sugar, Wheat Bran (4.5%), Invert Sugar, Raising Agents (E500ii, E503ii), Salt, Emulsifier (E322, E471), Dough Conditioner (E223).",
+    "serving_size": "25 g",
+    "serving_size_g": 25.0,
+    "product_weight_g": 100.0,
+    "categories_tags": [
+      "en:biscuits",
+      "en:digestive-biscuits"
+    ],
+    "nutriments": {
+      "sugars_100g": 14.5,
+      "fat_100g": 21.0,
+      "salt_100g": 0.9,
+      "proteins_100g": 8.5,
+      "fiber_100g": 6.0,
+      "energy_kcal_100g": 475
+    }
+  },
+  {
+    "barcode": "8901058852372",
+    "product_name": "Maggi 2-Minute Masala Instant Noodles",
+    "brands": "Nestle India",
+    "ingredients_text": "Refined Wheat Flour (Maida), Palm Oil, Iodized Salt, Wheat Gluten, Thickeners (E508, E412), Acidity Regulators (E501i, E500i), Humectant (E451i), Hydrolyzed Groundnut Protein, Mixed Spices, Dehydrated Onion, Sugar, Flavour Enhancer (E635), Caramel Colour (E150d).",
+    "serving_size": "70 g",
+    "serving_size_g": 70.0,
+    "product_weight_g": 70.0,
+    "categories_tags": [
+      "en:noodles",
+      "en:instant-noodles"
+    ],
+    "nutriments": {
+      "sugars_100g": 2.2,
+      "fat_100g": 15.7,
+      "salt_100g": 3.2,
+      "proteins_100g": 8.2,
+      "fiber_100g": 3.6,
+      "energy_kcal_100g": 427
+    }
+  },
+  {
+    "barcode": "8901058862012",
+    "product_name": "Maggi Nutri-Licious Masala Veg Atta Noodles",
+    "brands": "Nestle India",
+    "ingredients_text": "Whole Wheat Flour (Atta 85%), Palm Oil, Iodized Salt, Wheat Gluten, Thickeners (E508, E412), Acidity Regulators (E501i, E500i), Spices, Dehydrated Vegetables (Carrot, Green Peas), Flavour Enhancer (E635).",
+    "serving_size": "72.5 g",
+    "serving_size_g": 72.5,
+    "product_weight_g": 72.5,
+    "categories_tags": [
+      "en:noodles",
+      "en:atta-noodles"
+    ],
+    "nutriments": {
+      "sugars_100g": 2.5,
+      "fat_100g": 13.0,
+      "salt_100g": 2.4,
+      "proteins_100g": 9.5,
+      "fiber_100g": 6.5,
+      "energy_kcal_100g": 415
+    }
+  },
+  {
+    "barcode": "8901725134105",
+    "product_name": "Sunfeast YiPPee! Magic Masala Noodles",
+    "brands": "ITC",
+    "ingredients_text": "Refined Wheat Flour (Maida), Edible Vegetable Oil (Palm), Iodised Salt, Wheat Gluten, Mineral, Acidity Regulators (E500ii, E501i), Thickener (E412), Flavour Enhancers (E627, E631), Spices.",
+    "serving_size": "70 g",
+    "serving_size_g": 70.0,
+    "product_weight_g": 70.0,
+    "categories_tags": [
+      "en:noodles",
+      "en:instant-noodles"
+    ],
+    "nutriments": {
+      "sugars_100g": 3.0,
+      "fat_100g": 16.0,
+      "salt_100g": 2.8,
+      "proteins_100g": 8.0,
+      "fiber_100g": 3.0,
+      "energy_kcal_100g": 435
+    }
+  },
+  {
+    "barcode": "8901014002018",
+    "product_name": "Top Ramen Curry Veg Noodles",
+    "brands": "Nissin India",
+    "ingredients_text": "Wheat Flour, Edible Vegetable Oil (Palm), Salt, Mineral Salt (E508), Acidity Regulators (E500i, E451i), Curry Seasoning, Flavour Enhancer (E621, E635), Caramel (E150c).",
+    "serving_size": "70 g",
+    "serving_size_g": 70.0,
+    "product_weight_g": 70.0,
+    "categories_tags": [
+      "en:noodles",
+      "en:ramen"
+    ],
+    "nutriments": {
+      "sugars_100g": 3.2,
+      "fat_100g": 17.0,
+      "salt_100g": 3.0,
+      "proteins_100g": 8.5,
+      "fiber_100g": 2.5,
+      "energy_kcal_100g": 445
+    }
+  },
+  {
+    "barcode": "8901042953018",
+    "product_name": "MTR Ready to Eat Dal Makhani",
+    "brands": "MTR Foods",
+    "ingredients_text": "Water, Black Gram (Urad Dal 18%), Butter (Milk Fat), Red Kidney Beans (Rajma 5%), Cream, Tomato Paste, Refined Sunflower Oil, Salt, Ginger, Garlic, Spices.",
+    "serving_size": "150 g",
+    "serving_size_g": 150.0,
+    "product_weight_g": 300.0,
+    "categories_tags": [
+      "en:ready-meals",
+      "en:canned-curries",
+      "en:dal-makhani"
+    ],
+    "nutriments": {
+      "sugars_100g": 1.5,
+      "fat_100g": 9.5,
+      "salt_100g": 1.2,
+      "proteins_100g": 5.2,
+      "fiber_100g": 4.0,
+      "energy_kcal_100g": 145
+    }
+  },
+  {
+    "barcode": "8901491101838",
+    "product_name": "Kurkure Masala Munch",
+    "brands": "PepsiCo India",
+    "ingredients_text": "Rice Meal, Edible Vegetable Oil (Palmolein), Corn Meal, Gram Meal, Spices and Condiments (Chilli Powder, Onion Powder, Garlic Powder, Coriander Powder, Turmeric Powder), Salt, Sugar, Tartaric Acid (E334), Citric Acid (E330).",
+    "serving_size": "30 g",
+    "serving_size_g": 30.0,
+    "product_weight_g": 90.0,
+    "categories_tags": [
+      "en:snacks",
+      "en:savoury-snacks"
+    ],
+    "nutriments": {
+      "sugars_100g": 2.5,
+      "fat_100g": 34.0,
+      "salt_100g": 2.1,
+      "proteins_100g": 6.0,
+      "fiber_100g": 2.0,
+      "energy_kcal_100g": 560
+    }
+  },
+  {
+    "barcode": "8901491001084",
+    "product_name": "Lay's India's Magic Masala Potato Chips",
+    "brands": "PepsiCo India",
+    "ingredients_text": "Potato, Edible Vegetable Oil (Palmolein), Seasoning (Spices and Condiments, Sugar, Salt, Dry Mango Powder, Citric Acid E330, Tartaric Acid E334, Flavour Enhancer E635).",
+    "serving_size": "30 g",
+    "serving_size_g": 30.0,
+    "product_weight_g": 50.0,
+    "categories_tags": [
+      "en:snacks",
+      "en:chips",
+      "en:potato-crisps"
+    ],
+    "nutriments": {
+      "sugars_100g": 4.0,
+      "fat_100g": 33.5,
+      "salt_100g": 1.7,
+      "proteins_100g": 7.0,
+      "fiber_100g": 3.5,
+      "energy_kcal_100g": 544
+    }
+  },
+  {
+    "barcode": "8901491001015",
+    "product_name": "Lay's Classic Salted Potato Chips",
+    "brands": "PepsiCo India",
+    "ingredients_text": "Potato, Edible Vegetable Oil (Palmolein), Iodised Salt.",
+    "serving_size": "30 g",
+    "serving_size_g": 30.0,
+    "product_weight_g": 50.0,
+    "categories_tags": [
+      "en:chips",
+      "en:potato-crisps"
+    ],
+    "nutriments": {
+      "sugars_100g": 0.5,
+      "fat_100g": 35.0,
+      "salt_100g": 1.4,
+      "proteins_100g": 6.5,
+      "fiber_100g": 3.2,
+      "energy_kcal_100g": 550
+    }
+  },
+  {
+    "barcode": "8901764012204",
+    "product_name": "Haldiram's Nagpur Aloo Bhujia",
+    "brands": "Haldiram's",
+    "ingredients_text": "Potatoes (44%), Edible Vegetable Oil (Cottonseed, Corn, Palmolein), Gram Pulse Flour, Moth Flour, Rice Flour, Starch, Iodised Salt, Spices (Chilli, Coriander, Cumin), Acidity Regulator (E330).",
+    "serving_size": "30 g",
+    "serving_size_g": 30.0,
+    "product_weight_g": 150.0,
+    "categories_tags": [
+      "en:snacks",
+      "en:savoury-snacks",
+      "en:namkeen"
+    ],
+    "nutriments": {
+      "sugars_100g": 1.5,
+      "fat_100g": 42.0,
+      "salt_100g": 1.9,
+      "proteins_100g": 8.0,
+      "fiber_100g": 4.0,
+      "energy_kcal_100g": 580
+    }
+  },
+  {
+    "barcode": "8901764011023",
+    "product_name": "Haldiram's Bhujia Sev",
+    "brands": "Haldiram's",
+    "ingredients_text": "Moth Bean Flour (47%), Edible Vegetable Oil, Gram Pulse Flour, Iodised Salt, Red Chilli Powder, Black Pepper, Ginger, Cardamom, Clove.",
+    "serving_size": "30 g",
+    "serving_size_g": 30.0,
+    "product_weight_g": 200.0,
+    "categories_tags": [
+      "en:snacks",
+      "en:savoury-snacks",
+      "en:namkeen"
+    ],
+    "nutriments": {
+      "sugars_100g": 1.0,
+      "fat_100g": 40.0,
+      "salt_100g": 1.8,
+      "proteins_100g": 12.0,
+      "fiber_100g": 5.0,
+      "energy_kcal_100g": 570
+    }
+  },
+  {
+    "barcode": "8901764013010",
+    "product_name": "Haldiram's Khatta Meetha Mixture",
+    "brands": "Haldiram's",
+    "ingredients_text": "Gram Pulse Flour, Edible Vegetable Oil, Rice Flakes, Sugar, Peanuts, Sago, Lentils, Green Peas, Salt, Mango Powder, Turmeric, Citric Acid (E330).",
+    "serving_size": "30 g",
+    "serving_size_g": 30.0,
+    "product_weight_g": 200.0,
+    "categories_tags": [
+      "en:namkeen",
+      "en:savoury-snacks"
+    ],
+    "nutriments": {
+      "sugars_100g": 14.0,
+      "fat_100g": 32.0,
+      "salt_100g": 1.5,
+      "proteins_100g": 9.0,
+      "fiber_100g": 3.5,
+      "energy_kcal_100g": 525
+    }
+  },
+  {
+    "barcode": "8901491501010",
+    "product_name": "Doritos Nacho Cheese Tortilla Chips",
+    "brands": "PepsiCo India",
+    "ingredients_text": "Corn (68%), Edible Vegetable Oil (Palmolein), Seasoning (Cheese Powder, Milk Solids, Salt, Sugar, Onion Powder, Garlic Powder, Flavour Enhancers E627 E631, Acidity Regulators E330 E270).",
+    "serving_size": "30 g",
+    "serving_size_g": 30.0,
+    "product_weight_g": 70.0,
+    "categories_tags": [
+      "en:chips",
+      "en:tortilla-chips"
+    ],
+    "nutriments": {
+      "sugars_100g": 3.5,
+      "fat_100g": 26.0,
+      "salt_100g": 1.8,
+      "proteins_100g": 7.5,
+      "fiber_100g": 4.5,
+      "energy_kcal_100g": 505
+    }
+  },
+  {
+    "barcode": "8901030005427",
+    "product_name": "Cadbury Dairy Milk Chocolate",
+    "brands": "Mondelez India",
+    "ingredients_text": "Sugar, Milk Solids (22%), Cocoa Butter, Cocoa Solids, Emulsifiers (E442, E476), Flavours (Natural, Nature Identical and Artificial Vanilla).",
+    "serving_size": "20 g",
+    "serving_size_g": 20.0,
+    "product_weight_g": 50.0,
+    "categories_tags": [
+      "en:chocolates",
+      "en:milk-chocolates"
+    ],
+    "nutriments": {
+      "sugars_100g": 57.0,
+      "fat_100g": 30.5,
+      "salt_100g": 0.2,
+      "proteins_100g": 8.0,
+      "fiber_100g": 2.0,
+      "energy_kcal_100g": 532
+    }
+  },
+  {
+    "barcode": "8901058863217",
+    "product_name": "Nestle KitKat 4-Finger Crisp Wafer",
+    "brands": "Nestle India",
+    "ingredients_text": "Sugar, Milk Solids, Wheat Flour (Maida), Hydrogenated Vegetable Fats, Cocoa Butter, Cocoa Solids (4.5%), Emulsifier (E322 Soy Lecithin), Raising Agent (E500ii), Yeast, Salt.",
+    "serving_size": "38 g",
+    "serving_size_g": 38.0,
+    "product_weight_g": 38.0,
+    "categories_tags": [
+      "en:chocolates",
+      "en:wafer-bars"
+    ],
+    "nutriments": {
+      "sugars_100g": 46.0,
+      "fat_100g": 24.5,
+      "salt_100g": 0.3,
+      "proteins_100g": 6.5,
+      "fiber_100g": 1.8,
+      "energy_kcal_100g": 495
+    }
+  },
+  {
+    "barcode": "8901030018120",
+    "product_name": "Cadbury 5 Star Chocolate Bar",
+    "brands": "Mondelez India",
+    "ingredients_text": "Sugar, Liquid Glucose, Invert Sugar, Hydrogenated Vegetable Oil, Milk Solids, Cocoa Solids, Fractionated Fat, Emulsifiers (E442, E471, E476), Salt.",
+    "serving_size": "40 g",
+    "serving_size_g": 40.0,
+    "product_weight_g": 40.0,
+    "categories_tags": [
+      "en:chocolates",
+      "en:caramel-bars"
+    ],
+    "nutriments": {
+      "sugars_100g": 54.0,
+      "fat_100g": 20.0,
+      "salt_100g": 0.4,
+      "proteins_100g": 3.5,
+      "fiber_100g": 1.0,
+      "energy_kcal_100g": 460
+    }
+  },
+  {
+    "barcode": "8901262022018",
+    "product_name": "Amul 75% Bitter Dark Chocolate",
+    "brands": "Amul",
+    "ingredients_text": "Cocoa Solids (75%), Sugar, Cocoa Butter, Permitted Emulsifiers (E322, E476), Natural Vanilla Flavour.",
+    "serving_size": "20 g",
+    "serving_size_g": 20.0,
+    "product_weight_g": 150.0,
+    "categories_tags": [
+      "en:chocolates",
+      "en:dark-chocolates"
+    ],
+    "nutriments": {
+      "sugars_100g": 24.0,
+      "fat_100g": 42.0,
+      "salt_100g": 0.05,
+      "proteins_100g": 8.5,
+      "fiber_100g": 11.0,
+      "energy_kcal_100g": 565
+    }
+  },
+  {
+    "barcode": "8901764021015",
+    "product_name": "Coca-Cola Original Carbonated Beverage",
+    "brands": "Coca-Cola India",
+    "ingredients_text": "Carbonated Water, Sugar, Acidity Regulator (E338 Phosphoric Acid), Caramel Colour (E150d), Flavours (Natural Flavouring Substances), Caffeine.",
+    "serving_size": "250 ml",
+    "serving_size_g": 250.0,
+    "product_weight_g": 250.0,
+    "categories_tags": [
+      "en:beverages",
+      "en:carbonated-drinks",
+      "en:colas"
+    ],
+    "nutriments": {
+      "sugars_100g": 10.6,
+      "fat_100g": 0.0,
+      "salt_100g": 0.02,
+      "proteins_100g": 0.0,
+      "fiber_100g": 0.0,
+      "energy_kcal_100g": 44
+    }
+  },
+  {
+    "barcode": "8901764022012",
+    "product_name": "Thums Up Charged Strong Cola",
+    "brands": "Coca-Cola India",
+    "ingredients_text": "Carbonated Water, Sugar, Acidity Regulator (E338), Caramel Colour (E150d), Natural Flavours, Caffeine (145 mg/L).",
+    "serving_size": "250 ml",
+    "serving_size_g": 250.0,
+    "product_weight_g": 250.0,
+    "categories_tags": [
+      "en:beverages",
+      "en:colas"
+    ],
+    "nutriments": {
+      "sugars_100g": 10.0,
+      "fat_100g": 0.0,
+      "salt_100g": 0.03,
+      "proteins_100g": 0.0,
+      "fiber_100g": 0.0,
+      "energy_kcal_100g": 40
+    }
+  },
+  {
+    "barcode": "8901719201011",
+    "product_name": "Frooti Fresh 'N' Juicy Mango Drink",
+    "brands": "Parle Agro",
+    "ingredients_text": "Water, Mango Pulp (19.5%), Sugar, Acidity Regulator (E330 Citric Acid), Antioxidant (E300 Ascorbic Acid), Permitted Natural Colour (E160a) and Flavours.",
+    "serving_size": "150 ml",
+    "serving_size_g": 150.0,
+    "product_weight_g": 150.0,
+    "categories_tags": [
+      "en:beverages",
+      "en:fruit-juices",
+      "en:mango-drinks"
+    ],
+    "nutriments": {
+      "sugars_100g": 13.5,
+      "fat_100g": 0.0,
+      "salt_100g": 0.04,
+      "proteins_100g": 0.1,
+      "fiber_100g": 0.2,
+      "energy_kcal_100g": 60
+    }
+  },
+  {
+    "barcode": "8901491202016",
+    "product_name": "Sting Energy Drink (Red)",
+    "brands": "PepsiCo India",
+    "ingredients_text": "Carbonated Water, Sugar, Acidity Regulators (E330, E331), Taurine, Caffeine (300 mg/L), Preservatives (E211 Sodium Benzoate, E202), Inositol, Vitamins (B3, B6, B12), Synthetic Food Colour (E129 Allura Red).",
+    "serving_size": "250 ml",
+    "serving_size_g": 250.0,
+    "product_weight_g": 250.0,
+    "categories_tags": [
+      "en:beverages",
+      "en:energy-drinks"
+    ],
+    "nutriments": {
+      "sugars_100g": 7.0,
+      "fat_100g": 0.0,
+      "salt_100g": 0.1,
+      "proteins_100g": 0.2,
+      "fiber_100g": 0.0,
+      "energy_kcal_100g": 28
+    }
+  },
+  {
+    "barcode": "8901262010053",
+    "product_name": "Amul High Protein Plain Greek Yogurt",
+    "brands": "Amul",
+    "ingredients_text": "Pasteurized Skimmed Milk, Milk Solids, Active Lactic Cultures (Lactobacillus bulgaricus, Streptococcus thermophilus).",
+    "serving_size": "100 g",
+    "serving_size_g": 100.0,
+    "product_weight_g": 100.0,
+    "categories_tags": [
+      "en:yogurts",
+      "en:greek-yogurts",
+      "en:dairy-products"
+    ],
+    "nutriments": {
+      "sugars_100g": 4.5,
+      "fat_100g": 0.2,
+      "salt_100g": 0.08,
+      "proteins_100g": 10.0,
+      "fiber_100g": 0.0,
+      "energy_kcal_100g": 62
+    }
+  },
+  {
+    "barcode": "8901262010121",
+    "product_name": "Amul Pasteurised Butter",
+    "brands": "Amul",
+    "ingredients_text": "Butter (Milk Fat 80%), Common Salt, Annatto Colour (E160b).",
+    "serving_size": "10 g",
+    "serving_size_g": 10.0,
+    "product_weight_g": 100.0,
+    "categories_tags": [
+      "en:butters",
+      "en:dairy-spreads"
+    ],
+    "nutriments": {
+      "sugars_100g": 0.0,
+      "fat_100g": 80.0,
+      "salt_100g": 2.5,
+      "proteins_100g": 0.5,
+      "fiber_100g": 0.0,
+      "energy_kcal_100g": 722
+    }
+  },
+  {
+    "barcode": "8908007789012",
+    "product_name": "Pintola All-Natural Creamy Peanut Butter",
+    "brands": "Pintola",
+    "ingredients_text": "100% Roasted Peanuts.",
+    "serving_size": "32 g (2 tbsp)",
+    "serving_size_g": 32.0,
+    "product_weight_g": 350.0,
+    "categories_tags": [
+      "en:spreads",
+      "en:peanut-butters"
+    ],
+    "nutriments": {
+      "sugars_100g": 6.2,
+      "fat_100g": 49.5,
+      "salt_100g": 0.03,
+      "proteins_100g": 30.0,
+      "fiber_100g": 9.0,
+      "energy_kcal_100g": 625
+    }
+  },
+  {
+    "barcode": "8000500179864",
+    "product_name": "Nutella Hazelnut Spread with Cocoa",
+    "brands": "Ferrero",
+    "ingredients_text": "Sugar, Palm Oil, Hazelnuts (13%), Skimmed Milk Powder (8.7%), Low-Fat Cocoa (7.4%), Emulsifier (E322 Lecithin), Vanillin.",
+    "serving_size": "15 g (1 tbsp)",
+    "serving_size_g": 15.0,
+    "product_weight_g": 350.0,
+    "categories_tags": [
+      "en:spreads",
+      "en:hazelnut-spreads"
+    ],
+    "nutriments": {
+      "sugars_100g": 56.3,
+      "fat_100g": 30.9,
+      "salt_100g": 0.1,
+      "proteins_100g": 6.3,
+      "fiber_100g": 3.0,
+      "energy_kcal_100g": 539
+    }
+  },
+  {
+    "barcode": "8901499009121",
+    "product_name": "Quaker Rolled White Oats",
+    "brands": "PepsiCo India",
+    "ingredients_text": "100% Whole Grain Rolled Oats.",
+    "serving_size": "40 g",
+    "serving_size_g": 40.0,
+    "product_weight_g": 400.0,
+    "categories_tags": [
+      "en:breakfast-cereals",
+      "en:rolled-oats",
+      "en:whole-foods"
+    ],
+    "nutriments": {
+      "sugars_100g": 1.0,
+      "fat_100g": 8.5,
+      "salt_100g": 0.01,
+      "proteins_100g": 12.0,
+      "fiber_100g": 10.0,
+      "energy_kcal_100g": 389
+    }
+  },
+  {
+    "barcode": "8901088001013",
+    "product_name": "Kellogg's Chocos Chocolate Wheat Cereal",
+    "brands": "Kellogg's India",
+    "ingredients_text": "Wheat Flour (Maida 54%), Sugar, Cocoa Solids (5.5%), Minerals, Edible Vegetable Oil (Palmolein), Cereal Extract, Iodised Salt, Vitamins, Colour (E150d), Antioxidant (E320).",
+    "serving_size": "30 g",
+    "serving_size_g": 30.0,
+    "product_weight_g": 250.0,
+    "categories_tags": [
+      "en:breakfast-cereals",
+      "en:chocolate-cereals"
+    ],
+    "nutriments": {
+      "sugars_100g": 29.5,
+      "fat_100g": 3.0,
+      "salt_100g": 0.8,
+      "proteins_100g": 8.0,
+      "fiber_100g": 5.0,
+      "energy_kcal_100g": 380
+    }
+  },
+  {
+    "barcode": "8901088002010",
+    "product_name": "Kellogg's Corn Flakes Original",
+    "brands": "Kellogg's India",
+    "ingredients_text": "Milled Corn (89%), Sugar, Malt Extract, Iodized Salt, Vitamins, Minerals, Antioxidant (E307b).",
+    "serving_size": "30 g",
+    "serving_size_g": 30.0,
+    "product_weight_g": 475.0,
+    "categories_tags": [
+      "en:breakfast-cereals",
+      "en:corn-flakes"
+    ],
+    "nutriments": {
+      "sugars_100g": 8.5,
+      "fat_100g": 0.8,
+      "salt_100g": 1.1,
+      "proteins_100g": 7.0,
+      "fiber_100g": 2.5,
+      "energy_kcal_100g": 378
+    }
+  },
+  {
+    "barcode": "8901000000011",
+    "product_name": "Fresh Royal Gala Apples",
+    "brands": "Nature Fresh",
+    "ingredients_text": "100% Fresh Raw Apples.",
+    "serving_size": "150 g",
+    "serving_size_g": 150.0,
+    "product_weight_g": 150.0,
+    "categories_tags": [
+      "en:fruits",
+      "en:apples",
+      "en:fresh-fruits"
+    ],
+    "nutriments": {
+      "sugars_100g": 10.4,
+      "fat_100g": 0.2,
+      "salt_100g": 0.001,
+      "proteins_100g": 0.3,
+      "fiber_100g": 2.4,
+      "energy_kcal_100g": 52
+    }
+  },
+  {
+    "barcode": "8901000000035",
+    "product_name": "Raw California Almonds (Whole Badam)",
+    "brands": "Nut Harvest",
+    "ingredients_text": "100% Raw Unsalted Almonds.",
+    "serving_size": "28 g (approx 23 almonds)",
+    "serving_size_g": 28.0,
+    "product_weight_g": 250.0,
+    "categories_tags": [
+      "en:nuts",
+      "en:almonds",
+      "en:whole-foods"
+    ],
+    "nutriments": {
+      "sugars_100g": 4.2,
+      "fat_100g": 49.9,
+      "salt_100g": 0.002,
+      "proteins_100g": 21.2,
+      "fiber_100g": 12.5,
+      "energy_kcal_100g": 579
+    }
+  },
+  {
+    "barcode": "8901000000059",
+    "product_name": "Plain Roasted Fox Nuts (Phool Makhana)",
+    "brands": "Organic Staples",
+    "ingredients_text": "100% Roasted Lotus Seeds (Fox Nuts / Makhana).",
+    "serving_size": "30 g (1 bowl)",
+    "serving_size_g": 30.0,
+    "product_weight_g": 100.0,
+    "categories_tags": [
+      "en:snacks",
+      "en:makhana",
+      "en:whole-foods"
+    ],
+    "nutriments": {
+      "sugars_100g": 0.5,
+      "fat_100g": 0.5,
+      "salt_100g": 0.01,
+      "proteins_100g": 9.7,
+      "fiber_100g": 14.5,
+      "energy_kcal_100g": 347
+    }
+  },
+  {
+    "barcode": "8901000000080",
+    "product_name": "Natural Tender Coconut Water",
+    "brands": "Pure Tropics",
+    "ingredients_text": "100% Natural Coconut Water.",
+    "serving_size": "200 ml",
+    "serving_size_g": 200.0,
+    "product_weight_g": 200.0,
+    "categories_tags": [
+      "en:beverages",
+      "en:coconut-water",
+      "en:whole-foods"
+    ],
+    "nutriments": {
+      "sugars_100g": 2.6,
+      "fat_100g": 0.2,
+      "salt_100g": 0.05,
+      "proteins_100g": 0.7,
+      "fiber_100g": 1.1,
+      "energy_kcal_100g": 19
+    }
+  },
+  {
+    "barcode": "8901000000097",
+    "product_name": "Dry Roasted Unsalted Chana (Chickpeas)",
+    "brands": "Traditional Harvest",
+    "ingredients_text": "100% Roasted Bengal Gram / Chickpeas.",
+    "serving_size": "40 g",
+    "serving_size_g": 40.0,
+    "product_weight_g": 250.0,
+    "categories_tags": [
+      "en:snacks",
+      "en:roasted-chana",
+      "en:whole-foods"
+    ],
+    "nutriments": {
+      "sugars_100g": 1.0,
+      "fat_100g": 5.5,
+      "salt_100g": 0.02,
+      "proteins_100g": 19.0,
+      "fiber_100g": 15.0,
+      "energy_kcal_100g": 365
+    }
+  }
+]

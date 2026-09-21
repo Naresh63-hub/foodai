@@ -1,0 +1,12 @@
+Django==4.2.*
+djangorestframework==3.14.*
+django-cors-headers
+django-environ
+psycopg2-binary
+djangorestframework-simplejwt
+pytest
+pytest-django
+requests
+pytesseract
+pillow
+openpyxl
