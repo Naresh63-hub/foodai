@@ -1,8 +1,12 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { toast } from 'sonner'
 
+const apiBase = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL.replace(/\/+$/, '')}/api`
+  : '/api'
+
 const client = axios.create({
-  baseURL: '/api',
+  baseURL: apiBase,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
