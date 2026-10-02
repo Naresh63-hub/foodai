@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import SafeAreaView from '../components/SafeAreaView'
 import { INGREDIENT_CATEGORIES } from '../constants'
 import { getAdditiveDetail, getUserProfile } from '../api/food'
@@ -7,43 +7,42 @@ import { AdditiveReferenceItem } from '../types/food'
 
 export default function IngredientDetails() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const [data, setData] = useState<AdditiveReferenceItem | null>(null)
+  const [notFound, setNotFound] = useState(false)
   const [weightKg, setWeightKg] = useState<number | null>(70)
   const [loading, setLoading] = useState(true)
 
+  // Load the saved body weight once, independent of which additive is viewed.
   useEffect(() => {
     getUserProfile()
       .then((p) => {
         if (p?.body_weight_kg) setWeightKg(p.body_weight_kg)
       })
       .catch(() => {})
+  }, [])
 
-    if (id) {
-      getAdditiveDetail(id, weightKg)
-        .then((res) => {
-          setData(res)
-        })
-        .catch(() => {
-          const cleanId = decodeURIComponent(id)
-          setData({
-            id: 1,
-            code: cleanId.startsWith('E') || cleanId.startsWith('INS') ? cleanId : 'Standard Item',
-            common_name: cleanId,
-            category: cleanId.toLowerCase().includes('sugar') ? 'sugar' : cleanId.toLowerCase().includes('oil') ? 'oil' : 'additive',
-            fssai_ref: 'FSSAI Food Safety and Standards (Food Products Standards and Food Additives) Regulations, 2011',
-            who_jecfa_ref: 'Evaluated by Joint FAO/WHO Expert Committee on Food Additives (JECFA)',
-            adi_mg_per_kg: cleanId.toLowerCase().includes('sorbate') ? 25 : cleanId.toLowerCase().includes('benzoate') ? 5 : null,
-            food_limit_mg_per_kg: 1000,
-            notes: `${cleanId} is an authorized functional substance evaluated for food safety and shelf stability.`,
-            calculated_user_exposure_mg_per_day: weightKg ? 5 * weightKg : null,
-            explanation: `${cleanId} helps maintain freshness, emulsification, or structural integrity in manufactured foods.`,
-          })
-        })
-        .finally(() => setLoading(false))
-    }
-  }, [id, weightKg])
+  // Fetch the additive reference for this id. Never fabricates: an unknown additive
+  // resolves to an honest "not in our reference yet" state instead of made-up numbers.
+  useEffect(() => {
+    if (!id) return
+    setLoading(true)
+    setNotFound(false)
+    getAdditiveDetail(id, weightKg)
+      .then((res) => setData(res))
+      .catch(() => {
+        setData(null)
+        setNotFound(true)
+      })
+      .finally(() => setLoading(false))
+    // Only re-fetch when the additive changes; the weight slider updates the exposure
+    // figure locally (see adiExposure below), so it must not trigger a refetch here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id])
 
   const cat = INGREDIENT_CATEGORIES[data?.category || 'other'] ?? INGREDIENT_CATEGORIES.other
+  // Same formula the backend uses (adi_mg_per_kg * body_weight_kg); computed here so the
+  // slider updates the safe-limit figure without a round-trip.
   const adiExposure = data?.adi_mg_per_kg && weightKg ? data.adi_mg_per_kg * weightKg : null
 
   if (loading) {
@@ -58,12 +57,41 @@ export default function IngredientDetails() {
     )
   }
 
+  if (notFound || !data) {
+    const name = decodeURIComponent(id || '')
+    return (
+      <SafeAreaView>
+        <div className="px-5 py-6 pb-28 max-w-md mx-auto">
+          <button
+            onClick={() => navigate(-1)}
+            className="text-xs font-bold text-gray-500 hover:text-gray-900 inline-flex items-center gap-1 mb-4"
+          >
+            ← Back to Product Results
+          </button>
+          <div className="rounded-2xl bg-white shadow-card border border-gray-100 p-6 text-center">
+            <div className="text-3xl mb-2">🔬</div>
+            <h1 className="text-lg font-black text-gray-900 tracking-tight">{name}</h1>
+            <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+              We don't have <strong>{name}</strong> in our additive reference database yet, so we
+              won't guess at its ADI limit or safety numbers. Everything shown elsewhere here comes
+              from verified FSSAI / WHO-JECFA references — and we'd rather say "not sure" than
+              invent a figure.
+            </p>
+          </div>
+        </div>
+      </SafeAreaView>
+    )
+  }
+
   return (
     <SafeAreaView>
       <div className="px-5 py-6 pb-28 max-w-md mx-auto">
-        <Link to={-1 as any} className="text-xs font-bold text-gray-500 hover:text-gray-900 inline-flex items-center gap-1 mb-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="text-xs font-bold text-gray-500 hover:text-gray-900 inline-flex items-center gap-1 mb-4"
+        >
           ← Back to Product Results
-        </Link>
+        </button>
 
         {/* Title Header */}
         <div className="rounded-3xl bg-white shadow-card p-5 border border-gray-100 mb-5">

@@ -1,5 +1,4 @@
 ﻿import os
-import shutil
 from abc import ABC, abstractmethod
 from io import BytesIO
 
@@ -46,15 +45,15 @@ class TesseractOCREngine(OCREngine):
         try:
             img = self._Image.open(BytesIO(image_bytes))
             text = self._pytesseract.image_to_string(img)
-            if text and text.strip():
-                return text
-            return "INGREDIENTS: Refined Wheat Flour, Sugar, Palm Oil, Cocoa Solids, Salt, Emulsifier E322, Raising Agent E500"
+            # Return only what was actually read. An empty result is surfaced to the
+            # UI as "couldn't read this label" rather than being replaced with a
+            # made-up ingredient list.
+            return (text or "").strip()
         except OCREngineUnavailable:
             raise
         except Exception as e:
-            # If tesseract binary not found, return sample extracted text for smooth user testing
-            if "tesseract is not installed" in str(e).lower() or not shutil.which("tesseract"):
-                return "INGREDIENTS: Refined Wheat Flour, Sugar, Palm Oil, Cocoa Solids, Salt, Leavening Agent (E500ii, E503ii), Emulsifier (E322), Vanilla Flavour."
+            # Never fabricate label text. If the engine is missing or errors out,
+            # report unavailability so the caller can fail honestly.
             raise OCREngineUnavailable("OCR engine unavailable") from e
 
 
