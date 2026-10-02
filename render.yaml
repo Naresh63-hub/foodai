@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: foodai-backend
+    env: python
+    plan: free
+    buildCommand: cd foodai_backend && pip install -r ../requirements.txt && python manage.py migrate && python manage.py import_food_dataset
+    startCommand: cd foodai_backend && gunicorn foodai_backend.wsgi:application
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: foodai_backend.settings.prod
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: foodai-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: FIREBASE_ADMIN_SDK_KEY_PATH
+        value: firebase-service-account.json
+      - key: CORS_ALLOW_ALL_ORIGINS
+        value: "false"
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://your-frontend-domain.vercel.app
+
+databases:
+  - name: foodai-db
+    databaseName: foodai
+    user: foodai_user
+    plan: free

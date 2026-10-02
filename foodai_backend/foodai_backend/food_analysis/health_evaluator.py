@@ -7,6 +7,8 @@ strictly using nutritional thresholds and verified ingredient compositions witho
 from typing import Dict, List, Optional, Any
 import re
 
+from foodai_backend.food_analysis import thresholds as T
+
 
 # Condition Display Metadata
 CONDITION_META = {
@@ -158,7 +160,7 @@ def evaluate_fssai_fopnl(
     flags = []
 
     # 1. High in Added Sugar Warning
-    if sugars_100g >= 15.0:
+    if sugars_100g >= T.SUGAR_HIGH:
         flags.append({
             "type": "HIGH_SUGAR",
             "badge": "HIGH SUGAR",
@@ -170,7 +172,7 @@ def evaluate_fssai_fopnl(
         })
 
     # 2. High in Sodium / Salt Warning
-    if salt_100g >= 1.25:
+    if salt_100g >= T.SALT_HIGH:
         sodium_mg = salt_100g * 400
         flags.append({
             "type": "HIGH_SALT",
@@ -184,7 +186,7 @@ def evaluate_fssai_fopnl(
 
     # 3. High in Saturated Fat Warning
     has_palm = _has_keyword(ingredients_text, UNHEALTHY_FATS_KEYWORDS)
-    if fat_100g >= 17.5 or (has_palm and fat_100g >= 12.0):
+    if fat_100g >= T.FAT_HIGH or (has_palm and fat_100g >= T.FAT_PALM_TRIGGER):
         flags.append({
             "type": "HIGH_FAT",
             "badge": "HIGH SAT FAT",
@@ -215,7 +217,7 @@ def generate_damage_control_advice(
     steps = []
 
     # High Sugar Damage Control
-    if sugars_100g >= 15.0:
+    if sugars_100g >= T.SUGAR_HIGH:
         steps.append({
             "icon": "🥜",
             "action": "Pair with Raw Nuts or Seeds (5-8 Almonds/Walnuts)",
@@ -228,7 +230,7 @@ def generate_damage_control_advice(
         })
 
     # High Salt Damage Control
-    if salt_100g >= 1.0:
+    if salt_100g >= T.SALT_DAMAGE:
         steps.append({
             "icon": "💧",
             "action": "Drink a Glass of Water (300ml) with Potassium",
@@ -250,7 +252,7 @@ def generate_damage_control_advice(
 
     # Portion limit rule
     portion_limit = "Limit portion to 1 standard serving (20-30g) rather than finishing the whole pack."
-    if sugars_100g >= 25.0:
+    if sugars_100g >= T.SUGAR_STRICT:
         portion_limit = "Strictly limit to 1-2 pieces (maximum 15g) and avoid on an empty stomach."
 
     return {
@@ -263,6 +265,10 @@ def generate_damage_control_advice(
                 "rationale": "Eating slowly increases satiety peptide secretion.",
             }
         ],
+        "disclaimer": (
+            "General nutritional awareness only — not medical advice, diagnosis, or treatment. "
+            "Consult a qualified physician or registered dietitian before changing your diet."
+        ),
     }
 
 
@@ -305,8 +311,8 @@ def evaluate_health_conditions(
             r"\bsugar\b", r"\binvert sugar\b", r"\bglucose\b", r"\bmaltodextrin\b",
             r"\bliquid glucose\b", r"\bcorn syrup\b", r"\bdextrose\b", r"\bsucrose\b"
         ])
-        is_high_sugar = sugars_100g >= 15.0 or sugars_serving >= 10.0
-        is_mod_sugar = sugars_100g >= 6.0
+        is_high_sugar = sugars_100g >= T.SUGAR_HIGH or sugars_serving >= T.SUGAR_HIGH_PER_SERVING
+        is_mod_sugar = sugars_100g >= T.SUGAR_MODERATE
 
         if is_high_sugar:
             warnings.append({
@@ -315,7 +321,7 @@ def evaluate_health_conditions(
                 "severity": "danger",
                 "badge": "High Blood Sugar Risk",
                 "title": "High Simple Sugar Content",
-                "message": f"Contains {sugars_100g:.1f}g sugar per 100g ({sugars_serving:.1f}g per serving). Rapidly absorbs into the bloodstream, triggering sharp glycemic and insulin spikes.",
+                "message": f"Contains {sugars_100g:.1f}g sugar per 100g ({sugars_serving:.1f}g per serving). Free sugars are digested quickly and can raise blood glucose levels, which makes glucose management harder.",
                 "action": "Avoid or strictly limit portion to less than 15g. Prefer low-glycemic, fiber-rich whole alternatives.",
                 "scientific_ref": "WHO Guideline on Free Sugars Intake & ADA Standards of Medical Care in Diabetes."
             })
@@ -334,8 +340,8 @@ def evaluate_health_conditions(
     # 2. HYPERTENSION / HIGH BLOOD PRESSURE
     if "hypertension" in active_conditions or "high_bp" in active_conditions:
         matched_sodium_additives = _find_matching_additives(ingredients_text, SODIUM_ADDITIVES)
-        is_high_salt = salt_100g >= 1.25 or salt_serving >= 0.6
-        is_mod_salt = salt_100g >= 0.6 or len(matched_sodium_additives) > 0
+        is_high_salt = salt_100g >= T.SALT_HIGH or salt_serving >= T.SALT_HIGH_PER_SERVING
+        is_mod_salt = salt_100g >= T.SALT_MODERATE or len(matched_sodium_additives) > 0
 
         if is_high_salt:
             warnings.append({
@@ -364,7 +370,7 @@ def evaluate_health_conditions(
     # 3. HEART DISEASE / CHOLESTEROL / HYPERLIPIDEMIA
     if "heart_disease" in active_conditions or "cholesterol" in active_conditions:
         has_bad_fats = _has_keyword(ingredients_text, UNHEALTHY_FATS_KEYWORDS)
-        is_high_fat = fat_100g >= 17.5
+        is_high_fat = fat_100g >= T.FAT_HIGH
 
         if has_bad_fats and is_high_fat:
             warnings.append({
@@ -392,7 +398,7 @@ def evaluate_health_conditions(
     # 4. CHILD MODE (Age < 12)
     if "child_mode" in active_conditions:
         matched_child_additives = _find_matching_additives(ingredients_text, CHILD_ALERT_ADDITIVES)
-        is_ultra_sugary = sugars_100g >= 20.0
+        is_ultra_sugary = sugars_100g >= T.CHILD_SUGAR_ULTRA
 
         if matched_child_additives:
             warnings.append({
@@ -480,7 +486,7 @@ def evaluate_health_conditions(
     # 9. KIDNEY / RENAL HEALTH
     if "kidney_disease" in active_conditions or "renal" in active_conditions:
         matched_kidney_additives = _find_matching_additives(ingredients_text, PHOSPHORUS_POTASSIUM_ADDITIVES)
-        if matched_kidney_additives or salt_100g >= 1.0:
+        if matched_kidney_additives or salt_100g >= T.SALT_KIDNEY:
             notes = f"Additives found: {', '.join(matched_kidney_additives)}." if matched_kidney_additives else ""
             warnings.append({
                 "condition": "kidney_disease",
@@ -496,7 +502,7 @@ def evaluate_health_conditions(
     # 10. FATTY LIVER / NAFLD
     if "fatty_liver" in active_conditions or "nafld" in active_conditions:
         has_fructose = _has_keyword(ingredients_text, [r"\bfructose\b", r"\bcorn syrup\b", r"\binvert\b"])
-        if has_fructose or sugars_100g >= 15.0 or processing_level == "ultra_processed":
+        if has_fructose or sugars_100g >= T.SUGAR_HIGH or processing_level == "ultra_processed":
             warnings.append({
                 "condition": "fatty_liver",
                 "condition_title": "Fatty Liver / NAFLD",

@@ -1,5 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { toast } from 'sonner'
+import { auth } from '../config/firebase'
+import { AUTH_BYPASS } from '../config/authMode'
 
 const apiBase = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL.replace(/\/+$/, '')}/api`
@@ -14,10 +16,15 @@ const client = axios.create({
 })
 
 client.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem('access')
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`
+  async (config: InternalAxiosRequestConfig) => {
+    try {
+      const user = auth.currentUser
+      if (user && config.headers) {
+        const token = await user.getIdToken()
+        config.headers.Authorization = `Bearer ${token}`
+      }
+    } catch (error) {
+      console.error('Error getting Firebase token:', error)
     }
     return config
   },
@@ -28,10 +35,10 @@ client.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('access')
-      localStorage.removeItem('refresh')
-      window.location.href = '/login'
-      toast.error('Session expired. Please log in again.')
+      if (!AUTH_BYPASS) {
+        toast.error('Session expired. Please log in again.')
+        window.location.href = '/login'
+      }
     } else if (error.response?.data) {
       const data = error.response.data as { detail?: string; message?: string }
       const message = data.detail || data.message || 'Something went wrong'

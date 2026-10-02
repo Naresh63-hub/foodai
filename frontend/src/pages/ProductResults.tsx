@@ -24,6 +24,8 @@ export default function ProductResults() {
   )
   const [loading, setLoading] = useState(!data)
   const [activeConditions, setActiveConditions] = useState<string[]>([])
+  const [notFound, setNotFound] = useState(false)
+  const [notFoundDetail, setNotFoundDetail] = useState<string>('')
 
   useEffect(() => {
     // Load local stored preferences
@@ -48,15 +50,21 @@ export default function ProductResults() {
       getProductDetail(scanId, ageNum, weightNum, conditions)
         .then((res) => {
           setData(res)
+          setLoading(false)
         })
         .catch(() => {
           scanBarcode(scanId, ageNum, weightNum, conditions)
             .then((res) => {
               setData(res)
             })
-            .catch(() => {
-              // High quality fallback sample data
-              setData({
+            .catch((err: any) => {
+              setNotFound(true)
+              setNotFoundDetail(
+                err?.response?.data?.detail ||
+                  'This product is not in our verified database. To keep results trustworthy, we never guess product data \u2014 use the label photo (OCR) or paste the ingredients manually.'
+              )
+              // Legacy demo payload kept only so this branch stays inert; it is intentionally NOT rendered.
+              void ({
                 product: {
                   barcode: scanId,
                   product_name: 'Britannia Glucose / Tiger Biscuits',
@@ -168,6 +176,7 @@ export default function ProductResults() {
                 damage_control: {
                   headline: 'Science-Backed Damage Control',
                   portion_limit: 'Strictly limit to 2-3 biscuits (max 20g) and pair with whole foods.',
+                  disclaimer: 'General nutritional awareness only — not medical advice, diagnosis, or treatment. Consult a qualified physician or registered dietitian before changing your diet.',
                   mitigation_steps: [
                     {
                       icon: '🥜',
@@ -300,6 +309,51 @@ export default function ProductResults() {
             <div className="h-20 bg-gray-200 rounded-2xl" />
           </div>
           <div className="h-36 bg-gray-200 rounded-2xl" />
+        </div>
+      </SafeAreaView>
+    )
+  }
+
+  if (notFound || !data) {
+    return (
+      <SafeAreaView>
+        <div className="px-5 py-10 max-w-md mx-auto">
+          <div className="rounded-3xl bg-white shadow-card border border-gray-100 p-6 text-center">
+            <div className="text-5xl mb-3">🔍</div>
+            <h1 className="text-lg font-black text-gray-900 tracking-tight mb-2">
+              No Verified Data Found
+            </h1>
+            <p className="text-xs text-gray-600 leading-relaxed mb-1">
+              {notFoundDetail ||
+                'This product is not in our verified database.'}
+            </p>
+            <p className="text-[11px] text-gray-400 mb-5">
+              We never invent nutrition numbers. Add this product yourself and we will
+              analyze the real label.
+            </p>
+            <div className="grid grid-cols-2 gap-2.5">
+              <Link
+                to="/scan"
+                state={{ tab: 'ocr' }}
+                className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 text-xs transition-all"
+              >
+                📷 Photograph Label
+              </Link>
+              <Link
+                to="/scan"
+                state={{ tab: 'text' }}
+                className="rounded-xl bg-gray-900 hover:bg-black text-white font-bold py-2.5 text-xs transition-all"
+              >
+                📝 Paste Ingredients
+              </Link>
+            </div>
+            <Link
+              to="/explore"
+              className="inline-block mt-4 text-[11px] font-bold text-emerald-700 hover:underline"
+            >
+              Browse the curated catalog ›
+            </Link>
+          </div>
         </div>
       </SafeAreaView>
     )
@@ -537,6 +591,11 @@ export default function ProductResults() {
                 </div>
               ))}
             </div>
+
+            <p className="mt-2.5 text-[10px] leading-snug text-teal-800/80 italic">
+              {damageControl.disclaimer ||
+                'General nutritional awareness only — not medical advice. Consult a physician or registered dietitian before changing your diet.'}
+            </p>
           </div>
         )}
 
@@ -719,8 +778,11 @@ export default function ProductResults() {
           </Link>
         </div>
 
-        <div className="text-center text-[10px] text-gray-400">
-          Product ID: {scanId} · Evaluated with FSSAI / WHO JECFA Standards
+        <div className="text-center text-[10px] text-gray-400 leading-relaxed mt-2">
+          <p>Product ID: {scanId} · Evaluated with FSSAI / WHO JECFA Standards</p>
+          <p className="mt-1 font-medium text-gray-500">
+            Educational nutritional awareness only. Not a medical diagnosis, prescription, or treatment.
+          </p>
         </div>
       </div>
     </SafeAreaView>

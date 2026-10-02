@@ -3,6 +3,7 @@
 [![Frontend - React 18](https://img.shields.io/badge/Frontend-React%2018%20%2B%20Vite-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Backend - Django REST](https://img.shields.io/badge/Backend-Django%204.2%20REST-092E20?logo=django&logoColor=white)](https://www.djangoproject.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Styling-Tailwind%20CSS-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Firebase Auth](https://img.shields.io/badge/Auth-Firebase-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![Vercel Deployment](https://img.shields.io/badge/Deploy-Vercel-black?logo=vercel&logoColor=white)](https://vercel.com/)
 [![License - MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -81,12 +82,15 @@ Tracks your cumulative daily consumption against **World Health Organization (WH
 foodai/
 ├── frontend/                     # React 18 + Vite SPA
 │   ├── src/
-│   │   ├── api/                  # Axios HTTP client with dynamic VITE_API_URL
+│   │   ├── api/                  # Axios HTTP client with Firebase token injection
 │   │   ├── components/           # UI Components, Badges & Navigation
-│   │   ├── pages/                # Scan, Results, Explorer, Tracker, Cart, DNA
+│   │   ├── contexts/             # Firebase Auth Context
+│   │   ├── config/               # Firebase configuration
+│   │   ├── pages/                # Scan, Results, Explorer, Tracker, Cart, DNA, Login, Register
 │   │   ├── types/                # TypeScript Interfaces (Health, Nutrition)
 │   │   └── utils/                # Audio synthesizer & helper utilities
-│   ├── vercel.json               # Vercel Single-Page-App routing configuration
+│   ├── e2e/                      # Playwright E2E tests
+│   ├── vercel.json               # Vercel deployment configuration
 │   └── package.json
 │
 ├── foodai_backend/               # Python Django REST Backend
@@ -95,11 +99,16 @@ foodai/
 │   │   ├── health_evaluator.py   # Medical conditions & damage control logic
 │   │   ├── nutrition.py          # Weight percentage & nutrition analysis
 │   │   └── management/commands/  # Catalog seeders & dataset importers
-│   ├── users/                    # User authentication & health preference profiles
+│   ├── users/                    # User health preference profiles
 │   ├── scans/                    # Scan history & OCR integration
+│   ├── firebase_auth.py          # Firebase authentication backend
+│   ├── firebase_config.py        # Firebase Admin SDK configuration
+│   ├── middleware.py             # Firebase token extraction middleware
 │   └── manage.py
 │
+├── .github/workflows/            # CI/CD pipelines (GitHub Actions)
 ├── requirements.txt              # Python dependencies
+├── FIREBASE_SETUP.md             # Firebase setup guide
 └── README.md
 ```
 
@@ -110,10 +119,20 @@ foodai/
 ### Prerequisites
 - **Node.js** (v18+) & **npm**
 - **Python** (v3.10+) & **pip**
+- **Firebase Project** (for authentication) - See [FIREBASE_SETUP.md](FIREBASE_SETUP.md)
 
 ---
 
-### 1. Backend Setup (Django)
+### 1. Firebase Setup (Required for Authentication)
+
+Follow the detailed setup guide in [FIREBASE_SETUP.md](FIREBASE_SETUP.md) to:
+- Create a Firebase project
+- Enable Email/Password authentication
+- Get Firebase configuration
+- Download service account key for backend
+- Configure environment variables
+
+### 2. Backend Setup (Django)
 
 ```powershell
 # 1. Navigate to the project root and activate virtualenv
@@ -124,21 +143,24 @@ python -m venv venv
 # 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. Apply database migrations
+# 3. Copy .env.example to .env and configure
+# Add your Firebase configuration and service account key path
+
+# 4. Apply database migrations
 cd foodai_backend
 python manage.py migrate
 
-# 4. Seed the curated FMCG food catalog
+# 5. Seed the curated FMCG food catalog
 python manage.py import_food_dataset
 
-# 5. Start the backend server
+# 6. Start the backend server
 python manage.py runserver 8000
 ```
-Backend API will be live at `http://127.0.0.1:8000/`.
+Backend API will be live at `http://127.0.0.1:8000/` with API docs at `/api/docs/`
 
 ---
 
-### 2. Frontend Setup (React Vite)
+### 3. Frontend Setup (React Vite)
 
 ```powershell
 # In a new terminal window:
@@ -147,7 +169,10 @@ cd d:/foodai/frontend
 # 1. Install dependencies
 npm install
 
-# 2. Start Vite development server
+# 2. Create .env.local file with Firebase configuration
+# Copy from Firebase Console (see FIREBASE_SETUP.md)
+
+# 3. Start Vite development server
 npm run dev
 ```
 Frontend web application will be live at `http://localhost:5173/`.
@@ -160,14 +185,21 @@ Frontend web application will be live at `http://localhost:5173/`.
 ```powershell
 cd d:/foodai/foodai_backend
 pytest
-# Result: 44 passed
+# Result: 45+ passed (including Firebase auth tests)
 ```
 
-### Frontend Tests (Vitest)
+### Frontend Unit Tests (Vitest)
 ```powershell
 cd d:/foodai/frontend
-npx vitest run
-# Result: 7 passed
+npm run test
+# Result: 10+ passed (including auth, login, register tests)
+```
+
+### Frontend E2E Tests (Playwright)
+```powershell
+cd d:/foodai/frontend
+npm run test:e2e
+# Runs end-to-end tests in Chromium, Firefox, and WebKit
 ```
 
 ---
@@ -182,24 +214,37 @@ npx vitest run
    - **Root Directory**: `frontend`
    - **Build Command**: `npm run build`
    - **Output Directory**: `dist`
-3. Add Environment Variable:
+3. Add Environment Variables (from Firebase Console):
+   - `VITE_FIREBASE_API_KEY`
+   - `VITE_FIREBASE_AUTH_DOMAIN`
+   - `VITE_FIREBASE_PROJECT_ID`
+   - `VITE_FIREBASE_STORAGE_BUCKET`
+   - `VITE_FIREBASE_MESSAGING_SENDER_ID`
+   - `VITE_FIREBASE_APP_ID`
    - `VITE_API_URL` = `https://your-backend-url.onrender.com`
 4. Click **Deploy**.
 
 ---
 
-### Option B: Backend on Render.com (Free Tier)
+### Option B: Backend on Render.com (Blueprint via `render.yaml`)
 
-1. Create a **New Web Service** on [Render](https://render.com) connected to `Naresh63-hub/foodai`.
-2. Configure settings:
+The repository ships a `render.yaml` blueprint that provisions a **managed PostgreSQL** instance and injects `DATABASE_URL` automatically. **Do not use SQLite in production** — Render's free-tier disk is ephemeral and scan history / user profiles are wiped on every redeploy.
+
+1. Create a **New Blueprint** on [Render](https://render.com) connected to `Naresh63-hub/foodai` (it reads `render.yaml`).
+2. The blueprint configures:
    - **Root Directory**: `foodai_backend`
-   - **Runtime**: `Python 3`
-   - **Build Command**: `pip install -r ../requirements.txt && python manage.py migrate && python manage.py import_food_dataset`
-   - **Start Command**: `gunicorn foodai_backend.wsgi:application`
-3. Set Environment Variables:
-   - `SECRET_KEY` = `<your-secure-secret>`
+   - **Build Command**: `cd foodai_backend && pip install -r ../requirements.txt && python manage.py migrate && python manage.py import_food_dataset`
+   - **Start Command**: `cd foodai_backend && gunicorn foodai_backend.wsgi:application`
+   - **Database**: free PostgreSQL `foodai-db` (connection string wired into `DATABASE_URL`)
+3. Environment Variables (already in `render.yaml`, adjust to your domain):
+   - `DJANGO_SETTINGS_MODULE` = `foodai_backend.settings.prod`
+   - `SECRET_KEY` = auto-generated
    - `DEBUG` = `False`
-   - `DATABASE_URL` = `sqlite:///db.sqlite3` (or your Supabase PostgreSQL URL)
+   - `ALLOWED_HOSTS` = `.onrender.com` (or your custom domain)
+   - `FIREBASE_ADMIN_SDK_KEY_PATH` = `firebase-service-account.json`
+   - `CORS_ALLOW_ALL_ORIGINS` = `false`
+   - `CORS_ALLOWED_ORIGINS` = `https://your-frontend-domain.vercel.app`
+4. Upload your Firebase service account key securely to Render.
 
 ---
 

@@ -112,7 +112,7 @@ export default function Nutrition() {
         <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-white border border-blue-200 p-4.5 text-xs text-blue-900 leading-relaxed shadow-sm">
           <div className="flex items-center gap-1.5 font-bold mb-1">
             <span>📐</span>
-            <span>Mathematical Guarantee</span>
+            <span>How These Numbers Work</span>
           </div>
           <p>
             Values per 100g represent direct physical mass fractions. For instance, 25g sugar in 100g of food corresponds exactly to <strong>25% sugar by total product weight</strong>.

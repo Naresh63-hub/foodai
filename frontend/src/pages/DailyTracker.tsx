@@ -223,7 +223,7 @@ export default function DailyTracker() {
           <div>
             <p className="font-bold text-emerald-900 mb-0.5">WHO Guideline Benchmark:</p>
             <p className="text-[11px] text-emerald-800 leading-relaxed">
-              Consuming less than 5% of total daily energy from free sugars (~25g for an average adult) provides significant protective metabolic and dental benefits.
+              Keeping free sugars below 5% of total daily energy (~25g for an average adult) is associated with a lower risk of dental cavities and makes it easier to stay within recommended sugar limits.
             </p>
           </div>
         </div>

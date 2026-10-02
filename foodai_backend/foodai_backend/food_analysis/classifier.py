@@ -69,6 +69,20 @@ _TOKEN_KEYWORDS = {
 }
 
 
+def _build_keyword_index():
+    """Flatten (keyword, category) pairs and sort longest-first so the most specific
+    term wins (e.g. 'whole wheat' beats 'flour', 'corn syrup' beats 'sugar')."""
+    pairs = []
+    for category, keywords in _TOKEN_KEYWORDS.items():
+        for kw in keywords:
+            pairs.append((kw, category))
+    pairs.sort(key=lambda p: len(p[0]), reverse=True)
+    return pairs
+
+
+_KEYWORD_INDEX = _build_keyword_index()
+
+
 def classify_ingredient(name: str, additive_queryset=None) -> str:
     name_lower = name.lower().strip()
     if not name_lower:
@@ -90,16 +104,15 @@ def classify_ingredient(name: str, additive_queryset=None) -> str:
         except Exception:
             pass
 
-    for category, keywords in _TOKEN_KEYWORDS.items():
-        for kw in keywords:
-            # Match as whole word or phrase with word boundaries if short, or phrase in string
-            if len(kw) <= 4:
-                pattern = rf'\b{re.escape(kw)}\b'
-                if re.search(pattern, name_lower):
-                    return category
-            else:
-                if kw in name_lower:
-                    return category
+    for kw, category in _KEYWORD_INDEX:
+        # Match as whole word or phrase with word boundaries if short, or phrase in string
+        if len(kw) <= 4:
+            pattern = rf'\b{re.escape(kw)}\b'
+            if re.search(pattern, name_lower):
+                return category
+        else:
+            if kw in name_lower:
+                return category
 
     return 'other'
 

@@ -1,33 +1,80 @@
+import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate, Outlet, useParams } from 'react-router-dom'
-import Home from './pages/Home'
-import Scan from './pages/Scan'
-import ProductResults from './pages/ProductResults'
-import IngredientDetails from './pages/IngredientDetails'
-import Nutrition from './pages/Nutrition'
-import FoodDNA from './pages/FoodDNA'
-import ProductComparison from './pages/ProductComparison'
-import History from './pages/History'
-import Profile from './pages/Profile'
-import ProfilePreferences from './pages/ProfilePreferences'
-import DailyTracker from './pages/DailyTracker'
-import GroceryCart from './pages/GroceryCart'
-import CatalogExplorer from './pages/CatalogExplorer'
 import BottomTabBar from './components/BottomTabBar'
 import SafeAreaView from './components/SafeAreaView'
+import { useAuth } from './contexts/AuthContext'
 
-function PlaceholderPage({ title, subtitle }: { title: string; subtitle?: string }) {
+// Code-split page routes so the initial bundle stays small; each page loads on demand.
+const Home = lazy(() => import('./pages/Home'))
+const Scan = lazy(() => import('./pages/Scan'))
+const ProductResults = lazy(() => import('./pages/ProductResults'))
+const IngredientDetails = lazy(() => import('./pages/IngredientDetails'))
+const Nutrition = lazy(() => import('./pages/Nutrition'))
+const FoodDNA = lazy(() => import('./pages/FoodDNA'))
+const ProductComparison = lazy(() => import('./pages/ProductComparison'))
+const History = lazy(() => import('./pages/History'))
+const Profile = lazy(() => import('./pages/Profile'))
+const ProfilePreferences = lazy(() => import('./pages/ProfilePreferences'))
+const DailyTracker = lazy(() => import('./pages/DailyTracker'))
+const GroceryCart = lazy(() => import('./pages/GroceryCart'))
+const CatalogExplorer = lazy(() => import('./pages/CatalogExplorer'))
+const Login = lazy(() => import('./pages/Login'))
+const Register = lazy(() => import('./pages/Register'))
+
+function PageSpinner() {
+  return (
+    <div className="flex min-h-[60vh] items-center justify-center">
+      <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-emerald-600"></div>
+    </div>
+  )
+}
+
+function PlaceholderPage({ title }: { title: string }) {
   return (
     <SafeAreaView>
-      <div className="px-6 py-8 pb-28">
-        <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
-        {subtitle && <p className="mt-2 text-gray-600">{subtitle}</p>}
+      <div className="px-5 py-16 text-center max-w-md mx-auto">
+        <div className="rounded-3xl bg-white shadow-card border border-gray-100 p-6">
+          <div className="text-4xl mb-3">🔍</div>
+          <h1 className="text-lg font-black text-gray-900 tracking-tight">{title}</h1>
+          <p className="text-xs text-gray-500 mt-1">This item is not available.</p>
+        </div>
       </div>
     </SafeAreaView>
   )
 }
 
-const Login = () => <PlaceholderPage title="Login" subtitle="Welcome back to FoodAI." />
-const Register = () => <PlaceholderPage title="Create Account" subtitle="Join FoodAI today." />
+function DevDemoBanner() {
+  const { isDemoMode } = useAuth()
+  if (!isDemoMode) return null
+  return (
+    <div className="sticky top-0 z-50 bg-amber-400 text-amber-950 text-center text-xs font-bold py-1.5 px-3 shadow-sm">
+      🧪 DEV DEMO MODE — login is bypassed locally, no real account in use
+    </div>
+  )
+}
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth()
+
+  if (loading) {
+    return (
+      <SafeAreaView>
+        <div className="flex h-screen items-center justify-center">
+          <div className="text-center">
+            <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-indigo-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading...</p>
+          </div>
+        </div>
+      </SafeAreaView>
+    )
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
+  return <>{children}</>
+}
 
 function IngredientParamWrapper() {
   const { id } = useParams<{ id: string }>()
@@ -56,6 +103,7 @@ function ProductResultsParamWrapper() {
 function AppLayout() {
   return (
     <div className="relative min-h-screen">
+      <DevDemoBanner />
       <Outlet />
       <BottomTabBar />
     </div>
@@ -64,27 +112,29 @@ function AppLayout() {
 
 export default function AppRouter() {
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+    <Suspense fallback={<PageSpinner />}>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-      <Route element={<AppLayout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/explore" element={<CatalogExplorer />} />
-        <Route path="/scan" element={<Scan />} />
-        <Route path="/tracker" element={<DailyTracker />} />
-        <Route path="/cart" element={<GroceryCart />} />
-        <Route path="/compare" element={<ProductComparison />} />
-        <Route path="/results/:scanId" element={<ProductResultsParamWrapper />} />
-        <Route path="/ingredient/:id" element={<IngredientParamWrapper />} />
-        <Route path="/nutrition/:scanId" element={<NutritionParamWrapper />} />
-        <Route path="/dna/:scanId" element={<DnaParamWrapper />} />
-        <Route path="/history" element={<History />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/profile/preferences" element={<ProfilePreferences />} />
-      </Route>
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/explore" element={<ProtectedRoute><CatalogExplorer /></ProtectedRoute>} />
+          <Route path="/scan" element={<ProtectedRoute><Scan /></ProtectedRoute>} />
+          <Route path="/tracker" element={<ProtectedRoute><DailyTracker /></ProtectedRoute>} />
+          <Route path="/cart" element={<ProtectedRoute><GroceryCart /></ProtectedRoute>} />
+          <Route path="/compare" element={<ProtectedRoute><ProductComparison /></ProtectedRoute>} />
+          <Route path="/results/:scanId" element={<ProtectedRoute><ProductResultsParamWrapper /></ProtectedRoute>} />
+          <Route path="/ingredient/:id" element={<ProtectedRoute><IngredientParamWrapper /></ProtectedRoute>} />
+          <Route path="/nutrition/:scanId" element={<ProtectedRoute><NutritionParamWrapper /></ProtectedRoute>} />
+          <Route path="/dna/:scanId" element={<ProtectedRoute><DnaParamWrapper /></ProtectedRoute>} />
+          <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/profile/preferences" element={<ProtectedRoute><ProfilePreferences /></ProtectedRoute>} />
+        </Route>
 
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   )
 }

@@ -2,7 +2,7 @@ import { useState, useEffect, FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import SafeAreaView from '../components/SafeAreaView'
 import { toast } from 'sonner'
-import axios from '../api/client'
+import { useUserPreferences } from '../hooks/useUserPreferences'
 
 interface ConditionOption {
   id: string
@@ -87,35 +87,20 @@ const AVAILABLE_CONDITIONS: ConditionOption[] = [
 
 export default function ProfilePreferences() {
   const navigate = useNavigate()
-  const [age, setAge] = useState<string>('')
-  const [weight, setWeight] = useState<string>('')
-  const [selectedConditions, setSelectedConditions] = useState<string[]>([])
-  
-  const [initialAge, setInitialAge] = useState<string>('')
-  const [initialWeight, setInitialWeight] = useState<string>('')
-  const [initialConditions, setInitialConditions] = useState<string[]>([])
+  const { values, hydrating, save } = useUserPreferences()
+
+  const [age, setAge] = useState<string>(values.age)
+  const [weight, setWeight] = useState<string>(values.weight)
+  const [selectedConditions, setSelectedConditions] = useState<string[]>(values.conditions)
   const [saving, setSaving] = useState(false)
 
+  // Re-seed the editable draft whenever the committed values change
+  // (e.g. once server hydration completes).
   useEffect(() => {
-    const savedAge = localStorage.getItem('prefs_age') ?? ''
-    const savedWeight = localStorage.getItem('prefs_weight') ?? ''
-    const savedConditionsStr = localStorage.getItem('prefs_health_conditions') ?? '[]'
-    
-    let parsedConditions: string[] = []
-    try {
-      parsedConditions = JSON.parse(savedConditionsStr)
-    } catch {
-      parsedConditions = []
-    }
-
-    setAge(savedAge)
-    setWeight(savedWeight)
-    setSelectedConditions(parsedConditions)
-
-    setInitialAge(savedAge)
-    setInitialWeight(savedWeight)
-    setInitialConditions(parsedConditions)
-  }, [])
+    setAge(values.age)
+    setWeight(values.weight)
+    setSelectedConditions(values.conditions)
+  }, [values])
 
   const toggleCondition = (id: string) => {
     setSelectedConditions((prev) =>
@@ -130,9 +115,9 @@ export default function ProfilePreferences() {
   }
 
   const isDirty =
-    age !== initialAge ||
-    weight !== initialWeight ||
-    !isConditionsEqual(selectedConditions, initialConditions)
+    age !== values.age ||
+    weight !== values.weight ||
+    !isConditionsEqual(selectedConditions, values.conditions)
 
   const handleSave = async (e: FormEvent) => {
     e.preventDefault()
@@ -141,34 +126,26 @@ export default function ProfilePreferences() {
       return
     }
     setSaving(true)
-    const payload = {
-      age: age ? Number(age) : null,
-      body_weight_kg: weight ? Number(weight) : null,
-      health_conditions: selectedConditions,
+    const result = await save({ age, weight, conditions: selectedConditions })
+    setSaving(false)
+    if (result === 'server') {
+      toast.success('Health profile saved to your account')
+    } else if (result === 'local') {
+      toast.success('Health preferences saved')
+    } else {
+      toast.success('Saved offline — will sync when you sign in')
     }
+    setTimeout(() => navigate('/profile'), 500)
+  }
 
-    try {
-      await axios.put('/users/profile/', payload)
-      localStorage.setItem('prefs_age', age)
-      localStorage.setItem('prefs_weight', weight)
-      localStorage.setItem('prefs_health_conditions', JSON.stringify(selectedConditions))
-      setInitialAge(age)
-      setInitialWeight(weight)
-      setInitialConditions(selectedConditions)
-      toast.success('Health preferences saved successfully!')
-      setTimeout(() => navigate('/profile'), 600)
-    } catch {
-      localStorage.setItem('prefs_age', age)
-      localStorage.setItem('prefs_weight', weight)
-      localStorage.setItem('prefs_health_conditions', JSON.stringify(selectedConditions))
-      setInitialAge(age)
-      setInitialWeight(weight)
-      setInitialConditions(selectedConditions)
-      toast.success('Health preferences saved (offline mode)')
-      setTimeout(() => navigate('/profile'), 600)
-    } finally {
-      setSaving(false)
-    }
+  if (hydrating) {
+    return (
+      <SafeAreaView>
+        <div className="flex h-screen items-center justify-center">
+          <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-emerald-600"></div>
+        </div>
+      </SafeAreaView>
+    )
   }
 
   return (

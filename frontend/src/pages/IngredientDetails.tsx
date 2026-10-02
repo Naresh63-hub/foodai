@@ -121,7 +121,7 @@ export default function IngredientDetails() {
           {data?.adi_mg_per_kg ? (
             <div>
               <p className="text-xs text-emerald-800 leading-relaxed mb-3">
-                The regulatory non-toxic ADI is <strong className="text-emerald-900">{data.adi_mg_per_kg} mg/kg body weight/day</strong>.
+                The Acceptable Daily Intake (ADI) — a regulatory lifetime safety limit — is <strong className="text-emerald-900">{data.adi_mg_per_kg} mg/kg body weight/day</strong>.
               </p>
 
               {/* Weight Exposure Calculator */}
@@ -148,7 +148,7 @@ export default function IngredientDetails() {
             </div>
           ) : (
             <p className="text-xs text-emerald-800 leading-relaxed">
-              No numerical numerical ADI required; recognized as a standard culinary component or GMP (Good Manufacturing Practice) food constituent with no specific toxicity threshold.
+              No numerical ADI is needed — it's recognized as a standard culinary ingredient or a GMP (Good Manufacturing Practice) food constituent with no safety concern at typical use levels.
             </p>
           )}
         </div>
@@ -156,7 +156,7 @@ export default function IngredientDetails() {
         {/* Non-alarmist scientific reassurance */}
         <div className="rounded-2xl bg-gray-50 border border-gray-200 p-4 text-[11px] text-gray-600 leading-relaxed">
           <span className="font-bold text-gray-800">💡 Scientific Note: </span>
-          Chemical names do not indicate danger. All permitted additives undergo extensive multi-year toxicological testing by international safety authorities before approval.
+          Chemical names alone don't indicate danger. Permitted additives are reviewed for safety by international authorities (such as WHO/JECFA) before approval.
         </div>
       </div>
     </SafeAreaView>

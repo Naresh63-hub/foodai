@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import SafeAreaView from '../components/SafeAreaView'
 import { scanBarcode, scanOCR, scanText } from '../api/food'
@@ -8,7 +8,11 @@ import { QUICK_SAMPLE_PRESETS } from '../constants'
 
 export default function Scan() {
   const navigate = useNavigate()
-  const [tab, setTab] = useState<'barcode' | 'ocr' | 'text'>('barcode')
+  const location = useLocation()
+  const initialTab = (location.state as any)?.tab
+  const [tab, setTab] = useState<'barcode' | 'ocr' | 'text'>(
+    initialTab === 'ocr' || initialTab === 'text' ? initialTab : 'barcode'
+  )
   const [barcode, setBarcode] = useState('')
   const [ingredientsText, setIngredientsText] = useState('')
   const [productName, setProductName] = useState('')

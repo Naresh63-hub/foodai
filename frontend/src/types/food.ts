@@ -112,6 +112,7 @@ export interface DamageControlAdvice {
   headline: string
   portion_limit: string
   mitigation_steps: DamageControlStep[]
+  disclaimer?: string
 }
 
 export interface ProductAnalysisResult {

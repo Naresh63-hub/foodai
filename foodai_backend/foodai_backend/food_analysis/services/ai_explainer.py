@@ -1,10 +1,15 @@
-import os
 from typing import Dict, Any, Optional
+
+from foodai_backend.food_analysis import thresholds as T
 
 
 class AIExplainerService:
-    def __init__(self, api_key: Optional[str] = None):
-        self.api_key = api_key or os.environ.get("GEMINI_API_KEY") or os.environ.get("OPENAI_API_KEY")
+    """Deterministic 'What Should I Know?' synthesiser.
+
+    Turns already-computed nutrition/additive facts into plain-language prose using
+    fixed thresholds. It never calls an LLM and never invents numbers, honouring the
+    project's deterministic-core / no-fabrication rule (spec AC-10).
+    """
 
     def generate_summary(
         self,
@@ -18,9 +23,12 @@ class AIExplainerService:
         user_weight_kg: Optional[float] = None,
     ) -> Dict[str, Any]:
         """
-        Generates structured 'What Should I Know?' summary and age-based guidance.
-        Uses deterministic scientific synthesis by default with LLM provider option.
-        Guarantees exact nutrition numbers and regulatory references without hallucinations.
+        Generates the structured 'What Should I Know?' summary and age-based guidance.
+        Purely deterministic synthesis from verified numbers; no external model is
+        involved, so nutrition values and regulatory references cannot drift or hallucinate.
+
+        `user_weight_kg` is accepted for API compatibility and reserved for future
+        weight-scaled personalisation; it is intentionally not used to invent figures now.
         """
         per_100g = nutrition.get("per_100g", {})
         sugars_g = per_100g.get("sugars_g")
@@ -40,26 +48,26 @@ class AIExplainerService:
         # High/moderate/low nutrient highlights
         key_highlights = []
         if sugars_g is not None:
-            if sugars_g > 20:
+            if sugars_g > T.DESC_SUGAR_VERY_HIGH:
                 key_highlights.append(f"High sugar content ({sugars_g:.1f}% by weight)")
-            elif sugars_g > 10:
+            elif sugars_g > T.DESC_SUGAR_MODERATE:
                 key_highlights.append(f"Moderate sugar ({sugars_g:.1f}% by weight)")
             else:
                 key_highlights.append(f"Low sugar ({sugars_g:.1f}g / 100g)")
 
         if salt_g is not None:
-            if salt_g > 1.5:
+            if salt_g > T.DESC_SALT_HIGH:
                 key_highlights.append(f"High sodium/salt ({salt_g:.1f}g / 100g)")
-            elif salt_g > 0.5:
+            elif salt_g > T.DESC_SALT_MODERATE:
                 key_highlights.append(f"Moderate salt ({salt_g:.1f}g / 100g)")
 
-        if fat_g is not None and fat_g > 15:
+        if fat_g is not None and fat_g > T.DESC_FAT_HIGH:
             key_highlights.append(f"High fat density ({fat_g:.1f}% by weight)")
 
-        if fiber_g is not None and fiber_g >= 3:
+        if fiber_g is not None and fiber_g >= T.DESC_FIBER_GOOD:
             key_highlights.append(f"Good source of dietary fiber ({fiber_g:.1f}g / 100g)")
 
-        if protein_g is not None and protein_g >= 8:
+        if protein_g is not None and protein_g >= T.DESC_PROTEIN_HIGH:
             key_highlights.append(f"High protein source ({protein_g:.1f}g / 100g)")
 
         # Additives statement
@@ -89,8 +97,9 @@ class AIExplainerService:
 
         # 3. Scientific distinction
         scientific_note = (
-            "Safety limits (ADI in mg/kg body weight/day) define regulatory non-toxicity, "
-            "while dietary guidelines recommend moderation for balanced long-term metabolic health. "
+            "Safety limits (ADI in mg/kg body weight/day) are regulatory thresholds — intake at or "
+            "below them over a lifetime is considered to pose no appreciable health risk, "
+            "while dietary guidelines still recommend moderation for balanced long-term metabolic health. "
             "Chemical names denote standard food-grade compounds evaluated by FSSAI & WHO/JECFA."
         )
 

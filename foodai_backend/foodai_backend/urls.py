@@ -1,11 +1,7 @@
 from django.contrib import admin
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-    TokenVerifyView,
-)
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 from foodai_backend.food_analysis.views import (
     AdditiveDetailView,
@@ -19,13 +15,18 @@ from foodai_backend.food_analysis.views import (
 )
 from foodai_backend.scans.views import ScanDetailView, ScanListView
 from foodai_backend.scans.views_ocr import OCRScanView
-from foodai_backend.users.views import LoginView, ProfileView, RegisterView
+from foodai_backend.users.views import ProfileView
 
 router = DefaultRouter()
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+
+    # API Documentation
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 
     # Scanning & Analysis
     path('api/scan/barcode/', BarcodeScanView.as_view(), name='scan_barcode'),
@@ -44,13 +45,6 @@ urlpatterns = [
     path('api/scans/', ScanListView.as_view(), name='scans_list'),
     path('api/scans/<int:pk>/', ScanDetailView.as_view(), name='scan_detail'),
 
-    # Users & Auth
-    path('api/auth/register/', RegisterView.as_view(), name='auth_register'),
-    path('api/auth/login/', LoginView.as_view(), name='auth_login'),
+    # Users & Profile (Auth handled by Firebase)
     path('api/users/profile/', ProfileView.as_view(), name='user_profile'),
-    path('api/auth/', include([
-        path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-        path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-        path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
-    ])),
 ]

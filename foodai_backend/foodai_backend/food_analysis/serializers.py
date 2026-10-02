@@ -166,6 +166,7 @@ class DamageControlSerializer(serializers.Serializer):
     headline = serializers.CharField()
     portion_limit = serializers.CharField()
     mitigation_steps = DamageControlStepSerializer(many=True)
+    disclaimer = serializers.CharField(required=False, allow_blank=True)
 
 
 class ProductAnalysisSerializer(serializers.Serializer):
@@ -285,7 +286,7 @@ def analyze_product(
             simple_exp = f"{additive_ref.common_name} is used in food processing for stability and consistency."
         else:
             purpose_text = CATEGORY_DEFAULT_PURPOSES.get(category, "Common food constituent.")
-            concern_text = CATEGORY_DEFAULT_CONCERNS.get(category, "Non-toxic food constituent.")
+            concern_text = CATEGORY_DEFAULT_CONCERNS.get(category, "No specific safety concern flagged for this food constituent.")
             reg_refs = {
                 "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
                 "adi_limit": "Not specified (Food component)",

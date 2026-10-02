@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import SafeAreaView from '../components/SafeAreaView'
-import { toast } from 'sonner'
+import { useAuth } from '../contexts/AuthContext'
+import { useUserPreferences } from '../hooks/useUserPreferences'
 
 const CONDITION_NAMES: Record<string, { title: string; icon: string }> = {
   diabetes: { title: 'Diabetes / Pre-diabetes', icon: '🩸' },
@@ -18,25 +18,15 @@ const CONDITION_NAMES: Record<string, { title: string; icon: string }> = {
 
 export default function Profile() {
   const navigate = useNavigate()
-  const email = 'user@foodai.app'
-  const [age, setAge] = useState<string>('')
-  const [weight, setWeight] = useState<string>('')
-  const [conditions, setConditions] = useState<string[]>([])
+  const { user, signOut } = useAuth()
+  const { values } = useUserPreferences()
+  const email = user?.email ?? 'Not signed in'
+  const { age, weight } = values
+  const conditions = values.conditions
 
-  useEffect(() => {
-    setAge(localStorage.getItem('prefs_age') || '')
-    setWeight(localStorage.getItem('prefs_weight') || '')
-    try {
-      const conds = JSON.parse(localStorage.getItem('prefs_health_conditions') || '[]')
-      setConditions(conds)
-    } catch {
-      setConditions([])
-    }
-  }, [])
-
-  const handleLogout = () => {
-    toast.success('Signed out successfully')
-    setTimeout(() => navigate('/login'), 500)
+  const handleLogout = async () => {
+    await signOut()
+    navigate('/login')
   }
 
   return (

@@ -126,7 +126,7 @@ export default function Home() {
             <span>Food Science Tip</span>
           </div>
           <p>
-            Ingredients on food packages are listed in descending order of weight. If sugar or oil is in the top 3 ingredients, it makes up a major share of the formulation.
+            Ingredients are listed by weight, from highest to lowest. So an ingredient like sugar or oil appearing near the top means it's more abundant than those listed later — but position alone doesn't reveal the exact amount, and a top-3 spot can still be a modest share of the recipe.
           </p>
         </div>
 

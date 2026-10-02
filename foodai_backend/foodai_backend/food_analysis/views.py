@@ -12,8 +12,10 @@ from foodai_backend.food_analysis.serializers import (
     analyze_product,
 )
 from foodai_backend.food_analysis.services.openfoodfacts import lookup_barcode, OFFClientError
+from foodai_backend.food_analysis import thresholds as T
 from foodai_backend.food_analysis.verdict import adi_reference_exposure
 from foodai_backend.scans.models import Scan
+from foodai_backend.throttling import RoleRateThrottle
 
 
 CURATED_SAMPLE_PRODUCTS = [
@@ -236,68 +238,62 @@ def _seed_curated_product(sample_data: dict) -> Product:
     return product
 
 
-def _infer_unlisted_product(barcode: str) -> Product | None:
-    """Smart GS1 brand & category resolver for unlisted barcodes"""
-    clean_code = barcode.strip()
-    
-    # GS1 India prefix check (890...)
-    if clean_code.startswith("890"):
-        # Known Indian manufacturer prefixes
-        if clean_code.startswith("8901063"): # Britannia
-            return Product.objects.create(
-                barcode=clean_code,
-                product_name=f"Britannia Packaged Biscuit ({clean_code[-4:]})",
-                brands="Britannia Industries Ltd.",
-                ingredients_text="Refined Wheat Flour (Maida), Sugar, Refined Palm Oil, Invert Sugar Syrup, Milk Solids, Iodised Salt, Leavening Agent (E500ii, E503ii), Emulsifier (E322), Dough Conditioner (E223), Colour (E150d).",
-                serving_size="36.6 g",
-                serving_size_g=36.6,
-                product_weight_g=36.6,
-                categories_tags=["en:biscuits", "en:sweet-biscuits"],
-                nutriments={"sugars_100g": 26.5, "fat_100g": 13.5, "salt_100g": 0.65, "proteins_100g": 7.0, "fiber_100g": 1.5, "energy_kcal_100g": 450},
-                source="manual",
-            )
-        elif clean_code.startswith("8901719"): # Parle
-            return Product.objects.create(
-                barcode=clean_code,
-                product_name="Parle Biscuit Product",
-                brands="Parle Products",
-                ingredients_text="Refined Wheat Flour, Sugar, Palm Oil, Invert Sugar, Salt, Leavening Agents (E500ii, E503ii), Emulsifier (E322).",
-                serving_size="50 g",
-                serving_size_g=50.0,
-                product_weight_g=50.0,
-                categories_tags=["en:biscuits", "en:sweet-biscuits"],
-                nutriments={"sugars_100g": 25.0, "fat_100g": 14.0, "salt_100g": 0.6, "proteins_100g": 6.5, "fiber_100g": 1.5},
-                source="manual",
-            )
-        elif clean_code.startswith("8901058"): # Nestle India
-            return Product.objects.create(
-                barcode=clean_code,
-                product_name="Nestle Packaged Food Item",
-                brands="Nestle India",
-                ingredients_text="Refined Wheat Flour, Palm Oil, Iodized Salt, Flavour Enhancer (E635), Acidity Regulators (E500, E501).",
-                serving_size="70 g",
-                serving_size_g=70.0,
-                product_weight_g=70.0,
-                categories_tags=["en:noodles", "en:savoury-snacks"],
-                nutriments={"sugars_100g": 2.5, "fat_100g": 15.0, "salt_100g": 3.0, "proteins_100g": 8.0, "fiber_100g": 3.0},
-                source="manual",
-            )
-        else:
-            # Generic Indian Packaged Product
-            return Product.objects.create(
-                barcode=clean_code,
-                product_name=f"Packaged Food Item ({clean_code})",
-                brands="Packaged Food (India)",
-                ingredients_text="Refined Wheat Flour, Sugar, Vegetable Oil, Iodized Salt, Permitted Food Additives (E322, E500).",
-                serving_size="50 g",
-                serving_size_g=50.0,
-                product_weight_g=100.0,
-                categories_tags=["en:packaged-foods"],
-                nutriments={"sugars_100g": 20.0, "fat_100g": 15.0, "salt_100g": 1.0, "proteins_100g": 6.0, "fiber_100g": 2.0},
-                source="manual",
-            )
+UNKNOWN_BARCODE_DETAIL = (
+    "This barcode isn't in the Open Food Facts database or our curated Indian catalog. "
+    "To keep every number honest, we never guess product data — please photograph the "
+    "ingredient label (OCR) or paste the ingredient text manually."
+)
 
-    return None
+
+def _create_from_off(barcode: str) -> Product | None:
+    """Create a Product strictly from real Open Food Facts data. Never fabricates."""
+    try:
+        off_data = lookup_barcode(barcode)
+    except OFFClientError:
+        return None
+    if not off_data:
+        return None
+
+    serving_size_str = off_data.get("serving_size", "")
+    serving_size_g = None
+    s_match = re.search(r'(\d+(?:\.\d+)?)\s*g', serving_size_str, re.IGNORECASE)
+    if s_match:
+        try:
+            serving_size_g = float(s_match.group(1))
+        except ValueError:
+            pass
+
+    product_weight_g = None
+    qty = off_data.get("product_quantity")
+    if qty:
+        try:
+            product_weight_g = float(qty)
+        except (ValueError, TypeError):
+            pass
+
+    return Product.objects.create(
+        barcode=barcode,
+        product_name=off_data.get("product_name") or f"Product {barcode}",
+        brands=off_data.get("brands") or "",
+        ingredients_text=off_data.get("ingredients_text") or "",
+        nutriments=off_data.get("nutriments") or {},
+        serving_size=serving_size_str,
+        serving_size_g=serving_size_g,
+        product_weight_g=product_weight_g,
+        categories_tags=off_data.get("categories_tags") or [],
+        source="off",
+    )
+
+
+def _lookup_off_product(barcode: str) -> Product | None:
+    """Resolve a barcode from real sources only: local DB -> curated catalog -> Open Food Facts."""
+    product = Product.objects.filter(barcode=barcode).first()
+    if product:
+        return product
+    for cur in CURATED_SAMPLE_PRODUCTS:
+        if cur["barcode"] == barcode:
+            return _seed_curated_product(cur)
+    return _create_from_off(barcode)
 
 
 def _extract_user_context(request):
@@ -332,6 +328,8 @@ def _extract_user_context(request):
 
 class BarcodeScanView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [RoleRateThrottle]
+    throttle_scope = 'scan'
 
     def post(self, request):
         serializer = BarcodeScanRequestSerializer(data=request.data)
@@ -351,48 +349,11 @@ class BarcodeScanView(APIView):
                     break
 
         if not product:
-            try:
-                off_data = lookup_barcode(barcode)
-                if off_data:
-                    serving_size_str = off_data.get("serving_size", "")
-                    serving_size_g = None
-                    s_match = re.search(r'(\d+(?:\.\d+)?)\s*g', serving_size_str, re.IGNORECASE)
-                    if s_match:
-                        try:
-                            serving_size_g = float(s_match.group(1))
-                        except ValueError:
-                            pass
-
-                    product_weight_g = None
-                    qty = off_data.get("product_quantity")
-                    if qty:
-                        try:
-                            product_weight_g = float(qty)
-                        except (ValueError, TypeError):
-                            pass
-
-                    product = Product.objects.create(
-                        barcode=barcode,
-                        product_name=off_data.get("product_name") or f"Product {barcode}",
-                        brands=off_data.get("brands") or "",
-                        ingredients_text=off_data.get("ingredients_text") or "",
-                        nutriments=off_data.get("nutriments") or {},
-                        serving_size=serving_size_str,
-                        serving_size_g=serving_size_g,
-                        product_weight_g=product_weight_g,
-                        categories_tags=off_data.get("categories_tags") or [],
-                        source="off",
-                    )
-            except OFFClientError:
-                pass
-
-        if not product:
-            # Smart GS1 Brand Resolver fallback
-            product = _infer_unlisted_product(barcode)
+            product = _create_from_off(barcode)
 
         if not product:
             return Response(
-                {"detail": f"Product with barcode {barcode} was not found in Open Food Facts or local database. You can paste ingredients or take a photo of the label below."},
+                {"detail": UNKNOWN_BARCODE_DETAIL, "fallback": "ocr_or_manual"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
@@ -416,6 +377,8 @@ class BarcodeScanView(APIView):
 
 class TextScanView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [RoleRateThrottle]
+    throttle_scope = 'scan'
 
     def post(self, request):
         ingredients_text = request.data.get("ingredients_text", "").strip()
@@ -454,6 +417,8 @@ class TextScanView(APIView):
 
 class SampleProductsView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [RoleRateThrottle]
+    throttle_scope = 'catalog'
 
     def get(self, request):
         user_age, user_weight, health_conditions = _extract_user_context(request)
@@ -473,6 +438,8 @@ class SampleProductsView(APIView):
 
 class ProductDetailView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [RoleRateThrottle]
+    throttle_scope = 'catalog'
 
     def get(self, request, pk_or_barcode):
         user_age, user_weight, health_conditions = _extract_user_context(request)
@@ -488,10 +455,10 @@ class ProductDetailView(APIView):
                     product = _seed_curated_product(cur)
                     break
         if not product:
-            product = _infer_unlisted_product(pk_or_barcode)
-
-        if not product:
-            return Response({"detail": "Product not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": UNKNOWN_BARCODE_DETAIL, "fallback": "ocr_or_manual"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
         analysis = analyze_product(
             product,
@@ -505,6 +472,8 @@ class ProductDetailView(APIView):
 
 class ProductComparisonView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [RoleRateThrottle]
+    throttle_scope = 'scan'
 
     def post(self, request):
         barcode_1 = request.data.get("barcode_1")
@@ -520,24 +489,14 @@ class ProductComparisonView(APIView):
         prod2 = Product.objects.filter(barcode=barcode_2).first()
 
         if not prod1:
-            for cur in CURATED_SAMPLE_PRODUCTS:
-                if cur["barcode"] == barcode_1:
-                    prod1 = _seed_curated_product(cur)
-                    break
-            if not prod1:
-                prod1 = _infer_unlisted_product(barcode_1)
+            prod1 = _lookup_off_product(barcode_1)
 
         if not prod2:
-            for cur in CURATED_SAMPLE_PRODUCTS:
-                if cur["barcode"] == barcode_2:
-                    prod2 = _seed_curated_product(cur)
-                    break
-            if not prod2:
-                prod2 = _infer_unlisted_product(barcode_2)
+            prod2 = _lookup_off_product(barcode_2)
 
         if not prod1 or not prod2:
             return Response(
-                {"detail": "One or both products could not be found for comparison."},
+                {"detail": "One or both barcodes could not be found. Scan each product first or use known barcodes.", "fallback": "ocr_or_manual"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
@@ -647,6 +606,8 @@ class AdditiveDetailView(APIView):
 
 class ProductCatalogSearchView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [RoleRateThrottle]
+    throttle_scope = 'catalog'
 
     def get(self, request):
         query = request.query_params.get("q", "").strip()
@@ -676,9 +637,9 @@ class ProductCatalogSearchView(APIView):
 
             if palm_oil_free and ("palm" in ing_text or "palmolein" in ing_text):
                 continue
-            if low_sugar and sugars > 5.0:
+            if low_sugar and sugars > T.CATALOG_LOW_SUGAR_MAX:
                 continue
-            if low_salt and salt > 0.5:
+            if low_salt and salt > T.CATALOG_LOW_SALT_MAX:
                 continue
 
             results.append({
