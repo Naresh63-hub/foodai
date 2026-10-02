@@ -373,6 +373,8 @@ export default function ProductResults() {
   const healthierSwaps = data?.healthier_swaps || []
   const fopnlWarnings = data?.fopnl_warnings || []
   const damageControl = data?.damage_control
+  const disguised = data?.disguised_ingredients
+  const glycemic = data?.glycemic_response
 
   const handlePrintReport = () => {
     window.print()
@@ -596,6 +598,128 @@ export default function ProductResults() {
               {damageControl.disclaimer ||
                 'General nutritional awareness only — not medical advice. Consult a physician or registered dietitian before changing your diet.'}
             </p>
+          </div>
+        )}
+
+        {/* BLOOD GLUCOSE SPIKE PREDICTOR & GLYCEMIC TRAJECTORY */}
+        {glycemic && (
+          <div className="mb-5 rounded-2xl bg-gradient-to-br from-purple-50 via-indigo-50/50 to-white border border-purple-200 p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5">
+                <span className="text-lg">📈</span>
+                <h3 className="text-xs font-black uppercase tracking-wider text-purple-950">
+                  Glycemic Curve & Spike Estimator
+                </h3>
+              </div>
+              <span
+                className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${
+                  glycemic.spike_score >= 7.0
+                    ? 'bg-rose-100 text-rose-800 border border-rose-200'
+                    : glycemic.spike_score >= 4.0
+                    ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                    : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                }`}
+              >
+                {glycemic.tier}
+              </span>
+            </div>
+
+            {/* Spike Score Progress Bar */}
+            <div className="mt-2 mb-2.5">
+              <div className="flex justify-between text-[11px] font-bold text-gray-700 mb-1">
+                <span>Spike Severity Index:</span>
+                <span className="text-purple-900">{glycemic.spike_score} / 10</span>
+              </div>
+              <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className={`h-full transition-all duration-500 ${
+                    glycemic.spike_score >= 7.0
+                      ? 'bg-gradient-to-r from-amber-500 to-rose-600'
+                      : glycemic.spike_score >= 4.0
+                      ? 'bg-gradient-to-r from-emerald-500 to-amber-500'
+                      : 'bg-emerald-500'
+                  }`}
+                  style={{ width: `${Math.min(100, glycemic.spike_score * 10)}%` }}
+                />
+              </div>
+            </div>
+
+            <p className="text-[11px] text-gray-700 leading-relaxed bg-white/80 p-2.5 rounded-xl border border-purple-100">
+              {glycemic.explanation}
+            </p>
+
+            <div className="mt-2.5 flex items-center justify-between text-[10px] text-purple-900/80 font-semibold px-1">
+              <span>Buffering Quality: <strong className="text-purple-950">{glycemic.buffering_quality}</strong></span>
+              <span>Fiber: {glycemic.fiber_100g}g · Protein: {glycemic.protein_100g}g</span>
+            </div>
+          </div>
+        )}
+
+        {/* DISGUISED INGREDIENT ALIASES DETECTOR */}
+        {disguised && disguised.total_disguised_count > 0 && (
+          <div className="mb-5 rounded-2xl bg-gradient-to-br from-amber-50 via-orange-50/40 to-white border border-amber-300/80 p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5">
+                <span className="text-lg">🕵️</span>
+                <h3 className="text-xs font-black uppercase tracking-wider text-amber-950">
+                  Disguised Ingredients Detected ({disguised.total_disguised_count})
+                </h3>
+              </div>
+              <span className="text-[10px] font-black bg-amber-200 text-amber-950 px-2 py-0.5 rounded-full">
+                Technical Aliases
+              </span>
+            </div>
+
+            <p className="text-[11px] text-gray-700 mb-3 leading-snug">
+              {disguised.summary}
+            </p>
+
+            <div className="space-y-2">
+              {disguised.hidden_sugars.length > 0 && (
+                <div className="bg-white/90 p-2.5 rounded-xl border border-amber-200">
+                  <span className="text-[11px] font-extrabold text-pink-800 block mb-1">
+                    🍬 Hidden Sugar Aliases:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {disguised.hidden_sugars.map((s, sI) => (
+                      <span key={sI} className="text-[10px] font-bold bg-pink-50 text-pink-900 border border-pink-200 px-2 py-0.5 rounded-md">
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {disguised.hidden_salts.length > 0 && (
+                <div className="bg-white/90 p-2.5 rounded-xl border border-amber-200">
+                  <span className="text-[11px] font-extrabold text-blue-800 block mb-1">
+                    🧂 Hidden Sodium & Additive Salts:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {disguised.hidden_salts.map((s, sI) => (
+                      <span key={sI} className="text-[10px] font-bold bg-blue-50 text-blue-900 border border-blue-200 px-2 py-0.5 rounded-md">
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {disguised.hidden_fats.length > 0 && (
+                <div className="bg-white/90 p-2.5 rounded-xl border border-amber-200">
+                  <span className="text-[11px] font-extrabold text-amber-800 block mb-1">
+                    🧈 Industrial Refined Fats:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {disguised.hidden_fats.map((s, sI) => (
+                      <span key={sI} className="text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-md">
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 

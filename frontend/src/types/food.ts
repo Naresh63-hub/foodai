@@ -115,6 +115,25 @@ export interface DamageControlAdvice {
   disclaimer?: string
 }
 
+export interface DisguisedIngredients {
+  total_disguised_count: number
+  hidden_sugars: string[]
+  hidden_salts: string[]
+  hidden_fats: string[]
+  summary: string
+}
+
+export interface GlycemicResponse {
+  tier: string
+  spike_score: number
+  curve_shape: 'sharp_spike' | 'moderate_rise' | 'flat_sustained' | string
+  buffering_quality: string
+  sugars_100g: number
+  fiber_100g: number
+  protein_100g: number
+  explanation: string
+}
+
 export interface ProductAnalysisResult {
   product: ProductData
   nutrition: NutritionBreakdown
@@ -133,6 +152,8 @@ export interface ProductAnalysisResult {
   healthier_swaps?: HealthierSwap[]
   fopnl_warnings?: FOPNLWarning[]
   damage_control?: DamageControlAdvice
+  disguised_ingredients?: DisguisedIngredients
+  glycemic_response?: GlycemicResponse
 }
 
 export interface ComparisonResult {

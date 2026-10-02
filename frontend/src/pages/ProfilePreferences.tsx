@@ -83,6 +83,27 @@ const AVAILABLE_CONDITIONS: ConditionOption[] = [
     description: 'Monitors high-fructose corn syrup, liquid sugars & hepatic fat drivers.',
     category: 'metabolic',
   },
+  {
+    id: 'pcos',
+    title: 'PCOS / Hormonal Balance',
+    icon: '🌸',
+    description: 'Warns on high glycemic refined sugars & simple starches worsening insulin resistance.',
+    category: 'metabolic',
+  },
+  {
+    id: 'pregnancy',
+    title: 'Pregnancy & Nursing Safe Mode',
+    icon: '🤰',
+    description: 'Flags unpasteurized dairy, synthetic sweeteners (saccharin), and excess stimulants.',
+    category: 'special',
+  },
+  {
+    id: 'low_fodmap',
+    title: 'IBS / Low FODMAP & Gut Care',
+    icon: '🌿',
+    description: 'Detects fermentable polyols (maltitol, sorbitol) and isolated inulin fibers causing bloating.',
+    category: 'special',
+  },
 ]
 
 export default function ProfilePreferences() {

@@ -13,6 +13,8 @@ from foodai_backend.food_analysis.health_evaluator import (
     generate_healthier_swaps,
     evaluate_fssai_fopnl,
     generate_damage_control_advice,
+    evaluate_disguised_ingredients,
+    estimate_glycemic_response,
 )
 
 
@@ -169,6 +171,25 @@ class DamageControlSerializer(serializers.Serializer):
     disclaimer = serializers.CharField(required=False, allow_blank=True)
 
 
+class DisguisedIngredientsSerializer(serializers.Serializer):
+    total_disguised_count = serializers.IntegerField()
+    hidden_sugars = serializers.ListField(child=serializers.CharField())
+    hidden_salts = serializers.ListField(child=serializers.CharField())
+    hidden_fats = serializers.ListField(child=serializers.CharField())
+    summary = serializers.CharField()
+
+
+class GlycemicResponseSerializer(serializers.Serializer):
+    tier = serializers.CharField()
+    spike_score = serializers.FloatField()
+    curve_shape = serializers.CharField()
+    buffering_quality = serializers.CharField()
+    sugars_100g = serializers.FloatField()
+    fiber_100g = serializers.FloatField()
+    protein_100g = serializers.FloatField()
+    explanation = serializers.CharField()
+
+
 class ProductAnalysisSerializer(serializers.Serializer):
     product = ProductSerializer()
     nutrition = NutritionBreakdownSerializer()
@@ -184,6 +205,8 @@ class ProductAnalysisSerializer(serializers.Serializer):
     healthier_swaps = HealthierSwapSerializer(many=True, required=False)
     fopnl_warnings = FOPNLWarningSerializer(many=True, required=False)
     damage_control = DamageControlSerializer(required=False)
+    disguised_ingredients = DisguisedIngredientsSerializer(required=False)
+    glycemic_response = GlycemicResponseSerializer(required=False)
 
 
 def _build_processing_label_dict(processing_level: str) -> dict:
@@ -367,6 +390,17 @@ def analyze_product(
         health_warnings=health_warnings,
     )
 
+    # Disguised / Hidden Ingredient Aliases Detection
+    disguised_ingredients = evaluate_disguised_ingredients(
+        ingredients_text=product.ingredients_text,
+    )
+
+    # Estimated Glycemic Response & Blood Glucose Trajectory
+    glycemic_response = estimate_glycemic_response(
+        nutrition=nutrition,
+        ingredients_text=product.ingredients_text,
+    )
+
     return {
         "product": product_dict,
         "nutrition": nutrition,
@@ -382,4 +416,6 @@ def analyze_product(
         "healthier_swaps": healthier_swaps,
         "fopnl_warnings": fopnl_warnings,
         "damage_control": damage_control,
+        "disguised_ingredients": disguised_ingredients,
+        "glycemic_response": glycemic_response,
     }

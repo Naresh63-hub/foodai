@@ -10,10 +10,12 @@ export default function Scan() {
   const navigate = useNavigate()
   const location = useLocation()
   const initialTab = (location.state as any)?.tab
-  const [tab, setTab] = useState<'barcode' | 'ocr' | 'text'>(
-    initialTab === 'ocr' || initialTab === 'text' ? initialTab : 'barcode'
+  const [tab, setTab] = useState<'barcode' | 'batch' | 'ocr' | 'text'>(
+    initialTab === 'ocr' || initialTab === 'text' || initialTab === 'batch' ? initialTab : 'barcode'
   )
   const [barcode, setBarcode] = useState('')
+  const [batchCode, setBatchCode] = useState('')
+  const [batchCount, setBatchCount] = useState(0)
   const [ingredientsText, setIngredientsText] = useState('')
   const [productName, setProductName] = useState('')
   const [loading, setLoading] = useState(false)
@@ -21,6 +23,55 @@ export default function Scan() {
   const [cameraActive, setCameraActive] = useState(false)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
+
+  useEffect(() => {
+    try {
+      const existing = JSON.parse(localStorage.getItem('foodai_grocery_cart') || '[]')
+      setBatchCount(existing.length)
+    } catch {
+      setBatchCount(0)
+    }
+  }, [])
+
+  const handleBatchScanSubmit = async (codeToScan?: string) => {
+    const cleanBarcode = (codeToScan || batchCode).trim()
+    if (!cleanBarcode) {
+      toast.error('Please enter a barcode number')
+      return
+    }
+    setLoading(true)
+    const { age, weightKg, healthConditions } = getUserPreferences()
+    try {
+      const result = await scanBarcode(cleanBarcode, age, weightKg, healthConditions)
+      playScanSound()
+      
+      // Add directly to Grocery Cart
+      const existing = JSON.parse(localStorage.getItem('foodai_grocery_cart') || '[]')
+      const hasPalm = result.ingredients.some((i: any) => i.name.toLowerCase().includes('palm'))
+      const newItem = {
+        id: Date.now().toString(),
+        barcode: result.product.barcode || cleanBarcode,
+        product_name: result.product.product_name,
+        brands: result.product.brands,
+        processing_level: result.processing_level,
+        sugars_100g: result.nutrition.per_100g.sugars_g || 0,
+        salt_100g: result.nutrition.per_100g.salt_g || 0,
+        fat_100g: result.nutrition.per_100g.fat_g || 0,
+        additives_count: result.additives_count || 0,
+        has_palm_oil: hasPalm,
+        healthier_swap: result.healthier_swaps?.[0]?.name,
+      }
+      existing.push(newItem)
+      localStorage.setItem('foodai_grocery_cart', JSON.stringify(existing))
+      setBatchCount(existing.length)
+      setBatchCode('')
+      toast.success(`🛒 Added "${result.product.product_name}" to Cart!`)
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Product not found in database.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Start Live Webcam Video Stream for Barcode Scanner
   const startCamera = async () => {
@@ -168,32 +219,113 @@ export default function Scan() {
         </div>
 
         {/* Tab Selector */}
-        <div className="rounded-2xl bg-gray-100 p-1 flex gap-1 mb-5">
+        <div className="rounded-2xl bg-gray-100 p-1 grid grid-cols-4 gap-1 mb-5">
           <button
             onClick={() => setTab('barcode')}
-            className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`py-2 rounded-xl text-[11px] font-bold transition-all text-center ${
               tab === 'barcode' ? 'bg-white shadow-card text-gray-900' : 'text-gray-500 hover:text-gray-800'
             }`}
           >
             📊 Barcode
           </button>
           <button
+            onClick={() => setTab('batch')}
+            className={`py-2 rounded-xl text-[11px] font-bold transition-all text-center ${
+              tab === 'batch' ? 'bg-white shadow-card text-emerald-800 font-extrabold' : 'text-gray-500 hover:text-gray-800'
+            }`}
+          >
+            🛒 Cart ({batchCount})
+          </button>
+          <button
             onClick={() => setTab('ocr')}
-            className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`py-2 rounded-xl text-[11px] font-bold transition-all text-center ${
               tab === 'ocr' ? 'bg-white shadow-card text-gray-900' : 'text-gray-500 hover:text-gray-800'
             }`}
           >
-            📷 Label OCR
+            📷 OCR
           </button>
           <button
             onClick={() => setTab('text')}
-            className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`py-2 rounded-xl text-[11px] font-bold transition-all text-center ${
               tab === 'text' ? 'bg-white shadow-card text-gray-900' : 'text-gray-500 hover:text-gray-800'
             }`}
           >
-            📝 Paste Text
+            📝 Paste
           </button>
         </div>
+
+        {/* TAB 2: CONTINUOUS BATCH SUPERMARKET SCANNER */}
+        {tab === 'batch' && (
+          <div className="space-y-4">
+            <div className="rounded-3xl bg-gradient-to-br from-emerald-700 via-teal-800 to-gray-950 text-white p-5 shadow-soft">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">⚡</span>
+                  <div>
+                    <h2 className="text-sm font-black tracking-tight">Supermarket Basket Mode</h2>
+                    <p className="text-[10px] text-emerald-200 font-medium">Scan consecutive items into Grocery Cart</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate('/cart')}
+                  className="rounded-xl bg-white/20 hover:bg-white/30 px-3 py-1 text-xs font-bold text-white transition-all"
+                >
+                  View Cart ({batchCount}) →
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Batch Barcode Form */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                handleBatchScanSubmit()
+              }}
+              className="rounded-2xl bg-white shadow-card p-4 border border-gray-100"
+            >
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                Scan Barcode to Add to Cart
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={batchCode}
+                  onChange={(e) => setBatchCode(e.target.value)}
+                  placeholder="e.g. 8901063371040"
+                  className="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold px-4 py-2.5 text-xs transition-all disabled:opacity-50"
+                >
+                  {loading ? 'Adding...' : '➕ Add'}
+                </button>
+              </div>
+            </form>
+
+            {/* Tap to Quick Add Preset Foods */}
+            <div className="rounded-2xl bg-white p-4 border border-gray-100 shadow-card">
+              <p className="text-xs font-bold text-gray-700 mb-2">⚡ Tap to Quick Add into Cart:</p>
+              <div className="grid grid-cols-2 gap-2">
+                {QUICK_SAMPLE_PRESETS.slice(0, 4).map((p) => (
+                  <button
+                    key={p.barcode}
+                    type="button"
+                    onClick={() => handleBatchScanSubmit(p.barcode)}
+                    disabled={loading}
+                    className="p-2.5 text-left rounded-xl bg-gray-50 hover:bg-emerald-50 border border-gray-100 hover:border-emerald-200 transition-all"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-lg">{p.icon}</span>
+                      <span className="text-xs font-bold text-gray-900 truncate">{p.name}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* TAB 1: BARCODE SCANNER */}
         {tab === 'barcode' && (

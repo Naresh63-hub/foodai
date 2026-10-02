@@ -62,6 +62,21 @@ CONDITION_META = {
         "icon": "🩺",
         "short_desc": "High fructose & hepatic lipid accumulation",
     },
+    "pcos": {
+        "title": "PCOS / Hormonal Balance",
+        "icon": "🌸",
+        "short_desc": "Insulin resistance & endocrine-disrupting additives",
+    },
+    "pregnancy": {
+        "title": "Pregnancy & Nursing Safe Mode",
+        "icon": "🤰",
+        "short_desc": "Raw dairy, artificial sweeteners & high caffeine safety",
+    },
+    "low_fodmap": {
+        "title": "IBS / Low FODMAP & Gut Care",
+        "icon": "🌿",
+        "short_desc": "Fermentable polyols, sugar alcohols & gut irritants",
+    },
 }
 
 # Ingredient Matching Sets
@@ -140,6 +155,151 @@ def _find_matching_additives(text: str, additive_patterns: List[tuple]) -> List[
         if re.search(pattern, text_lower):
             found.append(name)
     return found
+
+
+DISGUISED_SUGAR_PATTERNS = [
+    (r"\b(maltodextrin|malto-dextrin)\b", "Maltodextrin (High Glycemic Hydrolysed Starch)"),
+    (r"\b(invert sugar|invert syrup)\b", "Invert Sugar Syrup"),
+    (r"\b(high fructose corn syrup|hfcs)\b", "High-Fructose Corn Syrup (HFCS)"),
+    (r"\b(glucose syrup|liquid glucose|corn syrup solids)\b", "Glucose Syrup / Corn Syrup Solids"),
+    (r"\b(dextrose|d-glucose)\b", "Dextrose / Pure D-Glucose"),
+    (r"\b(agave nectar|agave syrup)\b", "Agave Nectar (Concentrated Fructose)"),
+    (r"\b(malt extract|barley malt extract)\b", "Malt Extract (Maltose Rich)"),
+    (r"\b(cane juice crystals|evaporated cane juice)\b", "Cane Juice Crystals"),
+    (r"\b(trehalose|isomaltulose)\b", "Trehalose / Isomaltulose"),
+    (r"\b(golden syrup|molasses|caramel sugar)\b", "Golden Syrup / Molasses"),
+    (r"\b(fructose syrup|fruit sugar concentrate)\b", "Fruit Sugar Concentrate / Fructose"),
+]
+
+DISGUISED_SALT_PATTERNS = [
+    (r"\b(e\s*621|ins\s*621|monosodium glutamate|msg)\b", "Monosodium Glutamate (MSG / INS 621)"),
+    (r"\b(e\s*631|ins\s*631|disodium inosinate)\b", "Disodium Inosinate (INS 631)"),
+    (r"\b(e\s*627|ins\s*627|disodium guanylate)\b", "Disodium Guanylate (INS 627)"),
+    (r"\b(e\s*211|ins\s*211|sodium benzoate)\b", "Sodium Benzoate (INS 211)"),
+    (r"\b(e\s*223|ins\s*223|sodium metabisulphite)\b", "Sodium Metabisulphite (INS 223)"),
+    (r"\b(e\s*500ii|ins\s*500ii|sodium bicarbonate|baking soda)\b", "Sodium Bicarbonate (INS 500ii)"),
+    (r"\b(e\s*331|ins\s*331|sodium citrate|trisodium citrate)\b", "Sodium Citrate (INS 331)"),
+    (r"\b(e\s*452|ins\s*452|sodium polyphosphate)\b", "Sodium Polyphosphate (INS 452)"),
+]
+
+DISGUISED_FAT_PATTERNS = [
+    (r"\b(palm oil|refined palm oil|palmolein|superolein)\b", "Refined Palm Oil / Palmolein"),
+    (r"\b(hydrogenated vegetable oil|vanaspati)\b", "Hydrogenated Industrial Fat (Vanaspati)"),
+    (r"\b(partially hydrogenated)\b", "Partially Hydrogenated Oil (Trans Fat Source)"),
+    (r"\b(interesterified vegetable fat)\b", "Interesterified Vegetable Fat"),
+    (r"\b(fractionated palm kernel oil)\b", "Fractionated Palm Kernel Oil"),
+]
+
+GUT_IRRITANT_POLYOLS = [
+    (r"\b(maltitol|e\s*965|ins\s*965)\b", "Maltitol (High Fermentable Polyol)"),
+    (r"\b(sorbitol|e\s*420|ins\s*420)\b", "Sorbitol (Osmotic Laxative Effect in Excess)"),
+    (r"\b(isomalt|e\s*953|ins\s*953)\b", "Isomalt"),
+    (r"\b(inulin|chicory root fiber|oligofructose)\b", "Isolated Inulin / Chicory Root (High FODMAP)"),
+]
+
+
+def evaluate_disguised_ingredients(ingredients_text: str) -> Dict[str, Any]:
+    """
+    Detects hidden sugars, industrial sodium salts, and refined fats disguised under technical names.
+    """
+    if not ingredients_text:
+        return {
+            "total_disguised_count": 0,
+            "hidden_sugars": [],
+            "hidden_salts": [],
+            "hidden_fats": [],
+            "summary": "No ingredients text available to analyze disguised additives.",
+        }
+
+    hidden_sugars = _find_matching_additives(ingredients_text, DISGUISED_SUGAR_PATTERNS)
+    hidden_salts = _find_matching_additives(ingredients_text, DISGUISED_SALT_PATTERNS)
+    hidden_fats = _find_matching_additives(ingredients_text, DISGUISED_FAT_PATTERNS)
+    total_count = len(hidden_sugars) + len(hidden_salts) + len(hidden_fats)
+
+    summary_parts = []
+    if hidden_sugars:
+        summary_parts.append(f"{len(hidden_sugars)} disguised added sugar(s)")
+    if hidden_salts:
+        summary_parts.append(f"{len(hidden_salts)} technical sodium additive(s)")
+    if hidden_fats:
+        summary_parts.append(f"{len(hidden_fats)} industrial refined fat(s)")
+
+    if summary_parts:
+        summary = f"Detected {', '.join(summary_parts)} in the formulation."
+    else:
+        summary = "No common disguised industrial sugars, hidden sodium salts, or trans-fat sources detected."
+
+    return {
+        "total_disguised_count": total_count,
+        "hidden_sugars": hidden_sugars,
+        "hidden_salts": hidden_salts,
+        "hidden_fats": hidden_fats,
+        "summary": summary,
+    }
+
+
+def estimate_glycemic_response(
+    nutrition: Dict[str, Any],
+    ingredients_text: str = "",
+) -> Dict[str, Any]:
+    """
+    Estimates blood glucose trajectory & glycemic impact based on carbohydrate, sugar, fiber, and protein ratios.
+    """
+    p100 = nutrition.get("per_100g", {}) if nutrition else {}
+    sugars = p100.get("sugars_g") or 0.0
+    fiber = p100.get("fiber_g") or 0.0
+    protein = p100.get("proteins_g") or 0.0
+    fat = p100.get("fat_g") or 0.0
+
+    text_lower = (ingredients_text or "").lower()
+    has_refined_flour = any(k in text_lower for k in ["maida", "refined wheat", "starch", "corn starch", "maltodextrin"])
+    has_whole_grains = any(k in text_lower for k in ["whole wheat", "oats", "millet", "ragi", "quinoa", "brown rice", "chana"])
+
+    # Calculate Spike Risk Score (1 to 10 scale)
+    base_score = min(10.0, max(1.0, (sugars * 0.25) + (3.0 if has_refined_flour else 1.0)))
+    
+    # Buffering effect of fiber and protein
+    buffer_reduction = (fiber * 0.4) + (protein * 0.15)
+    if has_whole_grains:
+        buffer_reduction += 1.5
+
+    spike_score = round(max(1.0, min(10.0, base_score - buffer_reduction)), 1)
+
+    if spike_score >= 7.0:
+        tier = "High (Fast Glucose Surge)"
+        curve_shape = "sharp_spike"
+        buffering = "Poor"
+        explanation = (
+            f"High proportion of simple sugars ({sugars}g/100g) and refined carbohydrates with low protective dietary fiber ({fiber}g). "
+            "Causes a rapid postprandial blood glucose elevation followed by a reactive insulin dip."
+        )
+    elif spike_score >= 4.0:
+        tier = "Moderate (Gradual Rise)"
+        curve_shape = "moderate_rise"
+        buffering = "Moderate"
+        explanation = (
+            f"Moderate carbohydrate content with some buffering from protein ({protein}g) and fats ({fat}g), "
+            "providing a manageable, steady blood glucose release."
+        )
+    else:
+        tier = "Low (Sustained Energy)"
+        curve_shape = "flat_sustained"
+        buffering = "Strong"
+        explanation = (
+            f"Favorable nutrient balance with low free sugar ({sugars}g) and good dietary buffering ({fiber}g fiber, {protein}g protein). "
+            "Supports sustained metabolic energy without sudden glycemic spikes."
+        )
+
+    return {
+        "tier": tier,
+        "spike_score": spike_score,
+        "curve_shape": curve_shape,
+        "buffering_quality": buffering,
+        "sugars_100g": sugars,
+        "fiber_100g": fiber,
+        "protein_100g": protein,
+        "explanation": explanation,
+    }
 
 
 def evaluate_fssai_fopnl(
@@ -512,6 +672,60 @@ def evaluate_health_conditions(
                 "message": f"Free sugars and high fructose carbohydrates bypass insulin regulation and are directly metabolized in the liver into triglycerides (de novo lipogenesis).",
                 "action": "Minimize ultra-processed sweet snacks. Replace with unrefined fiber-rich whole foods.",
                 "scientific_ref": "EASL-EASD-EASO Clinical Practice Guidelines for the management of NAFLD."
+            })
+
+    # 11. PCOS / HORMONAL BALANCE
+    if "pcos" in active_conditions:
+        has_sugar = sugars_100g >= T.SUGAR_HIGH
+        has_high_gi = _has_keyword(ingredients_text, [r"\bmaida\b", r"\bmaltodextrin\b", r"\binvert sugar\b", r"\bhfcs\b"])
+        if has_sugar or has_high_gi:
+            warnings.append({
+                "condition": "pcos",
+                "condition_title": "PCOS / Hormonal Balance",
+                "severity": "warning",
+                "badge": "Insulin Resistance Trigger",
+                "title": "High Glycemic Load & Endocrine Strain",
+                "message": "Elevated refined sugar and simple starch intake can stimulate androgen synthesis and worsen insulin sensitivity in PCOS.",
+                "action": "Pair with fibrous seeds (chia/flax) and protein, or choose whole grain low-GI alternatives.",
+                "scientific_ref": "Androgen Excess and PCOS Society Nutrition Recommendations."
+            })
+
+    # 12. PREGNANCY & NURSING SAFE MODE
+    if "pregnancy" in active_conditions:
+        has_caffeine = _has_keyword(ingredients_text, [r"\bcaffeine\b", r"\bcoffee\b", r"\bguarana\b", r"\benergy blend\b"])
+        has_saccharin = _has_keyword(ingredients_text, [r"\bsaccharin\b", r"\be\s*954\b", r"\bins\s*954\b"])
+        has_raw_unpasteurized = _has_keyword(ingredients_text, [r"\bunpasteurized\b", r"\braw milk\b"])
+        if has_caffeine or has_saccharin or has_raw_unpasteurized:
+            details = []
+            if has_caffeine: details.append("caffeine/stimulants")
+            if has_saccharin: details.append("saccharin sweetener")
+            if has_raw_unpasteurized: details.append("unpasteurized dairy")
+            warnings.append({
+                "condition": "pregnancy",
+                "condition_title": "Pregnancy & Nursing Safe Mode",
+                "severity": "danger" if has_saccharin or has_raw_unpasteurized else "warning",
+                "badge": "Pregnancy Caution Flag",
+                "title": f"Contains {', '.join(details).capitalize()}",
+                "message": "Certain intense sweeteners, unpasteurized components, and stimulants require strict intake moderation during pregnancy.",
+                "action": "Check with your obstetrician or nutritionist before consuming.",
+                "scientific_ref": "ACOG (American College of Obstetricians and Gynecologists) Guidelines."
+            })
+
+    # 13. IBS / LOW FODMAP & GUT HEALTH
+    if "low_fodmap" in active_conditions or "ibs" in active_conditions:
+        matched_polyols = _find_matching_additives(ingredients_text, GUT_IRRITANT_POLYOLS)
+        has_high_fructose = _has_keyword(ingredients_text, [r"\bhfcs\b", r"\bhigh fructose\b", r"\bagave\b"])
+        if matched_polyols or has_high_fructose:
+            poly_names = ", ".join(matched_polyols) if matched_polyols else "high fructose"
+            warnings.append({
+                "condition": "low_fodmap",
+                "condition_title": "IBS / Low FODMAP & Gut Care",
+                "severity": "warning",
+                "badge": "High Fermentable Polyol Load",
+                "title": f"Contains Fermentable FODMAPs ({poly_names})",
+                "message": "Sugar alcohols (polyols) and isolated fibers ferment rapidly in the colon, triggering gas, bloating, and gastrointestinal distress.",
+                "action": "Limit portion size or choose gut-friendly, polyol-free whole food alternatives.",
+                "scientific_ref": "Monash University FODMAP Diet Guidelines."
             })
 
     return warnings

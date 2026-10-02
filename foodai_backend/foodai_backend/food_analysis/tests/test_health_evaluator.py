@@ -151,3 +151,60 @@ def test_damage_control_advice_generator():
     assert "headline" in advice
     assert len(advice["mitigation_steps"]) >= 2
     assert any("Nuts" in s["action"] or "Walk" in s["action"] for s in advice["mitigation_steps"])
+
+
+def test_evaluate_disguised_ingredients():
+    from foodai_backend.food_analysis.health_evaluator import evaluate_disguised_ingredients
+    text = "Refined Wheat Flour, Invert Sugar Syrup, Maltodextrin, Palm Oil, Sodium Benzoate, INS 621 MSG."
+    disguised = evaluate_disguised_ingredients(text)
+    assert disguised["total_disguised_count"] >= 3
+    assert len(disguised["hidden_sugars"]) >= 2
+    assert len(disguised["hidden_salts"]) >= 1
+    assert len(disguised["hidden_fats"]) >= 1
+
+
+def test_estimate_glycemic_response_fast_vs_slow():
+    from foodai_backend.food_analysis.health_evaluator import estimate_glycemic_response
+    # Fast spike item (High sugar, zero fiber)
+    high_gi_nutr = {"per_100g": {"sugars_g": 35.0, "fiber_g": 0.2, "proteins_g": 2.0, "fat_g": 10.0}}
+    fast_resp = estimate_glycemic_response(high_gi_nutr, "Maida, Sugar, Glucose Syrup")
+    assert fast_resp["spike_score"] >= 7.0
+    assert fast_resp["curve_shape"] == "sharp_spike"
+
+    # Slow sustained item (High fiber oats)
+    low_gi_nutr = {"per_100g": {"sugars_g": 2.0, "fiber_g": 11.0, "proteins_g": 13.0, "fat_g": 6.0}}
+    slow_resp = estimate_glycemic_response(low_gi_nutr, "Rolled Oats, Chia Seeds, Almonds")
+    assert slow_resp["spike_score"] <= 4.0
+    assert slow_resp["curve_shape"] == "flat_sustained"
+
+
+def test_new_health_conditions_pcos_pregnancy_fodmap():
+    # PCOS test
+    pcos_warns = evaluate_health_conditions(
+        product_name="Energy Bar",
+        ingredients_text="Maltodextrin, High-Fructose Corn Syrup, Palm Oil",
+        nutrition={"per_100g": {"sugars_g": 28.0, "salt_g": 0.2}},
+        processing_level="ultra_processed",
+        user_health_conditions=["pcos"],
+    )
+    assert any(w["condition"] == "pcos" for w in pcos_warns)
+
+    # Pregnancy test (saccharin / caffeine)
+    preg_warns = evaluate_health_conditions(
+        product_name="Diet Soda",
+        ingredients_text="Carbonated Water, Caffeine, INS 954 Saccharin",
+        nutrition={"per_100g": {"sugars_g": 0.0, "salt_g": 0.05}},
+        processing_level="ultra_processed",
+        user_health_conditions=["pregnancy"],
+    )
+    assert any(w["condition"] == "pregnancy" for w in preg_warns)
+
+    # Low FODMAP test (maltitol)
+    fodmap_warns = evaluate_health_conditions(
+        product_name="Sugar Free Candy",
+        ingredients_text="Sweetener (INS 965 Maltitol), Inulin, Natural Flavor",
+        nutrition={"per_100g": {"sugars_g": 0.5, "salt_g": 0.01}},
+        processing_level="ultra_processed",
+        user_health_conditions=["low_fodmap"],
+    )
+    assert any(w["condition"] == "low_fodmap" for w in fodmap_warns)
