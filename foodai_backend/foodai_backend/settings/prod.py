@@ -6,9 +6,16 @@ A real ALLOWED_HOSTS list and CORS origins must be supplied via environment
 variables so the app is not deployed with wildcard/debug defaults.
 """
 from .base import *  # noqa: F401,F403
+from django.core.exceptions import ImproperlyConfigured
 
 # Never inherit the dev default; force an explicit, safe posture.
 DEBUG = False
+
+# Fail fast if the deployment forgot to set a real, unique secret.
+if SECRET_KEY == 'django-insecure-dev-key-change-me':  # noqa: F405
+    raise ImproperlyConfigured(
+        'SECRET_KEY must be set to a unique value in production (refusing the dev default).'
+    )
 
 # In production ALLOWED_HOSTS must be provided explicitly via the environment.
 # Fail fast rather than silently running with a wildcard.

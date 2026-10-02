@@ -11,11 +11,15 @@ from foodai_backend.food_analysis.serializers import analyze_product
 class ScanListView(APIView):
     permission_classes = [AllowAny]
 
+    def get_permissions(self):
+        # Reading history is private (owner only); logging a scan may be anonymous.
+        if self.request.method.lower() == 'get':
+            return [IsAuthenticated()]
+        return [AllowAny()]
+
     def get(self, request):
-        if request.user.is_authenticated:
-            scans = Scan.objects.filter(user=request.user).order_by("-scanned_at")[:50]
-        else:
-            scans = Scan.objects.all().order_by("-scanned_at")[:20]
+        # AC-9: only the authenticated user's own scans, never other users'.
+        scans = Scan.objects.filter(user=request.user).order_by("-scanned_at")[:50]
 
         results = []
         for s in scans:
@@ -63,10 +67,11 @@ class ScanListView(APIView):
 
 
 class ScanDetailView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def delete(self, request, pk):
-        scan = Scan.objects.filter(pk=pk).first()
+        # Ownership check: a user can only delete their own scans (prevents IDOR).
+        scan = Scan.objects.filter(pk=pk, user=request.user).first()
         if not scan:
             return Response({"detail": "Scan not found"}, status=status.HTTP_404_NOT_FOUND)
         scan.delete()

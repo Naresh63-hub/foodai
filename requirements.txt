@@ -4,7 +4,6 @@ django-cors-headers
 django-environ
 redis
 psycopg2-binary
-djangorestframework-simplejwt
 pytest
 pytest-django
 pytest-cov
