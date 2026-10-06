@@ -1,0 +1,110 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Global Default-Deny Catch-All
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Reusable Hardened Security Primitives
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null && request.auth.uid != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // 3. Entity Validation Helpers (The Anti-Update-Gap)
+    function isValidUserProfile(data, userId) {
+      return data.userId is string &&
+             data.userId == userId &&
+             data.userId == request.auth.uid &&
+             data.email is string &&
+             data.email.size() <= 256 &&
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 128)) &&
+             (!('age' in data) || data.age == null || (data.age is int && data.age >= 1 && data.age <= 120)) &&
+             (!('bodyWeightKg' in data) || data.bodyWeightKg == null || (data.bodyWeightKg is number && data.bodyWeightKg > 0 && data.bodyWeightKg <= 400)) &&
+             (!('healthConditions' in data) || data.healthConditions is list);
+    }
+
+    function isValidFoodScan(data, userId) {
+      return data.id is string &&
+             isValidId(data.id) &&
+             data.userId is string &&
+             data.userId == userId &&
+             data.userId == request.auth.uid &&
+             data.foodName is string &&
+             data.foodName.size() > 0 &&
+             data.foodName.size() <= 256 &&
+             data.caloriesKcal is number &&
+             data.caloriesKcal >= 0 &&
+             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 8192));
+    }
+
+    function isValidDailyLog(data, userId) {
+      return data.id is string &&
+             isValidId(data.id) &&
+             data.userId is string &&
+             data.userId == userId &&
+             data.userId == request.auth.uid &&
+             data.productName is string &&
+             data.productName.size() > 0 &&
+             data.productName.size() <= 256 &&
+             (!('sugarsG' in data) || (data.sugarsG is number && data.sugarsG >= 0)) &&
+             (!('saltG' in data) || (data.saltG is number && data.saltG >= 0)) &&
+             (!('fatG' in data) || (data.fatG is number && data.fatG >= 0));
+    }
+
+    // 4. Secure Path Match Blocks
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // Blanket user listing is strictly prohibited
+      allow create: if isOwner(userId) && isValidUserProfile(incoming(), userId);
+      allow update: if isOwner(userId) &&
+                       isValidUserProfile(incoming(), userId) &&
+                       incoming().userId == existing().userId;
+      allow delete: if isOwner(userId);
+
+      // Food Scans Subcollection (AI Snapped Photos & Scans)
+      match /foodScans/{scanId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) &&
+                         isValidId(scanId) &&
+                         isValidFoodScan(incoming(), userId);
+        allow update: if isOwner(userId) &&
+                         isValidId(scanId) &&
+                         isValidFoodScan(incoming(), userId) &&
+                         incoming().userId == existing().userId;
+        allow delete: if isOwner(userId) && isValidId(scanId);
+      }
+
+      // Daily Logs Subcollection (24-Hour Food Intake Tracking)
+      match /dailyLogs/{logId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) &&
+                         isValidId(logId) &&
+                         isValidDailyLog(incoming(), userId);
+        allow update: if isOwner(userId) &&
+                         isValidId(logId) &&
+                         isValidDailyLog(incoming(), userId) &&
+                         incoming().userId == existing().userId;
+        allow delete: if isOwner(userId) && isValidId(logId);
+      }
+    }
+  }
+}
