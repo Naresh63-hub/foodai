@@ -6,7 +6,6 @@ import {
   signOut as firebaseSignOut,
   onAuthStateChanged,
   signInWithPopup,
-  sendPasswordResetEmail,
 } from 'firebase/auth'
 import { auth, googleProvider } from '../config/firebase'
 import { AUTH_BYPASS } from '../config/authMode'
@@ -21,7 +20,6 @@ interface AuthContextType {
   signUp: (email: string, password: string) => Promise<void>
   signInWithGoogle: () => Promise<void>
   signInDemo: () => void
-  sendPasswordReset: (email: string) => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -58,32 +56,6 @@ function isUnauthorizedDomainError(error: any): boolean {
     code === 'auth/operation-not-allowed' ||
     msg.includes('operation-not-allowed')
   )
-}
-
-function getFriendlyAuthErrorMessage(error: any): string {
-  if (!error) return 'Authentication failed'
-  const code = typeof error.code === 'string' ? error.code : ''
-  switch (code) {
-    case 'auth/invalid-credential':
-    case 'auth/wrong-password':
-      return 'Incorrect email or password. Please verify and try again.'
-    case 'auth/user-not-found':
-      return 'No account found with this email. Please check spelling or register.'
-    case 'auth/email-already-in-use':
-      return 'An account already exists with this email address. Please sign in.'
-    case 'auth/weak-password':
-      return 'Password should be at least 6 characters.'
-    case 'auth/invalid-email':
-      return 'Please enter a valid email address.'
-    case 'auth/popup-blocked':
-      return 'Google sign-in popup was blocked by browser. Please allow popups.'
-    case 'auth/popup-closed-by-user':
-      return 'Google sign-in window was closed.'
-    case 'auth/too-many-requests':
-      return 'Too many attempts. Please wait a few moments and try again.'
-    default:
-      return error.message || 'Authentication error. Please try again.'
-  }
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -129,8 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         toast.success(`Signed in as preview user (${email})`)
         return
       }
-      const friendlyMsg = getFriendlyAuthErrorMessage(error)
-      toast.error(friendlyMsg)
+      toast.error(error.message || 'Failed to sign in')
       throw error
     }
   }
@@ -152,8 +123,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         toast.success(`Signed in as preview user (${email})`)
         return
       }
-      const friendlyMsg = getFriendlyAuthErrorMessage(error)
-      toast.error(friendlyMsg)
+      toast.error(error.message || 'Failed to create account')
       throw error
     }
   }
@@ -194,23 +164,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       console.warn('Google sign in notice:', error?.message || error)
-      const friendlyMsg = getFriendlyAuthErrorMessage(error)
-      toast.error(friendlyMsg)
-      throw error
-    }
-  }
-
-  const sendPasswordReset = async (email: string) => {
-    if (AUTH_BYPASS) {
-      toast.success('Password reset link sent (demo mode)')
-      return
-    }
-    try {
-      await sendPasswordResetEmail(auth, email)
-      toast.success('Password reset email sent! Check your inbox.')
-    } catch (error: any) {
-      const friendlyMsg = getFriendlyAuthErrorMessage(error)
-      toast.error(friendlyMsg)
+      toast.error(error.message || 'Failed to sign in with Google')
       throw error
     }
   }
@@ -245,7 +199,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signUp,
         signInWithGoogle,
         signInDemo,
-        sendPasswordReset,
         signOut,
       }}
     >

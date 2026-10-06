@@ -6,7 +6,6 @@ import { getScanHistory } from '../api/food'
 import VoiceMealLoggerModal from '../components/VoiceMealLoggerModal'
 import { SkeletonRecentScans } from '../components/Skeleton'
 import { useAuth } from '../contexts/AuthContext'
-import InstallAppModal from '../components/InstallAppModal'
 
 export default function Home() {
   const navigate = useNavigate()
@@ -14,7 +13,6 @@ export default function Home() {
   const [recentScans, setRecentScans] = useState<any[]>([])
   const [loadingScans, setLoadingScans] = useState(true)
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false)
-  const [showInstallModal, setShowInstallModal] = useState(false)
 
   useEffect(() => {
     setLoadingScans(true)
@@ -44,37 +42,25 @@ export default function Home() {
               <span>🥗</span>
               <span>AI Food Transparency</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => setShowInstallModal(true)}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[11px] font-bold border border-emerald-200 shadow-xs transition-all active:scale-95"
-                title="Install FoodAI or Download Android APK"
+            {user ? (
+              <Link
+                to="/profile"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-gray-200 text-[11px] font-bold text-gray-700 shadow-xs hover:border-emerald-300 transition-all active:scale-95"
               >
-                <span>📱</span>
-                <span>Get App</span>
-              </button>
-
-              {user ? (
-                <Link
-                  to="/profile"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-gray-200 text-[11px] font-bold text-gray-700 shadow-xs hover:border-emerald-300 transition-all active:scale-95"
-                >
-                  <span>👤</span>
-                  <span className="max-w-[90px] truncate">
-                    {user.displayName || user.email?.split('@')[0] || 'Profile'}
-                  </span>
-                </Link>
-              ) : (
-                <Link
-                  to="/login"
-                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-600 hover:bg-emerald-700 text-xs font-extrabold text-white shadow-xs transition-all active:scale-95"
-                >
-                  <span>🔑</span>
-                  <span>Sign In</span>
-                </Link>
-              )}
-            </div>
+                <span>👤</span>
+                <span className="max-w-[110px] truncate">
+                  {user.displayName || user.email?.split('@')[0] || 'Profile'}
+                </span>
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-600 hover:bg-emerald-700 text-xs font-extrabold text-white shadow-xs transition-all active:scale-95"
+              >
+                <span>🔑</span>
+                <span>Sign In</span>
+              </Link>
+            )}
           </div>
           <h1 className="text-3xl font-black tracking-tight text-gray-900 leading-tight">
             Know What You're Eating
@@ -308,12 +294,6 @@ export default function Home() {
       <VoiceMealLoggerModal
         isOpen={isVoiceModalOpen}
         onClose={() => setIsVoiceModalOpen(false)}
-      />
-
-      {/* PWA / Android APK Installation Modal */}
-      <InstallAppModal
-        isOpen={showInstallModal}
-        onClose={() => setShowInstallModal(false)}
       />
     </SafeAreaView>
   )

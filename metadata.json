@@ -1,7 +1,0 @@
-{
-  "name": "FoodAI",
-  "description": "Know What You're Eating — AI Food Transparency & Pre-Eating Intelligence",
-  "capabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
-}

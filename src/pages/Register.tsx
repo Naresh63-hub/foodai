@@ -10,7 +10,6 @@ export default function Register() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -127,26 +126,16 @@ export default function Register() {
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <label htmlFor="password" className="block text-xs font-bold text-gray-700">
-                Password
-              </label>
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="text-[11px] text-gray-500 hover:text-gray-700"
-              >
-                {showPassword ? 'Hide 🙈' : 'Show 👁️'}
-              </button>
-            </div>
+            <label htmlFor="password" className="block text-xs font-bold text-gray-700 mb-1">
+              Password
+            </label>
             <input
               id="password"
-              type={showPassword ? 'text' : 'password'}
+              type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              autoComplete="new-password"
               className="w-full rounded-2xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
               placeholder="At least 6 characters"
             />
@@ -158,12 +147,11 @@ export default function Register() {
             </label>
             <input
               id="confirmPassword"
-              type={showPassword ? 'text' : 'password'}
+              type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               minLength={6}
-              autoComplete="new-password"
               className="w-full rounded-2xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
               placeholder="Confirm your password"
             />
