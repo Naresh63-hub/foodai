@@ -4,6 +4,7 @@ import SafeAreaView from '../components/SafeAreaView'
 import { useAuth } from '../contexts/AuthContext'
 import { useUserPreferences } from '../hooks/useUserPreferences'
 import { getUserFoodScans, StoredFoodScan } from '../services/firestoreService'
+import InstallAppModal from '../components/InstallAppModal'
 
 const CONDITION_NAMES: Record<string, { title: string; icon: string }> = {
   diabetes: { title: 'Diabetes / Pre-diabetes', icon: '🩸' },
@@ -28,6 +29,7 @@ export default function Profile() {
 
   const [cloudScans, setCloudScans] = useState<StoredFoodScan[]>([])
   const [loadingScans, setLoadingScans] = useState(false)
+  const [showInstallModal, setShowInstallModal] = useState(false)
 
   useEffect(() => {
     if (user?.uid) {
@@ -210,7 +212,16 @@ export default function Profile() {
           )}
         </div>
 
-        <div>
+        <div className="space-y-3">
+          <button
+            type="button"
+            onClick={() => setShowInstallModal(true)}
+            className="w-full rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold py-3.5 shadow-soft transition-all active:scale-[0.98] flex items-center justify-center gap-2.5 text-sm"
+          >
+            <span className="text-lg">📱</span>
+            <span>Install App / Download APK</span>
+          </button>
+
           <button
             onClick={handleLogout}
             className="w-full rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold py-3.5 border border-rose-200 transition-colors flex items-center justify-center gap-2 text-sm"
@@ -219,6 +230,11 @@ export default function Profile() {
             Log out
           </button>
         </div>
+
+        <InstallAppModal
+          isOpen={showInstallModal}
+          onClose={() => setShowInstallModal(false)}
+        />
 
         <div className="mt-8 text-center text-[10px] text-gray-400 font-medium">
           FoodAI Personal Food Intelligence · FSSAI & WHO/JECFA Compliant
