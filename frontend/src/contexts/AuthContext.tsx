@@ -7,6 +7,8 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
 } from 'firebase/auth'
 import { auth } from '../config/firebase'
 import { AUTH_BYPASS } from '../config/authMode'
@@ -52,6 +54,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (AUTH_BYPASS) return
+
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          setUser(result.user)
+          toast.success('Successfully signed in with Google')
+        }
+      })
+      .catch((error) => {
+        if (error.code !== 'auth/popup-closed-by-user') {
+          console.error('Redirect sign-in error:', error)
+        }
+      })
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user)
       setLoading(false)
@@ -96,11 +112,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       toast.success('Login bypassed (dev mode)')
       return
     }
+    const provider = new GoogleAuthProvider()
+    provider.setCustomParameters({ prompt: 'select_account' })
     try {
-      const provider = new GoogleAuthProvider()
       await signInWithPopup(auth, provider)
       toast.success('Successfully signed in with Google')
     } catch (error: any) {
+      if (error.code === 'auth/popup-blocked') {
+        toast.info('Popup was blocked by browser. Redirecting to Google...')
+        await signInWithRedirect(auth, provider)
+        return
+      }
+      if (error.code === 'auth/popup-closed-by-user') {
+        return
+      }
       toast.error(error.message || 'Failed to sign in with Google')
       throw error
     }
