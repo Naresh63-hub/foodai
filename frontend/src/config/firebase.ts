@@ -14,19 +14,10 @@ const firebaseConfig = {
 }
 
 // Initialize Firebase
-let app: FirebaseApp
-let auth: Auth
-let db: Firestore
+const app: FirebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+const auth: Auth = getAuth(app)
+const db: Firestore = getFirestore(app)
 let analytics: Analytics | null = null
-
-if (getApps().length === 0) {
-  app = initializeApp(firebaseConfig)
-} else {
-  app = getApps()[0]
-}
-
-auth = getAuth(app)
-db = getFirestore(app)
 
 // Initialize analytics only in browser environments where supported
 if (typeof window !== 'undefined') {

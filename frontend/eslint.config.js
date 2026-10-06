@@ -5,7 +5,7 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'coverage', 'playwright-report', 'test-results'] },
+  { ignores: ['dist', 'node_modules', 'coverage', 'playwright-report', 'test-results', 'android'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],
@@ -29,6 +29,7 @@ export default tseslint.config(
       // New (v6) aggressive react-hooks advisories that flag valid patterns such as
       // syncing draft state to props; keep them off so the gate targets real bugs.
       'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/purity': 'off',
       'no-useless-assignment': 'off',
     },
   },
