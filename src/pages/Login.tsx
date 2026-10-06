@@ -6,12 +6,11 @@ import SafeAreaView from '../components/SafeAreaView'
 
 export default function Login() {
   const navigate = useNavigate()
-  const { signIn, signInWithGoogle, signInDemo, sendPasswordReset } = useAuth()
+  const { signIn, signInWithGoogle, signInDemo } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [resettingPassword, setResettingPassword] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,19 +42,9 @@ export default function Login() {
     navigate('/')
   }
 
-  const handleForgotPassword = async () => {
-    if (!email) {
-      toast.info('Please enter your email address above to receive a reset link.')
-      return
-    }
-    setResettingPassword(true)
-    try {
-      await sendPasswordReset(email)
-    } catch {
-      // Error handled in AuthContext
-    } finally {
-      setResettingPassword(false)
-    }
+  const handleForgotPassword = () => {
+    const target = email ? `/forgot-password?email=${encodeURIComponent(email)}` : '/forgot-password'
+    navigate(target)
   }
 
   return (
@@ -140,10 +129,9 @@ export default function Login() {
               <button
                 type="button"
                 onClick={handleForgotPassword}
-                disabled={resettingPassword}
                 className="text-[11px] text-emerald-700 hover:underline font-bold"
               >
-                {resettingPassword ? 'Sending...' : 'Forgot password?'}
+                Forgot password?
               </button>
             </div>
             <div className="relative">

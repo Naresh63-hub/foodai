@@ -23,6 +23,7 @@ const FoodCameraSnap = lazy(() => import('./pages/FoodCameraSnap'))
 const VoiceLogPage = lazy(() => import('./pages/VoiceLogPage'))
 const Login = lazy(() => import('./pages/Login'))
 const Register = lazy(() => import('./pages/Register'))
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 
 function PageSpinner() {
   return (
@@ -121,6 +122,7 @@ export default function AppRouter() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         <Route element={<AppLayout />}>
           <Route path="/" element={<Home />} />
