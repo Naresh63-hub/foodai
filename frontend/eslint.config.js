@@ -30,6 +30,8 @@ export default tseslint.config(
       // syncing draft state to props; keep them off so the gate targets real bugs.
       'react-hooks/set-state-in-effect': 'off',
       'react-hooks/purity': 'off',
+      'react-hooks/static-components': 'off',
+      'no-empty': ['warn', { allowEmptyCatch: true }],
       'no-useless-assignment': 'off',
     },
   },

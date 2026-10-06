@@ -158,3 +158,121 @@ export async function searchProducts(filters: {
   const response = await client.get<CatalogProductItem[]>('/products/search/', { params })
   return response.data
 }
+
+export interface GeminiNutritionResult {
+  food_name: string
+  serving_description: string
+  serving_weight_g: number
+  calories_kcal: number
+  macros: {
+    carbohydrates_g: number
+    proteins_g: number
+    fat_g: number
+    saturated_fat_g: number
+    fiber_g: number
+    sugars_g: number
+    sodium_mg: number
+  }
+  macro_ratios: {
+    carbs_pct: number
+    protein_pct: number
+    fat_pct: number
+  }
+  micronutrients: {
+    name: string
+    amount: string
+    daily_value_pct: number
+  }[]
+  health_score: number
+  processing_level: string
+  glycemic_impact: 'Low' | 'Moderate' | 'High'
+  glycemic_explanation: string
+  dietary_tags: string[]
+  key_benefits: string[]
+  concerns_or_cautions: string[]
+  personalized_advice: string
+  healthier_swap: {
+    name: string
+    description: string
+    why_better: string
+  }
+  ingredients_breakdown: {
+    ingredient: string
+    category: string
+    purpose_or_benefit: string
+  }[]
+  burn_off_estimate: string
+}
+
+export async function analyzeFoodNutrition(payload: {
+  food_query: string
+  age?: number | null
+  weight_kg?: number | null
+  health_conditions?: string[] | null
+}): Promise<GeminiNutritionResult> {
+  const response = await client.post<GeminiNutritionResult>('/ai/nutrition-analyze', payload)
+  return response.data
+}
+
+export interface RecognizedIngredientItem {
+  name: string
+  amount_estimate: string
+  category: string
+  visual_cue: string
+}
+
+export interface FoodVisionAnalysisResult {
+  food_name: string
+  confidence_score: number
+  serving_description: string
+  serving_weight_g: number
+  calories_kcal: number
+  macros: {
+    carbohydrates_g: number
+    proteins_g: number
+    fat_g: number
+    saturated_fat_g: number
+    fiber_g: number
+    sugars_g: number
+    sodium_mg: number
+  }
+  macro_ratios: {
+    carbs_pct: number
+    protein_pct: number
+    fat_pct: number
+  }
+  processing_level: string
+  health_score: number
+  glycemic_impact: 'Low' | 'Moderate' | 'High'
+  glycemic_explanation: string
+  recognized_ingredients: RecognizedIngredientItem[]
+  dietary_tags: string[]
+  key_insights: string[]
+  cautions_and_allergens: string[]
+  personalized_advice: string
+  burn_off_estimate: string
+}
+
+export async function analyzeFoodPhoto(payload: {
+  image_base64?: string
+  imageFile?: File
+  mime_type?: string
+  age?: number | null
+  weight_kg?: number | null
+  health_conditions?: string[] | null
+}): Promise<FoodVisionAnalysisResult> {
+  if (payload.imageFile) {
+    const formData = new FormData()
+    formData.append('image', payload.imageFile)
+    if (payload.age) formData.append('age', String(payload.age))
+    if (payload.weight_kg) formData.append('weight_kg', String(payload.weight_kg))
+    if (payload.health_conditions) formData.append('health_conditions', payload.health_conditions.join(','))
+    const res = await client.post<FoodVisionAnalysisResult>('/ai/food-vision-analyze', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    return res.data
+  }
+
+  const res = await client.post<FoodVisionAnalysisResult>('/ai/food-vision-analyze', payload)
+  return res.data
+}

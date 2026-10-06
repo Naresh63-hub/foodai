@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import SafeAreaView from '../components/SafeAreaView'
 import { toast } from 'sonner'
 import { DailyFoodLogItem } from '../types/food'
+import WeeklyCalorieProgress from '../components/WeeklyCalorieProgress'
+import VoiceMealLoggerModal from '../components/VoiceMealLoggerModal'
 
 const WHO_LIMITS = {
   sugars_g: 25.0, // WHO recommended max free sugar for adults
@@ -11,8 +13,10 @@ const WHO_LIMITS = {
 }
 
 export default function DailyTracker() {
+  const [activeTab, setActiveTab] = useState<'weekly' | 'daily'>('weekly')
   const todayKey = `foodai_daily_log_${new Date().toISOString().split('T')[0]}`
   const [logs, setLogs] = useState<DailyFoodLogItem[]>([])
+  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false)
 
   useEffect(() => {
     try {
@@ -37,10 +41,14 @@ export default function DailyTracker() {
   }
 
   const handleClearAll = () => {
-    if (confirm('Clear all logged foods for today?')) {
-      saveLogs([])
-      toast.info('Daily tracker cleared')
-    }
+    const previous = [...logs]
+    saveLogs([])
+    toast.info('Daily tracker cleared', {
+      action: {
+        label: 'Undo',
+        onClick: () => saveLogs(previous),
+      },
+    })
   }
 
   // Calculate Daily Totals
@@ -55,18 +63,18 @@ export default function DailyTracker() {
 
   return (
     <SafeAreaView>
-      <div className="px-5 py-6 pb-28 max-w-md mx-auto">
+      <div className="px-4 sm:px-5 py-6 pb-36 max-w-md mx-auto w-full box-border">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           <div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-bold border border-emerald-200 mb-1">
               <span>📊</span>
-              <span>Daily Chemical & Nutrition Ledger</span>
+              <span>Nutrition & Caloric Progress</span>
             </div>
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Today's Food Intake</h1>
-            <p className="text-xs text-gray-500">Track cumulative free sugars, salt & additives</p>
+            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Progress & Intake</h1>
+            <p className="text-xs text-gray-500">7-Day Firestore Calorie trends & daily WHO limits</p>
           </div>
-          {logs.length > 0 && (
+          {activeTab === 'daily' && logs.length > 0 && (
             <button
               onClick={handleClearAll}
               className="text-[11px] font-bold text-gray-400 hover:text-rose-600 transition-colors"
@@ -76,8 +84,58 @@ export default function DailyTracker() {
           )}
         </div>
 
-        {/* WHO SAFE BUDGET RINGS / METRICS */}
-        <div className="rounded-3xl bg-gradient-to-br from-gray-900 via-teal-950 to-gray-900 text-white p-5 shadow-soft mb-6">
+        {/* Voice Command Quick Action Banner */}
+        <div className="mb-4 p-3.5 rounded-2xl bg-gradient-to-r from-purple-900 via-indigo-900 to-emerald-950 text-white flex items-center justify-between shadow-soft">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-xl shrink-0">
+              🎙️
+            </span>
+            <div className="min-w-0">
+              <p className="text-xs font-black truncate">Hands-Free Voice Command</p>
+              <p className="text-[10px] text-white/80 truncate">“Log 2 eggs & coffee for breakfast”</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsVoiceModalOpen(true)}
+            className="shrink-0 bg-white hover:bg-emerald-50 text-emerald-900 font-extrabold text-xs px-3 py-1.5 rounded-xl shadow-xs transition-all active:scale-95 ml-2"
+          >
+            Speak Meal 🎙️
+          </button>
+        </div>
+
+        {/* View Switcher: Weekly Recharts Progress vs Today's Ledger */}
+        <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-gray-100 mb-5 text-xs font-black">
+          <button
+            onClick={() => setActiveTab('weekly')}
+            className={`py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+              activeTab === 'weekly'
+                ? 'bg-white text-emerald-800 shadow-sm'
+                : 'text-gray-500 hover:text-gray-800'
+            }`}
+          >
+            <span>📈</span>
+            <span>Weekly Progress</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('daily')}
+            className={`py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+              activeTab === 'daily'
+                ? 'bg-white text-emerald-800 shadow-sm'
+                : 'text-gray-500 hover:text-gray-800'
+            }`}
+          >
+            <span>📋</span>
+            <span>Today's Intake ({logs.length})</span>
+          </button>
+        </div>
+
+        {/* RENDER ACTIVE TAB */}
+        {activeTab === 'weekly' ? (
+          <WeeklyCalorieProgress />
+        ) : (
+          <>
+            {/* WHO SAFE BUDGET RINGS / METRICS */}
+            <div className="rounded-3xl bg-gradient-to-br from-gray-900 via-teal-950 to-gray-900 text-white p-5 shadow-soft mb-6">
           <div className="flex items-center justify-between mb-4">
             <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-400">
               WHO Daily Safe Budget
@@ -227,7 +285,18 @@ export default function DailyTracker() {
             </p>
           </div>
         </div>
+          </>
+        )}
       </div>
+
+      {/* Voice Meal Logger Modal */}
+      <VoiceMealLoggerModal
+        isOpen={isVoiceModalOpen}
+        onClose={() => setIsVoiceModalOpen(false)}
+        onMealLogged={(newMeal) => {
+          setLogs((prev) => [newMeal, ...prev])
+        }}
+      />
     </SafeAreaView>
   )
 }

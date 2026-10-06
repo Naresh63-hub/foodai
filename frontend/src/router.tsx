@@ -18,6 +18,9 @@ const ProfilePreferences = lazy(() => import('./pages/ProfilePreferences'))
 const DailyTracker = lazy(() => import('./pages/DailyTracker'))
 const GroceryCart = lazy(() => import('./pages/GroceryCart'))
 const CatalogExplorer = lazy(() => import('./pages/CatalogExplorer'))
+const AINutritionAnalyzer = lazy(() => import('./pages/AINutritionAnalyzer'))
+const FoodCameraSnap = lazy(() => import('./pages/FoodCameraSnap'))
+const VoiceLogPage = lazy(() => import('./pages/VoiceLogPage'))
 const Login = lazy(() => import('./pages/Login'))
 const Register = lazy(() => import('./pages/Register'))
 
@@ -47,7 +50,7 @@ function DevDemoBanner() {
   const { isDemoMode } = useAuth()
   if (!isDemoMode) return null
   return (
-    <div className="sticky top-0 z-50 bg-amber-400 text-amber-950 text-center text-xs font-bold py-1.5 px-3 shadow-sm">
+    <div className="sticky top-0 z-50 w-full max-w-full bg-amber-400 text-amber-950 text-center text-xs font-bold py-1.5 px-3 shadow-sm truncate box-border">
       🧪 DEV DEMO MODE — login is bypassed locally, no real account in use
     </div>
   )
@@ -102,9 +105,11 @@ function ProductResultsParamWrapper() {
 
 function AppLayout() {
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen w-full max-w-full overflow-x-hidden box-border">
       <DevDemoBanner />
-      <Outlet />
+      <main className="w-full max-w-full box-border">
+        <Outlet />
+      </main>
       <BottomTabBar />
     </div>
   )
@@ -120,6 +125,9 @@ export default function AppRouter() {
         <Route element={<AppLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/explore" element={<ProtectedRoute><CatalogExplorer /></ProtectedRoute>} />
+          <Route path="/ai-nutrition" element={<ProtectedRoute><AINutritionAnalyzer /></ProtectedRoute>} />
+          <Route path="/camera-snap" element={<ProtectedRoute><FoodCameraSnap /></ProtectedRoute>} />
+          <Route path="/voice-log" element={<ProtectedRoute><VoiceLogPage /></ProtectedRoute>} />
           <Route path="/scan" element={<ProtectedRoute><Scan /></ProtectedRoute>} />
           <Route path="/tracker" element={<ProtectedRoute><DailyTracker /></ProtectedRoute>} />
           <Route path="/cart" element={<ProtectedRoute><GroceryCart /></ProtectedRoute>} />
