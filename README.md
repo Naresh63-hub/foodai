@@ -80,101 +80,173 @@ Tracks your cumulative daily consumption against **World Health Organization (WH
 
 ```
 foodai/
-├── src/                          # React 18 + Vite Frontend
-│   ├── api/                      # API client (/api/food)
-│   ├── components/               # Skeletons, Modals, SafeAreaView, Cards
-│   ├── contexts/                 # AuthContext (Google, Email/Pass, Demo, Reset)
-│   ├── config/                   # Firebase configuration & auth modes
-│   ├── pages/                    # Home, Scan, ProductResults, CatalogExplorer,
-│   │                             # DailyTracker, GroceryCart, Login, Register, ForgotPassword
-│   ├── types/                    # Food, Health & Nutrition types
-│   └── services/                 # Firestore & Web Speech Voice Meal Logger
-├── server/                       # Node.js Express Backend
-│   ├── analysis/                 # Food processing classifier, FOPNL thresholds, health evaluator
-│   ├── data/                     # Packaged FMCG products dataset & additives library
-│   ├── services/                 # Gemini Vision & AI Nutrition analyzer
-│   └── routes.ts                 # Express REST endpoints (/api/food/*)
-├── server.ts                     # Full-stack entry point (Express + Vite middlewares)
-├── .env.example                  # Environment variables template
-└── package.json                  # Single unified scripts & dependencies
+├── frontend/                     # React 18 + Vite SPA
+│   ├── src/
+│   │   ├── api/                  # Axios HTTP client with Firebase token injection
+│   │   ├── components/           # UI Components, Badges & Navigation
+│   │   ├── contexts/             # Firebase Auth Context
+│   │   ├── config/               # Firebase configuration
+│   │   ├── pages/                # Scan, Results, Explorer, Tracker, Cart, DNA, Login, Register
+│   │   ├── types/                # TypeScript Interfaces (Health, Nutrition)
+│   │   └── utils/                # Audio synthesizer & helper utilities
+│   ├── e2e/                      # Playwright E2E tests
+│   ├── vercel.json               # Vercel deployment configuration
+│   └── package.json
+│
+├── foodai_backend/               # Python Django REST Backend
+│   ├── food_analysis/            # Core processing engine, classification & FOPNL
+│   │   ├── classifier.py         # Ingredient categorization & additive detection
+│   │   ├── health_evaluator.py   # Medical conditions & damage control logic
+│   │   ├── nutrition.py          # Weight percentage & nutrition analysis
+│   │   └── management/commands/  # Catalog seeders & dataset importers
+│   ├── users/                    # User health preference profiles
+│   ├── scans/                    # Scan history & OCR integration
+│   ├── firebase_auth.py          # Firebase authentication backend
+│   ├── firebase_config.py        # Firebase Admin SDK configuration
+│   ├── middleware.py             # Firebase token extraction middleware
+│   └── manage.py
+│
+├── .github/workflows/            # CI/CD pipelines (GitHub Actions)
+├── requirements.txt              # Python dependencies
+├── FIREBASE_SETUP.md             # Firebase setup guide
+└── README.md
 ```
 
 ---
 
-## ⚡ Quickstart: Running Locally
+## ⚡ Quickstart: Local Development
 
 ### Prerequisites
-- **Node.js** (v18 or higher)
-- **npm** (comes with Node.js) or **bun**
+- **Node.js** (v18+) & **npm**
+- **Python** (v3.10+) & **pip**
+- **Firebase Project** (for authentication) - See [FIREBASE_SETUP.md](FIREBASE_SETUP.md)
 
 ---
 
-### Step 1: Clone the Repository
-```bash
-git clone https://github.com/Naresh63-hub/MelodyMap.git
-cd MelodyMap
-```
+### 1. Firebase Setup (Required for Authentication)
 
-### Step 2: Install Dependencies
-```bash
+Follow the detailed setup guide in [FIREBASE_SETUP.md](FIREBASE_SETUP.md) to:
+- Create a Firebase project
+- Enable Email/Password authentication
+- Get Firebase configuration
+- Download service account key for backend
+- Configure environment variables
+
+### 2. Backend Setup (Django)
+
+```powershell
+# 1. Navigate to the project root and activate virtualenv
+cd d:/foodai
+python -m venv venv
+.\venv\Scripts\activate
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Copy .env.example to .env and configure
+# Add your Firebase configuration and service account key path
+
+# 4. Apply database migrations
+cd foodai_backend
+python manage.py migrate
+
+# 5. Seed the curated FMCG food catalog
+python manage.py import_food_dataset
+
+# 6. Start the backend server
+python manage.py runserver 8000
+```
+Backend API will be live at `http://127.0.0.1:8000/` with API docs at `/api/docs/`
+
+---
+
+### 3. Frontend Setup (React Vite)
+
+```powershell
+# In a new terminal window:
+cd d:/foodai/frontend
+
+# 1. Install dependencies
 npm install
-```
 
-### Step 3: Configure Environment Variables
-Create your local environment file:
-```bash
-cp .env.example .env
-```
+# 2. Create .env.local file with Firebase configuration
+# Copy from Firebase Console (see FIREBASE_SETUP.md)
 
-Your `.env` contains:
-```env
-PORT=3000
-NODE_ENV=development
-VITE_AUTH_BYPASS=true
-GEMINI_API_KEY=
-```
-
-> **Note**: The app works out-of-the-box in local development with sample FMCG presets, curated nutrition database, and demo mode. To enable live Gemini image OCR and AI nutrition queries, set your `GEMINI_API_KEY`.
-
-### Step 4: Start the Local Development Server
-```bash
+# 3. Start Vite development server
 npm run dev
 ```
-
-Open your browser at **[http://localhost:3000](http://localhost:3000)**.
-Both frontend and backend are running together with live hot reload!
+Frontend web application will be live at `http://localhost:5173/`.
 
 ---
 
-## 🧪 Running Tests & Build
+## 🧪 Running Tests
 
-### Run Unit & Integration Tests (Vitest)
-```bash
-npm test
+### Backend Tests (Pytest)
+```powershell
+cd d:/foodai/foodai_backend
+pytest
+# Result: 45+ passed (including Firebase auth tests)
 ```
-Runs all 32 unit and component tests across 10 test suites (auth, routing, parser, skeletons, forms).
 
-### Build for Production
-```bash
-npm run build
+### Frontend Unit Tests (Vitest)
+```powershell
+cd d:/foodai/frontend
+npm run test
+# Result: 10+ passed (including auth, login, register tests)
 ```
-Typechecks with `tsc -b` and bundles with Vite into the `/dist` directory.
 
-### Run Production Server Locally
-```bash
-npm start
+### Frontend E2E Tests (Playwright)
+```powershell
+cd d:/foodai/frontend
+npm run test:e2e
+# Runs end-to-end tests in Chromium, Firefox, and WebKit
 ```
-Starts the production Express server serving the optimized `/dist` build on `http://localhost:3000`.
 
 ---
 
-## 🔑 Authentication Options Available Locally
+## 🚀 Production Deployment Guide
 
-1. **⚡ 1-Click Instant Demo Access**: Tap "Explore in Instant Demo Mode (No Login)" to test all features instantly.
-2. **Sign in with Google**: Works with live accounts or auto-falls back to preview user if domain is not whitelisted.
-3. **Email & Password**: Sign up, sign in, and reset passwords with the dedicated "Forgot Password" flow.
+### Option A: Frontend on Vercel (Recommended)
+
+1. Import repository `Naresh63-hub/foodai` on [Vercel](https://vercel.com/new).
+2. Configure project settings:
+   - **Framework Preset**: `Vite`
+   - **Root Directory**: `frontend`
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+3. Add Environment Variables (from Firebase Console):
+   - `VITE_FIREBASE_API_KEY`
+   - `VITE_FIREBASE_AUTH_DOMAIN`
+   - `VITE_FIREBASE_PROJECT_ID`
+   - `VITE_FIREBASE_STORAGE_BUCKET`
+   - `VITE_FIREBASE_MESSAGING_SENDER_ID`
+   - `VITE_FIREBASE_APP_ID`
+   - `VITE_API_URL` = `https://your-backend-url.onrender.com`
+4. Click **Deploy**.
+
+---
+
+### Option B: Backend on Render.com (Blueprint via `render.yaml`)
+
+The repository ships a `render.yaml` blueprint that provisions a **managed PostgreSQL** instance and injects `DATABASE_URL` automatically. **Do not use SQLite in production** — Render's free-tier disk is ephemeral and scan history / user profiles are wiped on every redeploy.
+
+1. Create a **New Blueprint** on [Render](https://render.com) connected to `Naresh63-hub/foodai` (it reads `render.yaml`).
+2. The blueprint configures:
+   - **Root Directory**: `foodai_backend`
+   - **Build Command**: `cd foodai_backend && pip install -r ../requirements.txt && python manage.py migrate && python manage.py import_food_dataset`
+   - **Start Command**: `cd foodai_backend && gunicorn foodai_backend.wsgi:application`
+   - **Database**: free PostgreSQL `foodai-db` (connection string wired into `DATABASE_URL`)
+3. Environment Variables (already in `render.yaml`, adjust to your domain):
+   - `DJANGO_SETTINGS_MODULE` = `foodai_backend.settings.prod`
+   - `SECRET_KEY` = auto-generated
+   - `DEBUG` = `False`
+   - `ALLOWED_HOSTS` = `.onrender.com` (or your custom domain)
+   - `FIREBASE_ADMIN_SDK_KEY_PATH` = `firebase-service-account.json`
+   - `CORS_ALLOW_ALL_ORIGINS` = `false`
+   - `CORS_ALLOWED_ORIGINS` = `https://your-frontend-domain.vercel.app`
+4. Upload your Firebase service account key securely to Render.
 
 ---
 
 ## 📜 License
-This project is licensed under the MIT License.
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.

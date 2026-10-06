@@ -45,9 +45,3 @@ coverage/
 frontend/coverage/
 screenshot_*.png
 *.tsbuildinfo
-server.js
-server.d.ts
-server/**/*.js
-server/**/*.d.ts
-vite.config.js
-vite.config.d.ts
