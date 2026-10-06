@@ -1,9 +1,12 @@
 {
   "projectId": "food-ai-433b7",
-  "appId": "1:59556325769:web:fd721532550b91c2b9d958",
+  "appId": "1:59556325769:web:90a209b9bf7b0aa9b9d958",
   "apiKey": "AIzaSyA4s3CDR_DmZjYobBghtFHwqVR--oDCYfI",
   "authDomain": "food-ai-433b7.firebaseapp.com",
+  "firestoreDatabaseId": "ai-studio-foodai-bd61f263-03be-4123-9302-5f3dc5b7d69f",
   "storageBucket": "food-ai-433b7.firebasestorage.app",
   "messagingSenderId": "59556325769",
-  "measurementId": "G-B7G4J09XC8"
+  "measurementId": "",
+  "oAuthClientId": "59556325769-489r0888tuooujuq25ikpuf5i0ethlgj.apps.googleusercontent.com",
+  "recaptchaSiteKey": ""
 }
