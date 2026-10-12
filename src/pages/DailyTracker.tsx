@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import SafeAreaView from '../components/SafeAreaView'
 import { toast } from 'sonner'
 import { DailyFoodLogItem } from '../types/food'
+import WeeklyCalorieProgress from '../components/WeeklyCalorieProgress'
 import VoiceMealLoggerModal from '../components/VoiceMealLoggerModal'
 
 const WHO_LIMITS = {
@@ -12,6 +13,7 @@ const WHO_LIMITS = {
 }
 
 export default function DailyTracker() {
+  const [activeTab, setActiveTab] = useState<'weekly' | 'daily'>('weekly')
   const todayKey = `foodai_daily_log_${new Date().toISOString().split('T')[0]}`
   const [logs, setLogs] = useState<DailyFoodLogItem[]>([])
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false)
@@ -66,13 +68,13 @@ export default function DailyTracker() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-bold border border-emerald-200 mb-1">
-              <span>📋</span>
-              <span>Daily Intake Tracker</span>
+              <span>📊</span>
+              <span>Nutrition & Caloric Progress</span>
             </div>
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Daily Intake</h1>
-            <p className="text-xs text-gray-500">Track daily sugar, salt, fat & additives against WHO limits</p>
+            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Progress & Intake</h1>
+            <p className="text-xs text-gray-500">7-Day Firestore Calorie trends & daily WHO limits</p>
           </div>
-          {logs.length > 0 && (
+          {activeTab === 'daily' && logs.length > 0 && (
             <button
               onClick={handleClearAll}
               className="text-[11px] font-bold text-gray-400 hover:text-rose-600 transition-colors"
@@ -83,7 +85,7 @@ export default function DailyTracker() {
         </div>
 
         {/* Voice Command Quick Action Banner */}
-        <div className="mb-5 p-3.5 rounded-2xl bg-gradient-to-r from-purple-900 via-indigo-900 to-emerald-950 text-white flex items-center justify-between shadow-soft">
+        <div className="mb-4 p-3.5 rounded-2xl bg-gradient-to-r from-purple-900 via-indigo-900 to-emerald-950 text-white flex items-center justify-between shadow-soft">
           <div className="flex items-center gap-2.5 min-w-0">
             <span className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-xl shrink-0">
               🎙️
@@ -101,8 +103,39 @@ export default function DailyTracker() {
           </button>
         </div>
 
-        {/* WHO SAFE BUDGET RINGS / METRICS */}
-        <div className="rounded-3xl bg-gradient-to-br from-gray-900 via-teal-950 to-gray-900 text-white p-5 shadow-soft mb-6">
+        {/* View Switcher: Weekly Recharts Progress vs Today's Ledger */}
+        <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-gray-100 mb-5 text-xs font-black">
+          <button
+            onClick={() => setActiveTab('weekly')}
+            className={`py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+              activeTab === 'weekly'
+                ? 'bg-white text-emerald-800 shadow-sm'
+                : 'text-gray-500 hover:text-gray-800'
+            }`}
+          >
+            <span>📈</span>
+            <span>Weekly Progress</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('daily')}
+            className={`py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+              activeTab === 'daily'
+                ? 'bg-white text-emerald-800 shadow-sm'
+                : 'text-gray-500 hover:text-gray-800'
+            }`}
+          >
+            <span>📋</span>
+            <span>Today's Intake ({logs.length})</span>
+          </button>
+        </div>
+
+        {/* RENDER ACTIVE TAB */}
+        {activeTab === 'weekly' ? (
+          <WeeklyCalorieProgress />
+        ) : (
+          <>
+            {/* WHO SAFE BUDGET RINGS / METRICS */}
+            <div className="rounded-3xl bg-gradient-to-br from-gray-900 via-teal-950 to-gray-900 text-white p-5 shadow-soft mb-6">
           <div className="flex items-center justify-between mb-4">
             <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-400">
               WHO Daily Safe Budget
@@ -252,6 +285,8 @@ export default function DailyTracker() {
             </p>
           </div>
         </div>
+          </>
+        )}
       </div>
 
       {/* Voice Meal Logger Modal */}
