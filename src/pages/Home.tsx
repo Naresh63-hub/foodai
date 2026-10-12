@@ -40,9 +40,15 @@ export default function Home() {
         {/* Hero Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between gap-2 mb-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200">
-              <span>🥗</span>
-              <span>AI Food Transparency</span>
+            <div className="inline-flex items-center gap-2">
+              <img
+                src="/icon-192.png"
+                alt="FoodAI Logo"
+                className="w-9 h-9 rounded-xl shadow-xs border border-emerald-100 object-contain shrink-0 select-none"
+              />
+              <span className="font-black text-gray-950 text-base tracking-tight">
+                Food<span className="text-emerald-600">AI</span>
+              </span>
             </div>
             <div className="flex items-center gap-1.5">
               <button

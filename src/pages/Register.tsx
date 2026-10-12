@@ -58,9 +58,16 @@ export default function Register() {
     <SafeAreaView>
       <div className="px-4 sm:px-6 py-8 pb-36 max-w-md mx-auto w-full box-border">
         <div className="text-center mb-6">
-          <span className="text-4xl">🥗</span>
-          <h1 className="text-2xl font-black text-gray-900 tracking-tight mt-2">Create Account</h1>
-          <p className="mt-1 text-xs text-gray-600">Join FoodAI to know what you're eating</p>
+          <div className="flex justify-center mb-3">
+            <img
+              src="/icon-192.png"
+              alt="FoodAI - Know What You're Eating"
+              className="w-16 h-16 rounded-2xl shadow-soft object-contain border border-emerald-100 bg-white p-1 select-none"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          <h1 className="text-2xl font-black text-gray-900 tracking-tight">Create Account</h1>
+          <p className="mt-1 text-xs text-gray-600">Know What You're Eating • Join FoodAI</p>
         </div>
 
         {/* Primary Google Sign-In Button */}

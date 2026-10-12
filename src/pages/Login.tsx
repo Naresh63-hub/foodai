@@ -59,8 +59,13 @@ export default function Login() {
       <div className="min-h-[85vh] flex flex-col justify-center px-4 sm:px-6 py-8 pb-32 max-w-md mx-auto w-full box-border">
         {/* Brand Header */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-white text-3xl shadow-soft mb-3">
-            🥗
+          <div className="flex justify-center mb-3">
+            <img
+              src="/icon-192.png"
+              alt="FoodAI - Know What You're Eating"
+              className="w-20 h-20 rounded-3xl shadow-soft object-contain border border-emerald-100 bg-white p-1 select-none"
+              referrerPolicy="no-referrer"
+            />
           </div>
           <div className="flex items-center justify-center gap-2">
             <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
@@ -68,7 +73,7 @@ export default function Login() {
             </h1>
           </div>
           <p className="mt-1.5 text-xs sm:text-sm text-gray-500 font-medium">
-            Sign in to track nutrients, decode food labels & analyze meals
+            Know What You're Eating • Scan, Analyze & Eat Better
           </p>
           <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-bold border border-emerald-200/60">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>

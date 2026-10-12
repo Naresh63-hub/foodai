@@ -1,55 +1,111 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
+    <!-- Background subtle rounded base for app icon -->
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#10b981"/>
-      <stop offset="45%" stop-color="#059669"/>
-      <stop offset="100%" stop-color="#047857"/>
-    </linearGradient>
-    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="100%" stop-color="#d1fae5"/>
+      <stop offset="100%" stop-color="#f8fafc"/>
     </linearGradient>
-    <linearGradient id="accentGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#34d399"/>
-      <stop offset="100%" stop-color="#6ee7b7"/>
+
+    <!-- Apple Outline Gradient -->
+    <linearGradient id="appleGrad" x1="15%" y1="0%" x2="85%" y2="100%">
+      <stop offset="0%" stop-color="#65a30d"/>
+      <stop offset="35%" stop-color="#22c55e"/>
+      <stop offset="75%" stop-color="#16a34a"/>
+      <stop offset="100%" stop-color="#14532d"/>
     </linearGradient>
-    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
-      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#064e3b" flood-opacity="0.35"/>
-    </filter>
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="6" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+
+    <!-- Leaf 1 (Left) -->
+    <linearGradient id="leafLeft" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4ade80"/>
+      <stop offset="100%" stop-color="#84cc16"/>
+    </linearGradient>
+
+    <!-- Leaf 2 (Right) -->
+    <linearGradient id="leafRight" x1="0%" y1="100%" x2="50%" y2="0%">
+      <stop offset="0%" stop-color="#15803d"/>
+      <stop offset="100%" stop-color="#22c55e"/>
+    </linearGradient>
+
+    <!-- Magnifier Gradient -->
+    <linearGradient id="magGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22c55e"/>
+      <stop offset="50%" stop-color="#16a34a"/>
+      <stop offset="100%" stop-color="#0f766e"/>
+    </linearGradient>
+
+    <!-- Drop Shadow for Apple -->
+    <filter id="softShadow" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#052e16" flood-opacity="0.12"/>
     </filter>
   </defs>
 
-  <!-- Background Squircle with subtle inset border -->
-  <rect width="512" height="512" rx="118" fill="url(#bgGrad)"/>
-  <rect width="504" height="504" x="4" y="4" rx="114" fill="none" stroke="#ffffff" stroke-opacity="0.2" stroke-width="4"/>
+  <!-- Background Canvas -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)"/>
+  <rect width="510" height="510" x="1" y="1" rx="111" fill="none" stroke="#e2e8f0" stroke-width="2"/>
 
-  <!-- Centered Icon Group -->
-  <g filter="url(#shadow)">
-    <!-- Main Leaf Body -->
-    <path d="M 368 144 C 230 136 148 220 152 352 C 196 364 260 360 318 316 C 374 274 380 196 368 144 Z" fill="url(#leafGrad)"/>
-    
-    <!-- Central AI Pulse / Leaf Vein Stem -->
-    <path d="M 164 340 Q 236 290 286 230" fill="none" stroke="#059669" stroke-width="14" stroke-linecap="round"/>
-    
-    <!-- Connected Neural / Circuit Nodes -->
-    <line x1="230" y1="274" x2="210" y2="236" stroke="#059669" stroke-width="8" stroke-linecap="round" stroke-dasharray="1 1"/>
-    <circle cx="206" cy="230" r="10" fill="#047857"/>
+  <g transform="translate(256, 260) scale(0.92) translate(-256, -260)" filter="url(#softShadow)">
+    <!-- Top Leaves -->
+    <!-- Left Leaf -->
+    <path d="M 235 152 C 205 130 190 92 208 62 C 242 66 256 102 242 144 Z"
+          fill="url(#leafLeft)"/>
+    <!-- Right Leaf -->
+    <path d="M 252 148 C 245 95 285 45 328 35 C 336 78 308 128 262 152 Z"
+          fill="url(#leafRight)"/>
 
-    <line x1="262" y1="250" x2="304" y2="246" stroke="#059669" stroke-width="8" stroke-linecap="round" stroke-dasharray="1 1"/>
-    <circle cx="310" cy="245" r="10" fill="#047857"/>
+    <!-- Apple Outline -->
+    <!-- Smooth Apple Shape: starts at top stem dip (256, 148) -->
+    <path d="M 256 154
+             C 215 125, 125 140, 105 235
+             C 85 330, 140 435, 225 448
+             C 246 451, 252 443, 256 443
+             C 260 443, 266 451, 287 448
+             C 372 435, 427 330, 407 235
+             C 387 140, 297 125, 256 154 Z"
+          fill="none"
+          stroke="url(#appleGrad)"
+          stroke-width="26"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
 
-    <!-- Dynamic AI Spark / Star Accent at Tip -->
-    <g transform="translate(378, 134)" filter="url(#glow)">
-      <circle cx="0" cy="0" r="16" fill="#fef08a"/>
-      <path d="M 0 -28 L 6 -8 L 26 0 L 6 8 L 0 28 L -6 8 L -26 0 L -6 -8 Z" fill="#ffffff"/>
+    <!-- Barcode Inside Apple (Left Half) -->
+    <g fill="#0f172a" transform="translate(145, 178)">
+      <rect x="0"  y="0" width="10" height="96" rx="5"/>
+      <rect x="18" y="0" width="18" height="96" rx="5"/>
+      <rect x="44" y="0" width="8"  height="96" rx="4"/>
+      <rect x="60" y="0" width="16" height="96" rx="5"/>
+      <rect x="84" y="0" width="9"  height="96" rx="4.5"/>
     </g>
 
-    <!-- Bowl / Safety Cradle Arc -->
-    <path d="M 140 330 C 140 395 210 420 256 420 C 302 420 372 395 372 330" fill="none" stroke="#ffffff" stroke-width="18" stroke-linecap="round" opacity="0.95"/>
-    <circle cx="140" cy="330" r="9" fill="#ffffff"/>
-    <circle cx="372" cy="330" r="9" fill="#ffffff"/>
+    <!-- Magnifying Glass & Nutrition Indicator (Right Half) -->
+    <!-- Magnifier Handle -->
+    <path d="M 334 300 L 378 354"
+          fill="none"
+          stroke="#0f766e"
+          stroke-width="26"
+          stroke-linecap="round"/>
+
+    <!-- Magnifier Lens Frame -->
+    <circle cx="282" cy="242" r="76"
+            fill="#ffffff"
+            stroke="url(#magGrad)"
+            stroke-width="24"/>
+
+    <!-- Nutrition Card inside Lens -->
+    <g transform="translate(236, 196)">
+      <!-- Top header line -->
+      <rect x="18" y="10" width="56" height="7" rx="3.5" fill="#0f172a"/>
+
+      <!-- Dot 1 (Green) + Bar -->
+      <circle cx="24" cy="34" r="6.5" fill="#22c55e"/>
+      <rect x="38" y="31" width="46" height="6" rx="3" fill="#22c55e"/>
+
+      <!-- Dot 2 (Amber / Orange) + Bar -->
+      <circle cx="24" cy="52" r="6.5" fill="#f59e0b"/>
+      <rect x="38" y="49" width="46" height="6" rx="3" fill="#f59e0b"/>
+
+      <!-- Dot 3 (Red) + Bar -->
+      <circle cx="24" cy="70" r="6.5" fill="#ef4444"/>
+      <rect x="38" y="67" width="34" height="6" rx="3" fill="#ef4444"/>
+    </g>
   </g>
 </svg>
