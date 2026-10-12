@@ -1,11 +1,12 @@
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
+import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': '/src',
+      '@': path.resolve(__dirname, './src'),
     },
   },
   server: {
@@ -20,7 +21,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    setupFiles: ['./src/test/setup.ts'],
+    setupFiles: [path.resolve(__dirname, './src/test/setup.ts')],
     // Only run unit/integration tests here; Playwright owns the e2e/ folder.
     include: ['src/**/*.{test,spec}.{js,ts,tsx}'],
     exclude: ['node_modules/', 'dist/', 'e2e/**'],
