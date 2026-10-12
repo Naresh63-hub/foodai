@@ -118,26 +118,6 @@ export default function Home() {
           <span className="text-xl shrink-0 ml-2">➔</span>
         </button>
 
-        {/* Weekly Caloric Progress Card */}
-        <Link
-          to="/tracker"
-          className="mt-3 flex items-center justify-between w-full rounded-3xl bg-gradient-to-r from-blue-700 via-indigo-700 to-teal-700 hover:from-blue-800 hover:to-teal-800 active:scale-[0.98] text-white p-5 shadow-soft transition-all duration-200"
-        >
-          <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl shrink-0">
-              📈
-            </div>
-            <div className="text-left min-w-0">
-              <div className="flex items-center gap-1.5">
-                <p className="font-extrabold text-lg leading-tight truncate">Weekly Progress</p>
-                <span className="text-[10px] uppercase font-bold bg-white/25 px-2 py-0.5 rounded-full shrink-0">Recharts</span>
-              </div>
-              <p className="text-xs text-white/85 font-medium truncate">7-Day caloric intake & Firestore trends</p>
-            </div>
-          </div>
-          <span className="text-xl shrink-0 ml-2">➔</span>
-        </Link>
-
         {/* 1-Tap Quick Demo Presets */}
         <div className="mt-8">
           <div className="flex items-center justify-between mb-3">
