@@ -10,7 +10,7 @@ class OFFClientError(Exception):
 
 
 BASE_URL = "https://world.openfoodfacts.org/api/v2/product"
-FIELDS = "product_name,brands,ingredients_text,nutriments,serving_size,product_quantity,categories_tags"
+FIELDS = "product_name,brands,ingredients_text,nutriments,serving_size,product_quantity,categories_tags,image_url,image_front_url,image_front_small_url,image_small_url"
 # Open Food Facts asks for a descriptive UA with a real contact so they can reach us
 # instead of silently blocking. Override with the OFF_USER_AGENT env var in production.
 USER_AGENT = os.environ.get(

@@ -70,6 +70,7 @@ export interface ProductData {
   product_weight_g: number | null
   source: string
   categories_tags: string[]
+  image_url?: string | null
 }
 
 export interface HealthWarning {

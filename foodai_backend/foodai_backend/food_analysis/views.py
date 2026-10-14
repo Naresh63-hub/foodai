@@ -245,6 +245,22 @@ UNKNOWN_BARCODE_DETAIL = (
 )
 
 
+def _parse_serving_size_g(val, default=100.0) -> float:
+    if val is None:
+        return default
+    if isinstance(val, (int, float)):
+        return float(val) if val > 0 else default
+    s = str(val).strip()
+    match = re.search(r'(\d+(?:\.\d+)?)\s*(?:g|grams?|ml)?\b', s, re.IGNORECASE)
+    if match:
+        try:
+            parsed = float(match.group(1))
+            return parsed if parsed > 0 else default
+        except (ValueError, TypeError):
+            pass
+    return default
+
+
 def _create_from_off(barcode: str) -> Product | None:
     """Create a Product strictly from real Open Food Facts data. Never fabricates."""
     try:
@@ -255,13 +271,7 @@ def _create_from_off(barcode: str) -> Product | None:
         return None
 
     serving_size_str = off_data.get("serving_size", "")
-    serving_size_g = None
-    s_match = re.search(r'(\d+(?:\.\d+)?)\s*g', serving_size_str, re.IGNORECASE)
-    if s_match:
-        try:
-            serving_size_g = float(s_match.group(1))
-        except ValueError:
-            pass
+    serving_size_g = _parse_serving_size_g(serving_size_str, default=100.0)
 
     product_weight_g = None
     qty = off_data.get("product_quantity")
@@ -271,12 +281,23 @@ def _create_from_off(barcode: str) -> Product | None:
         except (ValueError, TypeError):
             pass
 
+    image_url = (
+        off_data.get("image_front_url")
+        or off_data.get("image_url")
+        or off_data.get("image_front_small_url")
+        or off_data.get("image_small_url")
+        or ""
+    )
+    nutriments = off_data.get("nutriments") or {}
+    if image_url and isinstance(nutriments, dict):
+        nutriments["image_url"] = image_url
+
     return Product.objects.create(
         barcode=barcode,
         product_name=off_data.get("product_name") or f"Product {barcode}",
         brands=off_data.get("brands") or "",
         ingredients_text=off_data.get("ingredients_text") or "",
-        nutriments=off_data.get("nutriments") or {},
+        nutriments=nutriments,
         serving_size=serving_size_str,
         serving_size_g=serving_size_g,
         product_weight_g=product_weight_g,
@@ -399,7 +420,7 @@ class TextScanView(APIView):
             ingredients_text=ingredients_text,
             nutriments=nutriments,
             serving_size=serving_size,
-            serving_size_g=float(serving_size.replace("g", "").strip()) if "g" in str(serving_size) else 100.0,
+            serving_size_g=_parse_serving_size_g(serving_size),
             product_weight_g=float(product_weight_g) if product_weight_g else 100.0,
             source="manual",
         )

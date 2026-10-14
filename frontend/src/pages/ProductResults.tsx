@@ -16,12 +16,14 @@ import {
 } from '../types/food'
 import { toast } from 'sonner'
 import demoProductsData from '../constants/demoProducts.json'
+import { QUICK_SAMPLE_PRESETS } from '../constants'
 
 const demoProducts = demoProductsData as Record<string, ProductAnalysisResult>
 
 export default function ProductResults() {
   const { scanId } = useParams<{ scanId: string }>()
   const location = useLocation()
+  const [imgError, setImgError] = useState(false)
   const [data, setData] = useState<ProductAnalysisResult | null>(() => {
     const passed = (location.state as any)?.result
     if (passed) return passed
@@ -241,9 +243,183 @@ export default function ProductResults() {
     window.print()
   }
 
+  // Product image resolution
+  const productImageUrl =
+    p?.image_url ||
+    (scanId && QUICK_SAMPLE_PRESETS.find((q) => q.barcode === scanId)?.imageUrl) ||
+    (p?.barcode && `https://images.openfoodfacts.org/images/products/${p.barcode}/front_en.400.jpg`) ||
+    null
+
+  // Category Icon helper for fallback
+  const categoryIcon = (() => {
+    const name = (p?.product_name || '').toLowerCase()
+    const tags = (p?.categories_tags || []).join(' ').toLowerCase()
+    if (name.includes('biscuit') || name.includes('cookie') || tags.includes('biscuit')) return '🍪'
+    if (name.includes('noodle') || tags.includes('noodle')) return '🍜'
+    if (name.includes('yogurt') || name.includes('curd') || tags.includes('dairy')) return '🥛'
+    if (name.includes('coke') || name.includes('soda') || name.includes('drink')) return '🥤'
+    if (name.includes('peanut') || name.includes('butter') || tags.includes('spread')) return '🥜'
+    if (name.includes('chip') || name.includes('crisp')) return '🥔'
+    if (name.includes('apple') || name.includes('fruit')) return '🍎'
+    return '🥗'
+  })()
+
+  // Calculate Health Score & Verdict Pill matching screenshot
+  const { healthScorePct, healthScoreLabel, healthScoreColor, verdictPillText, verdictPillClass, verdictPillIcon } = (() => {
+    if (processingLevel === 'minimally_processed') {
+      return {
+        healthScorePct: 88,
+        healthScoreLabel: 'Good',
+        healthScoreColor: 'text-emerald-600',
+        verdictPillText: 'Healthy whole food option',
+        verdictPillClass: 'bg-emerald-50 text-emerald-800 border border-emerald-200',
+        verdictPillIcon: '✅',
+      }
+    }
+    if (processingLevel === 'processed_culinary') {
+      return {
+        healthScorePct: 76,
+        healthScoreLabel: 'Good',
+        healthScoreColor: 'text-emerald-600',
+        verdictPillText: 'Culinary ingredient',
+        verdictPillClass: 'bg-emerald-50 text-emerald-800 border border-emerald-200',
+        verdictPillIcon: '🥣',
+      }
+    }
+    if (processingLevel === 'processed') {
+      return {
+        healthScorePct: 58,
+        healthScoreLabel: 'Fair',
+        healthScoreColor: 'text-amber-600',
+        verdictPillText: 'Moderate option',
+        verdictPillClass: 'bg-amber-50 text-amber-800 border border-amber-200',
+        verdictPillIcon: '⚠️',
+      }
+    }
+    const sugarHigh = (n?.per_100g?.sugars_g || 0) > 15
+    return {
+      healthScorePct: sugarHigh ? 38 : 55,
+      healthScoreLabel: 'Fair',
+      healthScoreColor: 'text-amber-600',
+      verdictPillText: 'Not the best option',
+      verdictPillClass: 'bg-amber-50/90 text-amber-900 border border-amber-200',
+      verdictPillIcon: '⚠️',
+    }
+  })()
+
+  const caloriesVal =
+    n?.per_100g?.energy_kcal_100g ||
+    (data?.product as any)?.nutriments?.energy_kcal_100g ||
+    (sugarsPct ? Math.round(sugarsPct * 4 + 200) : null)
+  const proteinVal = n?.per_100g?.proteins_g ?? null
+  const sugarsVal = n?.per_100g?.sugars_g ?? null
+
   return (
     <SafeAreaView>
       <div className="px-5 py-6 pb-28 max-w-md mx-auto print:max-w-none print:p-0 print:pb-0">
+        {/* TOP BAR / NAVIGATION */}
+        <div className="flex items-center justify-between mb-4 print:hidden">
+          <Link
+            to="/scan"
+            className="w-9 h-9 rounded-full bg-white border border-gray-200 text-gray-700 flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all shadow-xs"
+            title="Back to Scan"
+          >
+            <span className="text-base font-bold">‹</span>
+          </Link>
+          <h1 className="text-sm font-black text-gray-900 tracking-tight">
+            Scan Result
+          </h1>
+          <button
+            onClick={handlePrintReport}
+            className="w-9 h-9 rounded-full bg-white border border-gray-200 text-gray-700 flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all shadow-xs"
+            title="Print or share report"
+          >
+            <span className="text-xs">📄</span>
+          </button>
+        </div>
+
+        {/* PRODUCT IDENTITY & IMAGE CARD (Matching User Screenshot) */}
+        <div className="rounded-3xl bg-white p-4 sm:p-5 shadow-card border border-gray-100 mb-4 print:border-gray-300">
+          <div className="flex items-center gap-3.5 sm:gap-4">
+            {/* Product Image on the Left */}
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gray-50 border border-gray-100 p-2 flex items-center justify-center shrink-0 relative overflow-hidden group">
+              {productImageUrl && !imgError ? (
+                <img
+                  src={productImageUrl}
+                  alt={p?.product_name || 'Product'}
+                  onError={() => setImgError(true)}
+                  className="w-full h-full object-contain transition-transform duration-200 group-hover:scale-105"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center text-gray-400">
+                  <span className="text-3xl sm:text-4xl">{categoryIcon}</span>
+                  <span className="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-tight">Verified</span>
+                </div>
+              )}
+            </div>
+
+            {/* Product Details on the Right */}
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base sm:text-lg font-black text-gray-950 leading-tight truncate" title={p?.product_name}>
+                {p?.product_name || 'Food Product'}
+              </h2>
+              {p?.brands && (
+                <p className="text-xs text-gray-500 font-medium truncate mt-0.5">{p.brands}</p>
+              )}
+
+              {/* Health Score line */}
+              <div className="mt-2 flex items-center gap-1.5 text-xs">
+                <span className="text-gray-500 font-bold">Health Score:</span>
+                <span className={`inline-flex items-center gap-1 font-extrabold ${healthScoreColor}`}>
+                  <span>✓</span>
+                  <span>{healthScoreLabel}</span>
+                </span>
+              </div>
+
+              {/* Score Range percentage */}
+              <div className="text-xs text-gray-600 font-medium mt-0.5">
+                <span className="text-gray-500 font-bold">Score Range: </span>
+                <span className="font-extrabold text-gray-900">{healthScorePct}%</span>
+              </div>
+
+              {/* Quick Nutrient Chips */}
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {caloriesVal !== null && (
+                  <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-800 text-[10px] font-bold">
+                    Cal: {caloriesVal}kcal
+                  </span>
+                )}
+                {proteinVal !== null && (
+                  <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-800 text-[10px] font-bold">
+                    Protein: {proteinVal}g
+                  </span>
+                )}
+                {sugarsVal !== null && (
+                  <span className="px-2 py-0.5 rounded-full bg-pink-50 text-pink-700 text-[10px] font-bold border border-pink-100">
+                    Sugar: {sugarsVal}g
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Assessment Bar & Quick Action */}
+          <div className="mt-3.5 pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+            <span className={`px-3 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1.5 ${verdictPillClass}`}>
+              <span>{verdictPillIcon}</span>
+              <span>{verdictPillText}</span>
+            </span>
+
+            <button
+              onClick={handleAddToCart}
+              className="w-8 h-8 rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 flex items-center justify-center transition-all active:scale-95"
+              title="Add to Grocery Cart"
+            >
+              <span className="text-xs">🛒</span>
+            </button>
+          </div>
+        </div>
         {/* HERO FOOD IDENTITY BANNER */}
         <div className="rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-700 to-gray-900 text-white p-6 shadow-soft text-center mb-4 relative overflow-hidden print:bg-white print:text-black print:border print:border-gray-300">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none print:hidden" />

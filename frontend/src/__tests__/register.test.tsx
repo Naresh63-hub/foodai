@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import Register from '../pages/Register'
 import { AuthProvider } from '../contexts/AuthContext'
+import { toast } from 'sonner'
 
 // Mock useAuth
 const mockSignUp = vi.fn()
@@ -72,8 +73,6 @@ describe('Register Page', () => {
   })
 
   it('shows alert when passwords do not match', () => {
-    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {})
-
     render(
       <BrowserRouter>
         <AuthProvider>
@@ -92,10 +91,8 @@ describe('Register Page', () => {
     fireEvent.change(confirmPasswordInput, { target: { value: 'different123' } })
     fireEvent.click(submitButton)
 
-    expect(alertMock).toHaveBeenCalledWith('Passwords do not match')
+    expect(toast.error).toHaveBeenCalledWith('Passwords do not match')
     expect(mockSignUp).not.toHaveBeenCalled()
-
-    alertMock.mockRestore()
   })
 
   it('calls signInWithGoogle when Google button is clicked', async () => {

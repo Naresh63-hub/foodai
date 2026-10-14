@@ -12,14 +12,15 @@
       "categories_tags": [
         "en:biscuits",
         "en:sweet-biscuits"
-      ]
+      ],
+      "image_url": "https://images.openfoodfacts.org/images/products/890/106/337/1040/front_en.12.400.jpg"
     },
     "nutrition": {
       "per_100g": {
         "sugars_g": 26.5,
         "salt_g": 0.65,
         "fat_g": 13.5,
-        "proteins_g": 7.0,
+        "proteins_g": 7,
         "fiber_g": 1.5
       },
       "per_serving": {
@@ -33,7 +34,7 @@
         "sugars_pct": 26.5,
         "salt_pct": 0.65,
         "fat_pct": 13.5,
-        "proteins_pct": 7.0,
+        "proteins_pct": 7,
         "fiber_pct": 1.5
       }
     },
@@ -49,7 +50,7 @@
         "regulatory_refs": {
           "fssai": "Permitted under FSSAI Food Safety Standards",
           "who_jecfa": "JECFA ADI Established",
-          "adi_mg_per_kg": 0.0,
+          "adi_mg_per_kg": 0,
           "food_limit_mg_per_kg": null
         }
       },
@@ -142,7 +143,7 @@
         "regulatory_refs": {
           "fssai": "Permitted under FSSAI Food Safety Standards",
           "who_jecfa": "JECFA ADI Established",
-          "adi_mg_per_kg": 0.0,
+          "adi_mg_per_kg": 0,
           "food_limit_mg_per_kg": null
         }
       },
@@ -198,7 +199,7 @@
         "regulatory_refs": {
           "fssai": "Permitted under FSSAI Food Safety Standards",
           "who_jecfa": "JECFA ADI Established",
-          "adi_mg_per_kg": 0.0,
+          "adi_mg_per_kg": 0,
           "food_limit_mg_per_kg": null
         }
       },
@@ -233,7 +234,7 @@
       "age_insights": [
         "General Guidance: For children, limit high-sugar and high-sodium ultra-processed snacks. For adults, balance with whole fiber-rich foods."
       ],
-      "scientific_note": "Safety limits (ADI in mg/kg body weight/day) are regulatory thresholds \u2014 intake at or below them over a lifetime is considered to pose no appreciable health risk, while dietary guidelines still recommend moderation for balanced long-term metabolic health. Chemical names denote standard food-grade compounds evaluated by FSSAI & WHO/JECFA.",
+      "scientific_note": "Safety limits (ADI in mg/kg body weight/day) are regulatory thresholds — intake at or below them over a lifetime is considered to pose no appreciable health risk, while dietary guidelines still recommend moderation for balanced long-term metabolic health. Chemical names denote standard food-grade compounds evaluated by FSSAI & WHO/JECFA.",
       "disclaimer": "This analysis is for nutritional awareness and educational purposes only. It does not provide medical diagnosis or treatment advice."
     },
     "dna_breakdown": {
@@ -276,7 +277,7 @@
       {
         "type": "HIGH_SUGAR",
         "badge": "HIGH SUGAR",
-        "icon": "\ud83d\uded1",
+        "icon": "🛑",
         "color": "rose",
         "title": "High Sugar (26.5g / 100g)",
         "description": "Exceeds FSSAI/WHO front-of-pack threshold (15g/100g). Supplies rapid empty calories.",
@@ -285,7 +286,7 @@
       {
         "type": "HIGH_FAT",
         "badge": "HIGH SAT FAT",
-        "icon": "\ud83d\uded1",
+        "icon": "🛑",
         "color": "amber",
         "title": "High Total / Saturated Fat (13.5g / 100g)",
         "description": "High lipid density formulated with refined palm or vegetable fats.",
@@ -297,22 +298,22 @@
       "portion_limit": "Strictly limit to 1-2 pieces (maximum 15g) and avoid on an empty stomach.",
       "mitigation_steps": [
         {
-          "icon": "\ud83e\udd5c",
+          "icon": "🥜",
           "action": "Pair with Raw Nuts or Seeds (5-8 Almonds/Walnuts)",
           "rationale": "Healthy fats and intact fiber slow gastric emptying, blunting the postprandial glucose spike by up to 35%."
         },
         {
-          "icon": "\ud83d\udeb6",
+          "icon": "🚶",
           "action": "Take a 10-15 Minute Light Walk After Eating",
           "rationale": "Active skeletal muscles take up circulating glucose via GLUT4 transporters independently of insulin."
         },
         {
-          "icon": "\ud83e\udd57",
+          "icon": "🥗",
           "action": "Balance with High-Fiber Greens / Raw Salad Next Meal",
           "rationale": "Prebiotic fiber nourishes the gut microbiome to buffer industrial emulsifier exposure."
         }
       ],
-      "disclaimer": "General nutritional awareness only \u2014 not medical advice, diagnosis, or treatment. Consult a qualified physician or registered dietitian before changing your diet."
+      "disclaimer": "General nutritional awareness only — not medical advice, diagnosis, or treatment. Consult a qualified physician or registered dietitian before changing your diet."
     },
     "disguised_ingredients": {
       "total_disguised_count": 4,
@@ -330,12 +331,12 @@
     },
     "glycemic_response": {
       "tier": "High (Fast Glucose Surge)",
-      "spike_score": 8.0,
+      "spike_score": 8,
       "curve_shape": "sharp_spike",
       "buffering_quality": "Poor",
       "sugars_100g": 26.5,
       "fiber_100g": 1.5,
-      "protein_100g": 7.0,
+      "protein_100g": 7,
       "explanation": "High proportion of simple sugars (26.5g/100g) and refined carbohydrates with low protective dietary fiber (1.5g). Causes a rapid postprandial blood glucose elevation followed by a reactive insulin dip."
     }
   },
@@ -347,13 +348,14 @@
       "brands": "Cadbury / Mondelez",
       "ingredients_text": "Refined Wheat Flour (Maida), Sugar, Fractionated Palm Oil, Cocoa Solids (4.5%), Invert Sugar, Leavening Agents (E500ii, E503ii), Iodized Salt, Emulsifier (E322), Natural Identical Flavouring Substances.",
       "serving_size": "30 g (3 biscuits)",
-      "product_weight_g": 120.0,
+      "product_weight_g": 120,
       "source": "off",
       "categories_tags": [
         "en:biscuits",
         "en:sweet-biscuits",
         "en:cookies"
-      ]
+      ],
+      "image_url": "https://images.openfoodfacts.org/images/products/762/221/044/9283/front_en.128.400.jpg"
     },
     "nutrition": {
       "per_100g": {
@@ -390,7 +392,7 @@
         "regulatory_refs": {
           "fssai": "Permitted under FSSAI Food Safety Standards",
           "who_jecfa": "JECFA ADI Established",
-          "adi_mg_per_kg": 0.0,
+          "adi_mg_per_kg": 0,
           "food_limit_mg_per_kg": null
         }
       },
@@ -496,7 +498,7 @@
         "regulatory_refs": {
           "fssai": "Permitted under FSSAI Food Safety Standards",
           "who_jecfa": "JECFA ADI Established",
-          "adi_mg_per_kg": 0.0,
+          "adi_mg_per_kg": 0,
           "food_limit_mg_per_kg": null
         }
       },
@@ -532,16 +534,16 @@
       "age_insights": [
         "General Guidance: For children, limit high-sugar and high-sodium ultra-processed snacks. For adults, balance with whole fiber-rich foods."
       ],
-      "scientific_note": "Safety limits (ADI in mg/kg body weight/day) are regulatory thresholds \u2014 intake at or below them over a lifetime is considered to pose no appreciable health risk, while dietary guidelines still recommend moderation for balanced long-term metabolic health. Chemical names denote standard food-grade compounds evaluated by FSSAI & WHO/JECFA.",
+      "scientific_note": "Safety limits (ADI in mg/kg body weight/day) are regulatory thresholds — intake at or below them over a lifetime is considered to pose no appreciable health risk, while dietary guidelines still recommend moderation for balanced long-term metabolic health. Chemical names denote standard food-grade compounds evaluated by FSSAI & WHO/JECFA.",
       "disclaimer": "This analysis is for nutritional awareness and educational purposes only. It does not provide medical diagnosis or treatment advice."
     },
     "dna_breakdown": {
-      "refined_carb": 10.0,
-      "sugar": 20.0,
-      "oil": 10.0,
-      "other": 30.0,
-      "additive": 20.0,
-      "salt_sodium": 10.0
+      "refined_carb": 10,
+      "sugar": 20,
+      "oil": 10,
+      "other": 30,
+      "additive": 20,
+      "salt_sodium": 10
     },
     "health_warnings": [],
     "healthier_swaps": [
@@ -574,7 +576,7 @@
       {
         "type": "HIGH_SUGAR",
         "badge": "HIGH SUGAR",
-        "icon": "\ud83d\uded1",
+        "icon": "🛑",
         "color": "rose",
         "title": "High Sugar (38.5g / 100g)",
         "description": "Exceeds FSSAI/WHO front-of-pack threshold (15g/100g). Supplies rapid empty calories.",
@@ -583,7 +585,7 @@
       {
         "type": "HIGH_FAT",
         "badge": "HIGH SAT FAT",
-        "icon": "\ud83d\uded1",
+        "icon": "🛑",
         "color": "amber",
         "title": "High Total / Saturated Fat (20.2g / 100g)",
         "description": "High lipid density formulated with refined palm or vegetable fats.",
@@ -595,22 +597,22 @@
       "portion_limit": "Strictly limit to 1-2 pieces (maximum 15g) and avoid on an empty stomach.",
       "mitigation_steps": [
         {
-          "icon": "\ud83e\udd5c",
+          "icon": "🥜",
           "action": "Pair with Raw Nuts or Seeds (5-8 Almonds/Walnuts)",
           "rationale": "Healthy fats and intact fiber slow gastric emptying, blunting the postprandial glucose spike by up to 35%."
         },
         {
-          "icon": "\ud83d\udeb6",
+          "icon": "🚶",
           "action": "Take a 10-15 Minute Light Walk After Eating",
           "rationale": "Active skeletal muscles take up circulating glucose via GLUT4 transporters independently of insulin."
         },
         {
-          "icon": "\ud83d\udca7",
+          "icon": "💧",
           "action": "Drink a Glass of Water (300ml) with Potassium",
           "rationale": "Helps renal hydration and sodium-potassium balance, reducing blood pressure tension."
         }
       ],
-      "disclaimer": "General nutritional awareness only \u2014 not medical advice, diagnosis, or treatment. Consult a qualified physician or registered dietitian before changing your diet."
+      "disclaimer": "General nutritional awareness only — not medical advice, diagnosis, or treatment. Consult a qualified physician or registered dietitian before changing your diet."
     },
     "disguised_ingredients": {
       "total_disguised_count": 3,
@@ -644,12 +646,13 @@
       "brands": "Nestle India",
       "ingredients_text": "Refined Wheat Flour (Maida), Palm Oil, Iodized Salt, Wheat Gluten, Thickeners (E508, E412), Acidity Regulators (E501i, E500i), Humectant (E451i), Hydrolyzed Groundnut Protein, Mixed Spices, Dehydrated Onion, Sugar, Flavour Enhancer (E635), Caramel Colour (E150d).",
       "serving_size": "70 g",
-      "product_weight_g": 70.0,
+      "product_weight_g": 70,
       "source": "manual",
       "categories_tags": [
         "en:noodles",
         "en:instant-noodles"
-      ]
+      ],
+      "image_url": "https://images.openfoodfacts.org/images/products/890/105/885/2372/front_en.71.400.jpg"
     },
     "nutrition": {
       "per_100g": {
@@ -686,7 +689,7 @@
         "regulatory_refs": {
           "fssai": "Permitted under FSSAI Food Safety Standards",
           "who_jecfa": "JECFA ADI Established",
-          "adi_mg_per_kg": 0.0,
+          "adi_mg_per_kg": 0,
           "food_limit_mg_per_kg": null
         }
       },
@@ -701,7 +704,7 @@
         "regulatory_refs": {
           "fssai": "Permitted under FSSAI Food Safety Standards",
           "who_jecfa": "JECFA ADI Established",
-          "adi_mg_per_kg": 0.0,
+          "adi_mg_per_kg": 0,
           "food_limit_mg_per_kg": null
         }
       },
@@ -742,7 +745,7 @@
         "regulatory_refs": {
           "fssai": "Permitted under FSSAI Food Safety Standards",
           "who_jecfa": "JECFA ADI Established",
-          "adi_mg_per_kg": 0.0,
+          "adi_mg_per_kg": 0,
           "food_limit_mg_per_kg": null
         }
       },
@@ -757,7 +760,7 @@
         "regulatory_refs": {
           "fssai": "Permitted under FSSAI Food Safety Standards",
           "who_jecfa": "JECFA ADI Established",
-          "adi_mg_per_kg": 0.0,
+          "adi_mg_per_kg": 0,
           "food_limit_mg_per_kg": null
         }
       },
@@ -863,7 +866,7 @@
         "regulatory_refs": {
           "fssai": "Permitted under FSSAI Food Safety Standards",
           "who_jecfa": "JECFA ADI Established",
-          "adi_mg_per_kg": 0.0,
+          "adi_mg_per_kg": 0,
           "food_limit_mg_per_kg": null
         }
       },
@@ -878,7 +881,7 @@
         "regulatory_refs": {
           "fssai": "Permitted under FSSAI Food Safety Standards",
           "who_jecfa": "JECFA ADI Established",
-          "adi_mg_per_kg": 0.0,
+          "adi_mg_per_kg": 0,
           "food_limit_mg_per_kg": null
         }
       }
@@ -903,7 +906,7 @@
       "age_insights": [
         "General Guidance: For children, limit high-sugar and high-sodium ultra-processed snacks. For adults, balance with whole fiber-rich foods."
       ],
-      "scientific_note": "Safety limits (ADI in mg/kg body weight/day) are regulatory thresholds \u2014 intake at or below them over a lifetime is considered to pose no appreciable health risk, while dietary guidelines still recommend moderation for balanced long-term metabolic health. Chemical names denote standard food-grade compounds evaluated by FSSAI & WHO/JECFA.",
+      "scientific_note": "Safety limits (ADI in mg/kg body weight/day) are regulatory thresholds — intake at or below them over a lifetime is considered to pose no appreciable health risk, while dietary guidelines still recommend moderation for balanced long-term metabolic health. Chemical names denote standard food-grade compounds evaluated by FSSAI & WHO/JECFA.",
       "disclaimer": "This analysis is for nutritional awareness and educational purposes only. It does not provide medical diagnosis or treatment advice."
     },
     "dna_breakdown": {
@@ -937,7 +940,7 @@
       {
         "type": "HIGH_SALT",
         "badge": "HIGH SODIUM",
-        "icon": "\ud83d\uded1",
+        "icon": "🛑",
         "color": "red",
         "title": "High Salt (3.20g / 100g)",
         "description": "Provides 1280mg sodium per 100g, exceeding FSSAI threshold (1.25g salt).",
@@ -946,7 +949,7 @@
       {
         "type": "HIGH_FAT",
         "badge": "HIGH SAT FAT",
-        "icon": "\ud83d\uded1",
+        "icon": "🛑",
         "color": "amber",
         "title": "High Total / Saturated Fat (15.7g / 100g)",
         "description": "High lipid density formulated with refined palm or vegetable fats.",
@@ -958,22 +961,22 @@
       "portion_limit": "Limit portion to 1 standard serving (20-30g) rather than finishing the whole pack.",
       "mitigation_steps": [
         {
-          "icon": "\ud83d\udca7",
+          "icon": "💧",
           "action": "Drink a Glass of Water (300ml) with Potassium",
           "rationale": "Helps renal hydration and sodium-potassium balance, reducing blood pressure tension."
         },
         {
-          "icon": "\ud83c\udf4c",
+          "icon": "🍌",
           "action": "Eat a Potassium-Rich Whole Food (Banana or Tender Coconut)",
           "rationale": "Potassium counteracts sodium vasoconstriction."
         },
         {
-          "icon": "\ud83e\udd57",
+          "icon": "🥗",
           "action": "Balance with High-Fiber Greens / Raw Salad Next Meal",
           "rationale": "Prebiotic fiber nourishes the gut microbiome to buffer industrial emulsifier exposure."
         }
       ],
-      "disclaimer": "General nutritional awareness only \u2014 not medical advice, diagnosis, or treatment. Consult a qualified physician or registered dietitian before changing your diet."
+      "disclaimer": "General nutritional awareness only — not medical advice, diagnosis, or treatment. Consult a qualified physician or registered dietitian before changing your diet."
     },
     "disguised_ingredients": {
       "total_disguised_count": 1,
@@ -986,7 +989,7 @@
     },
     "glycemic_response": {
       "tier": "Low (Sustained Energy)",
-      "spike_score": 1.0,
+      "spike_score": 1,
       "curve_shape": "flat_sustained",
       "buffering_quality": "Strong",
       "sugars_100g": 2.2,
@@ -1003,35 +1006,36 @@
       "brands": "Amul",
       "ingredients_text": "Pasteurized Skimmed Milk, Milk Solids, Active Lactic Cultures (Lactobacillus bulgaricus, Streptococcus thermophilus).",
       "serving_size": "100 g",
-      "product_weight_g": 100.0,
+      "product_weight_g": 100,
       "source": "manual",
       "categories_tags": [
         "en:yogurts",
         "en:greek-yogurts",
         "en:dairy-products"
-      ]
+      ],
+      "image_url": "https://images.openfoodfacts.org/images/products/890/126/201/0053/front_en.4.400.jpg"
     },
     "nutrition": {
       "per_100g": {
         "sugars_g": 4.5,
         "salt_g": 0.08,
         "fat_g": 0.2,
-        "proteins_g": 10.0,
-        "fiber_g": 0.0
+        "proteins_g": 10,
+        "fiber_g": 0
       },
       "per_serving": {
         "sugars_g": 4.5,
         "salt_g": 0.08,
         "fat_g": 0.2,
-        "proteins_g": 10.0,
-        "fiber_g": 0.0
+        "proteins_g": 10,
+        "fiber_g": 0
       },
       "pct_by_weight": {
         "sugars_pct": 4.5,
         "salt_pct": 0.08,
         "fat_pct": 0.2,
-        "proteins_pct": 10.0,
-        "fiber_pct": 0.0
+        "proteins_pct": 10,
+        "fiber_pct": 0
       }
     },
     "ingredients": [
@@ -1105,12 +1109,12 @@
       "age_insights": [
         "General Guidance: For children, limit high-sugar and high-sodium ultra-processed snacks. For adults, balance with whole fiber-rich foods."
       ],
-      "scientific_note": "Safety limits (ADI in mg/kg body weight/day) are regulatory thresholds \u2014 intake at or below them over a lifetime is considered to pose no appreciable health risk, while dietary guidelines still recommend moderation for balanced long-term metabolic health. Chemical names denote standard food-grade compounds evaluated by FSSAI & WHO/JECFA.",
+      "scientific_note": "Safety limits (ADI in mg/kg body weight/day) are regulatory thresholds — intake at or below them over a lifetime is considered to pose no appreciable health risk, while dietary guidelines still recommend moderation for balanced long-term metabolic health. Chemical names denote standard food-grade compounds evaluated by FSSAI & WHO/JECFA.",
       "disclaimer": "This analysis is for nutritional awareness and educational purposes only. It does not provide medical diagnosis or treatment advice."
     },
     "dna_breakdown": {
-      "protein_source": 50.0,
-      "other": 50.0
+      "protein_source": 50,
+      "other": 50
     },
     "health_warnings": [],
     "healthier_swaps": [
@@ -1137,12 +1141,12 @@
       "portion_limit": "Limit portion to 1 standard serving (20-30g) rather than finishing the whole pack.",
       "mitigation_steps": [
         {
-          "icon": "\ud83d\udca7",
+          "icon": "💧",
           "action": "Stay Hydrated and Savor Mindfully",
           "rationale": "Eating slowly increases satiety peptide secretion."
         }
       ],
-      "disclaimer": "General nutritional awareness only \u2014 not medical advice, diagnosis, or treatment. Consult a qualified physician or registered dietitian before changing your diet."
+      "disclaimer": "General nutritional awareness only — not medical advice, diagnosis, or treatment. Consult a qualified physician or registered dietitian before changing your diet."
     },
     "disguised_ingredients": {
       "total_disguised_count": 0,
@@ -1153,12 +1157,12 @@
     },
     "glycemic_response": {
       "tier": "Low (Sustained Energy)",
-      "spike_score": 1.0,
+      "spike_score": 1,
       "curve_shape": "flat_sustained",
       "buffering_quality": "Strong",
       "sugars_100g": 4.5,
-      "fiber_100g": 0.0,
-      "protein_100g": 10.0,
+      "fiber_100g": 0,
+      "protein_100g": 10,
       "explanation": "Favorable nutrient balance with low free sugar (4.5g) and good dietary buffering (0.0g fiber, 10.0g protein). Supports sustained metabolic energy without sudden glycemic spikes."
     }
   },
@@ -1170,35 +1174,36 @@
       "brands": "The Coca-Cola Company",
       "ingredients_text": "Carbonated Water, Colour (Caramel E150d), Acid (Phosphoric Acid E338), Sweeteners (Aspartame E951, Acesulfame K E950), Natural Flavourings Including Caffeine, Acidity Regulator (Sodium Citrates E331).",
       "serving_size": "330 ml",
-      "product_weight_g": 330.0,
+      "product_weight_g": 330,
       "source": "off",
       "categories_tags": [
         "en:beverages",
         "en:carbonated-drinks",
         "en:diet-beverages"
-      ]
+      ],
+      "image_url": "https://images.openfoodfacts.org/images/products/544/900/000/0996/front_en.1129.400.jpg"
     },
     "nutrition": {
       "per_100g": {
-        "sugars_g": 0.0,
+        "sugars_g": 0,
         "salt_g": 0.02,
-        "fat_g": 0.0,
-        "proteins_g": 0.0,
-        "fiber_g": 0.0
+        "fat_g": 0,
+        "proteins_g": 0,
+        "fiber_g": 0
       },
       "per_serving": {
-        "sugars_g": 0.0,
+        "sugars_g": 0,
         "salt_g": 0.066,
-        "fat_g": 0.0,
-        "proteins_g": 0.0,
-        "fiber_g": 0.0
+        "fat_g": 0,
+        "proteins_g": 0,
+        "fiber_g": 0
       },
       "pct_by_weight": {
-        "sugars_pct": 0.0,
+        "sugars_pct": 0,
         "salt_pct": 0.02,
-        "fat_pct": 0.0,
-        "proteins_pct": 0.0,
-        "fiber_pct": 0.0
+        "fat_pct": 0,
+        "proteins_pct": 0,
+        "fiber_pct": 0
       }
     },
     "ingredients": [
@@ -1226,7 +1231,7 @@
         "regulatory_refs": {
           "fssai": "Permitted under FSSAI Food Safety Standards",
           "who_jecfa": "JECFA ADI Established",
-          "adi_mg_per_kg": 0.0,
+          "adi_mg_per_kg": 0,
           "food_limit_mg_per_kg": null
         }
       },
@@ -1241,7 +1246,7 @@
         "regulatory_refs": {
           "fssai": "Permitted under FSSAI Food Safety Standards",
           "who_jecfa": "JECFA ADI Established",
-          "adi_mg_per_kg": 0.0,
+          "adi_mg_per_kg": 0,
           "food_limit_mg_per_kg": null
         }
       },
@@ -1256,7 +1261,7 @@
         "regulatory_refs": {
           "fssai": "Permitted under FSSAI Food Safety Standards",
           "who_jecfa": "JECFA ADI Established",
-          "adi_mg_per_kg": 40.0,
+          "adi_mg_per_kg": 40,
           "food_limit_mg_per_kg": null
         }
       },
@@ -1271,7 +1276,7 @@
         "regulatory_refs": {
           "fssai": "Permitted under FSSAI Food Safety Standards",
           "who_jecfa": "JECFA ADI Established",
-          "adi_mg_per_kg": 15.0,
+          "adi_mg_per_kg": 15,
           "food_limit_mg_per_kg": null
         }
       },
@@ -1299,7 +1304,7 @@
         "regulatory_refs": {
           "fssai": "Permitted under FSSAI Food Safety Standards",
           "who_jecfa": "JECFA ADI Established",
-          "adi_mg_per_kg": 0.0,
+          "adi_mg_per_kg": 0,
           "food_limit_mg_per_kg": null
         }
       }
@@ -1320,7 +1325,7 @@
       "age_insights": [
         "General Guidance: For children, limit high-sugar and high-sodium ultra-processed snacks. For adults, balance with whole fiber-rich foods."
       ],
-      "scientific_note": "Safety limits (ADI in mg/kg body weight/day) are regulatory thresholds \u2014 intake at or below them over a lifetime is considered to pose no appreciable health risk, while dietary guidelines still recommend moderation for balanced long-term metabolic health. Chemical names denote standard food-grade compounds evaluated by FSSAI & WHO/JECFA.",
+      "scientific_note": "Safety limits (ADI in mg/kg body weight/day) are regulatory thresholds — intake at or below them over a lifetime is considered to pose no appreciable health risk, while dietary guidelines still recommend moderation for balanced long-term metabolic health. Chemical names denote standard food-grade compounds evaluated by FSSAI & WHO/JECFA.",
       "disclaimer": "This analysis is for nutritional awareness and educational purposes only. It does not provide medical diagnosis or treatment advice."
     },
     "dna_breakdown": {
@@ -1360,12 +1365,12 @@
       "portion_limit": "Limit portion to 1 standard serving (20-30g) rather than finishing the whole pack.",
       "mitigation_steps": [
         {
-          "icon": "\ud83e\udd57",
+          "icon": "🥗",
           "action": "Balance with High-Fiber Greens / Raw Salad Next Meal",
           "rationale": "Prebiotic fiber nourishes the gut microbiome to buffer industrial emulsifier exposure."
         }
       ],
-      "disclaimer": "General nutritional awareness only \u2014 not medical advice, diagnosis, or treatment. Consult a qualified physician or registered dietitian before changing your diet."
+      "disclaimer": "General nutritional awareness only — not medical advice, diagnosis, or treatment. Consult a qualified physician or registered dietitian before changing your diet."
     },
     "disguised_ingredients": {
       "total_disguised_count": 1,
@@ -1378,12 +1383,12 @@
     },
     "glycemic_response": {
       "tier": "Low (Sustained Energy)",
-      "spike_score": 1.0,
+      "spike_score": 1,
       "curve_shape": "flat_sustained",
       "buffering_quality": "Strong",
-      "sugars_100g": 0.0,
-      "fiber_100g": 0.0,
-      "protein_100g": 0.0,
+      "sugars_100g": 0,
+      "fiber_100g": 0,
+      "protein_100g": 0,
       "explanation": "Favorable nutrient balance with low free sugar (0.0g) and good dietary buffering (0.0g fiber, 0.0g protein). Supports sustained metabolic energy without sudden glycemic spikes."
     }
   },
@@ -1395,20 +1400,21 @@
       "brands": "Pintola",
       "ingredients_text": "100% Roasted Peanuts.",
       "serving_size": "32 g (2 tbsp)",
-      "product_weight_g": 350.0,
+      "product_weight_g": 350,
       "source": "manual",
       "categories_tags": [
         "en:spreads",
         "en:peanut-butters"
-      ]
+      ],
+      "image_url": "https://images.openfoodfacts.org/images/products/890/800/778/9012/front_en.11.400.jpg"
     },
     "nutrition": {
       "per_100g": {
         "sugars_g": 6.2,
         "salt_g": 0.03,
         "fat_g": 49.5,
-        "proteins_g": 30.0,
-        "fiber_g": 9.0
+        "proteins_g": 30,
+        "fiber_g": 9
       },
       "per_serving": {
         "sugars_g": 1.984,
@@ -1421,8 +1427,8 @@
         "sugars_pct": 6.2,
         "salt_pct": 0.03,
         "fat_pct": 49.5,
-        "proteins_pct": 30.0,
-        "fiber_pct": 9.0
+        "proteins_pct": 30,
+        "fiber_pct": 9
       }
     },
     "ingredients": [
@@ -1459,11 +1465,11 @@
       "age_insights": [
         "General Guidance: For children, limit high-sugar and high-sodium ultra-processed snacks. For adults, balance with whole fiber-rich foods."
       ],
-      "scientific_note": "Safety limits (ADI in mg/kg body weight/day) are regulatory thresholds \u2014 intake at or below them over a lifetime is considered to pose no appreciable health risk, while dietary guidelines still recommend moderation for balanced long-term metabolic health. Chemical names denote standard food-grade compounds evaluated by FSSAI & WHO/JECFA.",
+      "scientific_note": "Safety limits (ADI in mg/kg body weight/day) are regulatory thresholds — intake at or below them over a lifetime is considered to pose no appreciable health risk, while dietary guidelines still recommend moderation for balanced long-term metabolic health. Chemical names denote standard food-grade compounds evaluated by FSSAI & WHO/JECFA.",
       "disclaimer": "This analysis is for nutritional awareness and educational purposes only. It does not provide medical diagnosis or treatment advice."
     },
     "dna_breakdown": {
-      "whole_food": 100.0
+      "whole_food": 100
     },
     "health_warnings": [],
     "healthier_swaps": [
@@ -1496,7 +1502,7 @@
       {
         "type": "HIGH_FAT",
         "badge": "HIGH SAT FAT",
-        "icon": "\ud83d\uded1",
+        "icon": "🛑",
         "color": "amber",
         "title": "High Total / Saturated Fat (49.5g / 100g)",
         "description": "High lipid density formulated with refined palm or vegetable fats.",
@@ -1508,12 +1514,12 @@
       "portion_limit": "Limit portion to 1 standard serving (20-30g) rather than finishing the whole pack.",
       "mitigation_steps": [
         {
-          "icon": "\ud83d\udca7",
+          "icon": "💧",
           "action": "Stay Hydrated and Savor Mindfully",
           "rationale": "Eating slowly increases satiety peptide secretion."
         }
       ],
-      "disclaimer": "General nutritional awareness only \u2014 not medical advice, diagnosis, or treatment. Consult a qualified physician or registered dietitian before changing your diet."
+      "disclaimer": "General nutritional awareness only — not medical advice, diagnosis, or treatment. Consult a qualified physician or registered dietitian before changing your diet."
     },
     "disguised_ingredients": {
       "total_disguised_count": 0,
@@ -1524,12 +1530,12 @@
     },
     "glycemic_response": {
       "tier": "Low (Sustained Energy)",
-      "spike_score": 1.0,
+      "spike_score": 1,
       "curve_shape": "flat_sustained",
       "buffering_quality": "Strong",
       "sugars_100g": 6.2,
-      "fiber_100g": 9.0,
-      "protein_100g": 30.0,
+      "fiber_100g": 9,
+      "protein_100g": 30,
       "explanation": "Favorable nutrient balance with low free sugar (6.2g) and good dietary buffering (9.0g fiber, 30.0g protein). Supports sustained metabolic energy without sudden glycemic spikes."
     }
   }

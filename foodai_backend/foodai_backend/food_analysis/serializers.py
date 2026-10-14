@@ -116,6 +116,7 @@ class ProductSerializer(serializers.Serializer):
     product_weight_g = serializers.FloatField(allow_null=True)
     source = serializers.CharField()
     categories_tags = serializers.ListField(child=serializers.CharField())
+    image_url = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     nutrition = NutritionBreakdownSerializer(required=False)
     ingredients = IngredientAnalysisSerializer(many=True, required=False)
 
@@ -364,6 +365,11 @@ def analyze_product(
         user_weight_kg=user_weight_kg,
     )
 
+    image_url = (
+        getattr(product, "image_url", None)
+        or (product.nutriments.get("image_url") if isinstance(getattr(product, "nutriments", None), dict) else None)
+        or ""
+    )
     product_dict = {
         "id": product.id if product.pk else 0,
         "barcode": product.barcode,
@@ -374,6 +380,7 @@ def analyze_product(
         "product_weight_g": product.product_weight_g,
         "source": product.source,
         "categories_tags": product.categories_tags or [],
+        "image_url": image_url,
     }
 
     # Front-of-Pack Nutritional Warning Labels (FSSAI FOPNL)
