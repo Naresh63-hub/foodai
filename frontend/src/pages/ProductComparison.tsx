@@ -4,8 +4,11 @@ import { toast } from 'sonner'
 import SafeAreaView from '../components/SafeAreaView'
 import ProcessingBadge from '../components/ProcessingBadge'
 import { compareProducts } from '../api/food'
-import { ComparisonResult } from '../types/food'
+import { ComparisonResult, ProductAnalysisResult } from '../types/food'
 import { QUICK_SAMPLE_PRESETS } from '../constants'
+import demoProductsData from '../constants/demoProducts.json'
+
+const demoProducts = demoProductsData as Record<string, ProductAnalysisResult>
 
 export default function ProductComparison() {
   const location = useLocation()
@@ -30,6 +33,51 @@ export default function ProductComparison() {
       setResult(res)
       toast.success('Comparison calculated!')
     } catch (err: any) {
+      const prod1 = demoProducts[barcode1]
+      const prod2 = demoProducts[barcode2]
+      if (prod1 && prod2) {
+        const sugar1 = prod1.nutrition.per_100g.sugars_g || 0
+        const sugar2 = prod2.nutrition.per_100g.sugars_g || 0
+        const salt1 = prod1.nutrition.per_100g.salt_g || 0
+        const salt2 = prod2.nutrition.per_100g.salt_g || 0
+        const fat1 = prod1.nutrition.per_100g.fat_g || 0
+        const fat2 = prod2.nutrition.per_100g.fat_g || 0
+        const prot1 = prod1.nutrition.per_100g.proteins_g || 0
+        const prot2 = prod2.nutrition.per_100g.proteins_g || 0
+
+        let betterIdx: 1 | 2 = 1
+        let rationale = ''
+        if (prod1.processing_level === 'ultra_processed' && prod2.processing_level !== 'ultra_processed') {
+          betterIdx = 2
+          rationale = `${prod2.product.product_name} is less processed and has better nutritional balance than ${prod1.product.product_name}.`
+        } else if (prod2.processing_level === 'ultra_processed' && prod1.processing_level !== 'ultra_processed') {
+          betterIdx = 1
+          rationale = `${prod1.product.product_name} is less processed and has better nutritional balance than ${prod2.product.product_name}.`
+        } else if (sugar1 > sugar2) {
+          betterIdx = 2
+          rationale = `${prod2.product.product_name} contains significantly less sugar (${sugar2}g vs ${sugar1}g per 100g).`
+        } else {
+          betterIdx = 1
+          rationale = `${prod1.product.product_name} has lower sugar and favorable nutrient density.`
+        }
+
+        const synthResult: ComparisonResult = {
+          product_1: prod1,
+          product_2: prod2,
+          comparison: {
+            sugar_diff_g: Math.round((sugar1 - sugar2) * 10) / 10,
+            salt_diff_g: Math.round((salt1 - salt2) * 10) / 10,
+            fat_diff_g: Math.round((fat1 - fat2) * 10) / 10,
+            protein_diff_g: Math.round((prot1 - prot2) * 10) / 10,
+            better_choice_index: betterIdx,
+            better_choice_product_name: betterIdx === 1 ? prod1.product.product_name : prod2.product.product_name,
+            rationale,
+          },
+        }
+        setResult(synthResult)
+        toast.success('Comparison calculated!')
+        return
+      }
       toast.error(err.response?.data?.detail || 'Failed to compare products.')
     } finally {
       setLoading(false)

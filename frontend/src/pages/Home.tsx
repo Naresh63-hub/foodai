@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import SafeAreaView from '../components/SafeAreaView'
 import { QUICK_SAMPLE_PRESETS } from '../constants'
+import demoProductsData from '../constants/demoProducts.json'
 import { getScanHistory } from '../api/food'
 import VoiceMealLoggerModal from '../components/VoiceMealLoggerModal'
 import { SkeletonRecentScans } from '../components/Skeleton'
 import { useAuth } from '../contexts/AuthContext'
 import InstallAppModal from '../components/InstallAppModal'
+
+const demoProducts = demoProductsData as Record<string, any>
 
 export default function Home() {
   const navigate = useNavigate()
@@ -31,7 +34,12 @@ export default function Home() {
   }, [])
 
   const handleQuickPreset = (barcode: string) => {
-    navigate(`/results/${barcode}`)
+    const demoData = demoProducts[barcode]
+    if (demoData) {
+      navigate(`/results/${barcode}`, { state: { result: demoData } })
+    } else {
+      navigate(`/results/${barcode}`)
+    }
   }
 
   return (

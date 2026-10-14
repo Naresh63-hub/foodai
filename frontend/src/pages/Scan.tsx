@@ -5,6 +5,9 @@ import SafeAreaView from '../components/SafeAreaView'
 import { scanBarcode, scanOCR, scanText } from '../api/food'
 import { playScanSound } from '../utils/audio'
 import { QUICK_SAMPLE_PRESETS } from '../constants'
+import demoProductsData from '../constants/demoProducts.json'
+
+const demoProducts = demoProductsData as Record<string, any>
 
 export default function Scan() {
   const navigate = useNavigate()
@@ -67,6 +70,31 @@ export default function Scan() {
       setBatchCode('')
       toast.success(`🛒 Added "${result.product.product_name}" to Cart!`)
     } catch (err: any) {
+      const fallback = demoProducts[cleanBarcode]
+      if (fallback) {
+        playScanSound()
+        const existing = JSON.parse(localStorage.getItem('foodai_grocery_cart') || '[]')
+        const hasPalm = fallback.ingredients?.some((i: any) => i.name.toLowerCase().includes('palm'))
+        const newItem = {
+          id: Date.now().toString(),
+          barcode: fallback.product.barcode || cleanBarcode,
+          product_name: fallback.product.product_name,
+          brands: fallback.product.brands,
+          processing_level: fallback.processing_level,
+          sugars_100g: fallback.nutrition?.per_100g?.sugars_g || 0,
+          salt_100g: fallback.nutrition?.per_100g?.salt_g || 0,
+          fat_100g: fallback.nutrition?.per_100g?.fat_g || 0,
+          additives_count: fallback.additives_count || 0,
+          has_palm_oil: hasPalm,
+          healthier_swap: fallback.healthier_swaps?.[0]?.name,
+        }
+        existing.push(newItem)
+        localStorage.setItem('foodai_grocery_cart', JSON.stringify(existing))
+        setBatchCount(existing.length)
+        setBatchCode('')
+        toast.success(`🛒 Added "${fallback.product.product_name}" to Cart!`)
+        return
+      }
       toast.error(err.response?.data?.detail || 'Product not found in database.')
     } finally {
       setLoading(false)
@@ -137,6 +165,13 @@ export default function Scan() {
       toast.success(`Identified: ${result.product.product_name}`)
       navigate(`/results/${cleanBarcode}`, { state: { result } })
     } catch (err: any) {
+      const fallback = demoProducts[cleanBarcode]
+      if (fallback) {
+        playScanSound()
+        toast.success(`Identified: ${fallback.product.product_name}`)
+        navigate(`/results/${cleanBarcode}`, { state: { result: fallback } })
+        return
+      }
       toast.error(err.response?.data?.detail || 'Barcode lookup failed. Try photo OCR or paste text below.')
     } finally {
       setLoading(false)
@@ -205,6 +240,13 @@ export default function Scan() {
 
   const selectPreset = (code: string) => {
     setBarcode(code)
+    const demoData = demoProducts[code]
+    if (demoData) {
+      playScanSound()
+      toast.success(`Identified: ${demoData.product.product_name}`)
+      navigate(`/results/${code}`, { state: { result: demoData } })
+      return
+    }
     handleBarcodeSubmit(code)
   }
 

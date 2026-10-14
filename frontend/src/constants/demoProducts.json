@@ -1,0 +1,1536 @@
+{
+  "8901063371040": {
+    "product": {
+      "id": 3,
+      "barcode": "8901063371040",
+      "product_name": "Britannia Glucose / Tiger Biscuits",
+      "brands": "Britannia Industries Ltd.",
+      "ingredients_text": "Refined Wheat Flour (Maida), Sugar, Refined Palm Oil, Invert Sugar Syrup, Milk Solids, Iodised Salt, Minerals, Emulsifier (E322 Lecithin), Raising Agents (E500ii, E503ii), Dough Conditioner (E223 Sodium Metabisulphite), Caramel Colour (E150d), Artificial Vanilla Flavour.",
+      "serving_size": "36.6 g",
+      "product_weight_g": 36.6,
+      "source": "manual",
+      "categories_tags": [
+        "en:biscuits",
+        "en:sweet-biscuits"
+      ]
+    },
+    "nutrition": {
+      "per_100g": {
+        "sugars_g": 26.5,
+        "salt_g": 0.65,
+        "fat_g": 13.5,
+        "proteins_g": 7.0,
+        "fiber_g": 1.5
+      },
+      "per_serving": {
+        "sugars_g": 9.699000000000002,
+        "salt_g": 0.23790000000000003,
+        "fat_g": 4.941,
+        "proteins_g": 2.562,
+        "fiber_g": 0.549
+      },
+      "pct_by_weight": {
+        "sugars_pct": 26.5,
+        "salt_pct": 0.65,
+        "fat_pct": 13.5,
+        "proteins_pct": 7.0,
+        "fiber_pct": 1.5
+      }
+    },
+    "ingredients": [
+      {
+        "id": 1,
+        "name": "Refined Wheat Flour (Maida)",
+        "category": "refined_carb",
+        "amount_g": null,
+        "purpose_text": "Endosperm only; fibre removed; high GI; white bread",
+        "concern_text": "Evaluated safe by FSSAI & JECFA within acceptable daily exposure.",
+        "simple_explanation": "Refined Wheat Flour (Maida) is used in food processing for stability and consistency.",
+        "regulatory_refs": {
+          "fssai": "Permitted under FSSAI Food Safety Standards",
+          "who_jecfa": "JECFA ADI Established",
+          "adi_mg_per_kg": 0.0,
+          "food_limit_mg_per_kg": null
+        }
+      },
+      {
+        "id": 2,
+        "name": "Sugar",
+        "category": "sugar",
+        "amount_g": null,
+        "purpose_text": "Sweetener providing quick carbohydrate energy, sweetness, and browning.",
+        "concern_text": "Excess free sugar consumption is linked to elevated dental caries, insulin resistance, and weight gain.",
+        "simple_explanation": "Sugar is a standard culinary ingredient categorized as sugar.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 3,
+        "name": "Refined Palm Oil",
+        "category": "oil",
+        "amount_g": null,
+        "purpose_text": "Lipid source providing texture, mouthfeel, moisture, and shelf stability.",
+        "concern_text": "High intake of refined vegetable fats may increase calorie density and saturated fat exposure.",
+        "simple_explanation": "Refined Palm Oil is a standard culinary ingredient categorized as oil.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 4,
+        "name": "Invert Sugar Syrup",
+        "category": "sugar",
+        "amount_g": null,
+        "purpose_text": "Sweetener providing quick carbohydrate energy, sweetness, and browning.",
+        "concern_text": "Excess free sugar consumption is linked to elevated dental caries, insulin resistance, and weight gain.",
+        "simple_explanation": "Invert Sugar Syrup is a standard culinary ingredient categorized as sugar.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 5,
+        "name": "Milk Solids",
+        "category": "protein_source",
+        "amount_g": null,
+        "purpose_text": "Nutrient source providing essential amino acids for tissue maintenance.",
+        "concern_text": "Nutrient-dense; check for relevant allergen declarations (milk, soy, gluten).",
+        "simple_explanation": "Milk Solids is a standard culinary ingredient categorized as protein source.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 6,
+        "name": "Iodised Salt",
+        "category": "salt_sodium",
+        "amount_g": null,
+        "purpose_text": "Essential seasoning enhancing flavor balance and providing sodium electrolyte.",
+        "concern_text": "Excess dietary sodium is associated with elevated blood pressure and cardiovascular risk.",
+        "simple_explanation": "Iodised Salt is a standard culinary ingredient categorized as salt sodium.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 7,
+        "name": "Minerals",
+        "category": "other",
+        "amount_g": null,
+        "purpose_text": "Food ingredient contributing to flavor, structure, or product formulation.",
+        "concern_text": "No specific toxicity when consumed within standard dietary guidelines.",
+        "simple_explanation": "Minerals is a standard culinary ingredient categorized as other.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 8,
+        "name": "Emulsifier (E322 Lecithin)",
+        "category": "additive",
+        "amount_g": null,
+        "purpose_text": "Emulsifier; soy/egg/sunflower source; generally safe",
+        "concern_text": "Evaluated safe by FSSAI & JECFA within acceptable daily exposure.",
+        "simple_explanation": "Lecithin is used in food processing for stability and consistency.",
+        "regulatory_refs": {
+          "fssai": "Permitted under FSSAI Food Safety Standards",
+          "who_jecfa": "JECFA ADI Established",
+          "adi_mg_per_kg": 0.0,
+          "food_limit_mg_per_kg": null
+        }
+      },
+      {
+        "id": 9,
+        "name": "Raising Agents (E500ii",
+        "category": "additive",
+        "amount_g": null,
+        "purpose_text": "Functional food additive used for emulsification, stabilization, or texture control.",
+        "concern_text": "Safe within standard regulatory thresholds (ADI); excessive cumulative intake should be monitored.",
+        "simple_explanation": "Raising Agents (E500ii is a standard culinary ingredient categorized as additive.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 10,
+        "name": "E503ii)",
+        "category": "additive",
+        "amount_g": null,
+        "purpose_text": "Functional food additive used for emulsification, stabilization, or texture control.",
+        "concern_text": "Safe within standard regulatory thresholds (ADI); excessive cumulative intake should be monitored.",
+        "simple_explanation": "E503ii) is a standard culinary ingredient categorized as additive.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 11,
+        "name": "Dough Conditioner (E223 Sodium Metabisulphite)",
+        "category": "additive",
+        "amount_g": null,
+        "purpose_text": "Sulfite; dried fruit/wine preservative",
+        "concern_text": "Evaluated safe by FSSAI & JECFA within acceptable daily exposure.",
+        "simple_explanation": "Sodium Metabisulfite is used in food processing for stability and consistency.",
+        "regulatory_refs": {
+          "fssai": "Permitted under FSSAI Food Safety Standards",
+          "who_jecfa": "JECFA ADI Established",
+          "adi_mg_per_kg": 0.7,
+          "food_limit_mg_per_kg": null
+        }
+      },
+      {
+        "id": 12,
+        "name": "Caramel Colour (E150d)",
+        "category": "additive",
+        "amount_g": null,
+        "purpose_text": "Caramel colour Class IV; cola colour; 4-MEI concerns",
+        "concern_text": "Evaluated safe by FSSAI & JECFA within acceptable daily exposure.",
+        "simple_explanation": "Sulfite Ammonia Caramel is used in food processing for stability and consistency.",
+        "regulatory_refs": {
+          "fssai": "Permitted under FSSAI Food Safety Standards",
+          "who_jecfa": "JECFA ADI Established",
+          "adi_mg_per_kg": 0.0,
+          "food_limit_mg_per_kg": null
+        }
+      },
+      {
+        "id": 13,
+        "name": "Artificial Vanilla Flavour.",
+        "category": "other",
+        "amount_g": null,
+        "purpose_text": "Food ingredient contributing to flavor, structure, or product formulation.",
+        "concern_text": "No specific toxicity when consumed within standard dietary guidelines.",
+        "simple_explanation": "Artificial Vanilla Flavour. is a standard culinary ingredient categorized as other.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      }
+    ],
+    "processing_level": "ultra_processed",
+    "verdict": "Ultra-processed biscuits",
+    "additives_count": 5,
+    "has_unknown_amount_count": 13,
+    "processing_level_label": {
+      "key": "ultra_processed",
+      "label": "Ultra-processed"
+    },
+    "summary_info": {
+      "summary": "This product is primarily formulated from refined wheat flour (maida), sugar, refined palm oil, invert sugar syrup. It contains 5 detected functional additives/preservatives. The exact quantities of individual additives are not disclosed on the manufacturer label.",
+      "key_highlights": [
+        "High sugar content (26.5% by weight)",
+        "Moderate salt (0.7g / 100g)"
+      ],
+      "age_insights": [
+        "General Guidance: For children, limit high-sugar and high-sodium ultra-processed snacks. For adults, balance with whole fiber-rich foods."
+      ],
+      "scientific_note": "Safety limits (ADI in mg/kg body weight/day) are regulatory thresholds \u2014 intake at or below them over a lifetime is considered to pose no appreciable health risk, while dietary guidelines still recommend moderation for balanced long-term metabolic health. Chemical names denote standard food-grade compounds evaluated by FSSAI & WHO/JECFA.",
+      "disclaimer": "This analysis is for nutritional awareness and educational purposes only. It does not provide medical diagnosis or treatment advice."
+    },
+    "dna_breakdown": {
+      "refined_carb": 7.7,
+      "sugar": 15.4,
+      "oil": 7.7,
+      "protein_source": 7.7,
+      "salt_sodium": 7.7,
+      "other": 15.4,
+      "additive": 38.5
+    },
+    "health_warnings": [],
+    "healthier_swaps": [
+      {
+        "name": "Roasted Almonds & Medjool Dates",
+        "category": "Whole Food Snack",
+        "benefits": "Zero added sugar or palm oil. Natural sweetness paired with healthy monounsaturated fats & magnesium for steady energy.",
+        "why_better": "No ultra-processing, 100% bioavailable fiber, zero industrial emulsifiers.",
+        "calories_density": "Moderate (Nutrient-Dense)",
+        "nova_group": 1
+      },
+      {
+        "name": "Roasted Makhana (Fox Nuts) with Pink Salt",
+        "category": "Minimally Processed",
+        "benefits": "Light, crunchy, low glycemic index. High in plant protein and rich in antioxidants with zero trans fats.",
+        "why_better": "90% less saturated fat, zero refined sugar, no synthetic leavening agents.",
+        "calories_density": "Low",
+        "nova_group": 1
+      },
+      {
+        "name": "100% Rolled Oats & Jaggery Homemade Cookies",
+        "category": "Minimally Processed Alternative",
+        "benefits": "Beta-glucan soluble fiber supports heart health and slow blood glucose release.",
+        "why_better": "Zero refined white maida, zero palm oil or chemical preservatives.",
+        "calories_density": "Moderate",
+        "nova_group": 2
+      }
+    ],
+    "fopnl_warnings": [
+      {
+        "type": "HIGH_SUGAR",
+        "badge": "HIGH SUGAR",
+        "icon": "\ud83d\uded1",
+        "color": "rose",
+        "title": "High Sugar (26.5g / 100g)",
+        "description": "Exceeds FSSAI/WHO front-of-pack threshold (15g/100g). Supplies rapid empty calories.",
+        "threshold_exceeded": "26.5g vs 15.0g limit"
+      },
+      {
+        "type": "HIGH_FAT",
+        "badge": "HIGH SAT FAT",
+        "icon": "\ud83d\uded1",
+        "color": "amber",
+        "title": "High Total / Saturated Fat (13.5g / 100g)",
+        "description": "High lipid density formulated with refined palm or vegetable fats.",
+        "threshold_exceeded": "13.5g vs 12.0g-17.5g limit"
+      }
+    ],
+    "damage_control": {
+      "headline": "Science-Backed Damage Control",
+      "portion_limit": "Strictly limit to 1-2 pieces (maximum 15g) and avoid on an empty stomach.",
+      "mitigation_steps": [
+        {
+          "icon": "\ud83e\udd5c",
+          "action": "Pair with Raw Nuts or Seeds (5-8 Almonds/Walnuts)",
+          "rationale": "Healthy fats and intact fiber slow gastric emptying, blunting the postprandial glucose spike by up to 35%."
+        },
+        {
+          "icon": "\ud83d\udeb6",
+          "action": "Take a 10-15 Minute Light Walk After Eating",
+          "rationale": "Active skeletal muscles take up circulating glucose via GLUT4 transporters independently of insulin."
+        },
+        {
+          "icon": "\ud83e\udd57",
+          "action": "Balance with High-Fiber Greens / Raw Salad Next Meal",
+          "rationale": "Prebiotic fiber nourishes the gut microbiome to buffer industrial emulsifier exposure."
+        }
+      ],
+      "disclaimer": "General nutritional awareness only \u2014 not medical advice, diagnosis, or treatment. Consult a qualified physician or registered dietitian before changing your diet."
+    },
+    "disguised_ingredients": {
+      "total_disguised_count": 4,
+      "hidden_sugars": [
+        "Invert Sugar Syrup"
+      ],
+      "hidden_salts": [
+        "Sodium Metabisulphite (INS 223)",
+        "Sodium Bicarbonate (INS 500ii)"
+      ],
+      "hidden_fats": [
+        "Refined Palm Oil / Palmolein"
+      ],
+      "summary": "Detected 1 disguised added sugar(s), 2 technical sodium additive(s), 1 industrial refined fat(s) in the formulation."
+    },
+    "glycemic_response": {
+      "tier": "High (Fast Glucose Surge)",
+      "spike_score": 8.0,
+      "curve_shape": "sharp_spike",
+      "buffering_quality": "Poor",
+      "sugars_100g": 26.5,
+      "fiber_100g": 1.5,
+      "protein_100g": 7.0,
+      "explanation": "High proportion of simple sugars (26.5g/100g) and refined carbohydrates with low protective dietary fiber (1.5g). Causes a rapid postprandial blood glucose elevation followed by a reactive insulin dip."
+    }
+  },
+  "8901030927644": {
+    "product": {
+      "id": 1,
+      "barcode": "8901030927644",
+      "product_name": "Oreo Original Vanilla Creme Biscuits",
+      "brands": "Cadbury / Mondelez",
+      "ingredients_text": "Refined Wheat Flour (Maida), Sugar, Fractionated Palm Oil, Cocoa Solids (4.5%), Invert Sugar, Leavening Agents (E500ii, E503ii), Iodized Salt, Emulsifier (E322), Natural Identical Flavouring Substances.",
+      "serving_size": "30 g (3 biscuits)",
+      "product_weight_g": 120.0,
+      "source": "off",
+      "categories_tags": [
+        "en:biscuits",
+        "en:sweet-biscuits",
+        "en:cookies"
+      ]
+    },
+    "nutrition": {
+      "per_100g": {
+        "sugars_g": 38.5,
+        "salt_g": 1.1,
+        "fat_g": 20.2,
+        "proteins_g": 5.4,
+        "fiber_g": 2.1
+      },
+      "per_serving": {
+        "sugars_g": 11.55,
+        "salt_g": 0.33,
+        "fat_g": 6.06,
+        "proteins_g": 1.62,
+        "fiber_g": 0.63
+      },
+      "pct_by_weight": {
+        "sugars_pct": 38.5,
+        "salt_pct": 1.1,
+        "fat_pct": 20.2,
+        "proteins_pct": 5.4,
+        "fiber_pct": 2.1
+      }
+    },
+    "ingredients": [
+      {
+        "id": 1,
+        "name": "Refined Wheat Flour (Maida)",
+        "category": "refined_carb",
+        "amount_g": null,
+        "purpose_text": "Endosperm only; fibre removed; high GI; white bread",
+        "concern_text": "Evaluated safe by FSSAI & JECFA within acceptable daily exposure.",
+        "simple_explanation": "Refined Wheat Flour (Maida) is used in food processing for stability and consistency.",
+        "regulatory_refs": {
+          "fssai": "Permitted under FSSAI Food Safety Standards",
+          "who_jecfa": "JECFA ADI Established",
+          "adi_mg_per_kg": 0.0,
+          "food_limit_mg_per_kg": null
+        }
+      },
+      {
+        "id": 2,
+        "name": "Sugar",
+        "category": "sugar",
+        "amount_g": null,
+        "purpose_text": "Sweetener providing quick carbohydrate energy, sweetness, and browning.",
+        "concern_text": "Excess free sugar consumption is linked to elevated dental caries, insulin resistance, and weight gain.",
+        "simple_explanation": "Sugar is a standard culinary ingredient categorized as sugar.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 3,
+        "name": "Fractionated Palm Oil",
+        "category": "oil",
+        "amount_g": null,
+        "purpose_text": "Lipid source providing texture, mouthfeel, moisture, and shelf stability.",
+        "concern_text": "High intake of refined vegetable fats may increase calorie density and saturated fat exposure.",
+        "simple_explanation": "Fractionated Palm Oil is a standard culinary ingredient categorized as oil.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 4,
+        "name": "Cocoa Solids (4.5%)",
+        "category": "other",
+        "amount_g": null,
+        "purpose_text": "Food ingredient contributing to flavor, structure, or product formulation.",
+        "concern_text": "No specific toxicity when consumed within standard dietary guidelines.",
+        "simple_explanation": "Cocoa Solids (4.5%) is a standard culinary ingredient categorized as other.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 5,
+        "name": "Invert Sugar",
+        "category": "sugar",
+        "amount_g": null,
+        "purpose_text": "Sweetener providing quick carbohydrate energy, sweetness, and browning.",
+        "concern_text": "Excess free sugar consumption is linked to elevated dental caries, insulin resistance, and weight gain.",
+        "simple_explanation": "Invert Sugar is a standard culinary ingredient categorized as sugar.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 6,
+        "name": "Leavening Agents (E500ii",
+        "category": "other",
+        "amount_g": null,
+        "purpose_text": "Food ingredient contributing to flavor, structure, or product formulation.",
+        "concern_text": "No specific toxicity when consumed within standard dietary guidelines.",
+        "simple_explanation": "Leavening Agents (E500ii is a standard culinary ingredient categorized as other.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 7,
+        "name": "E503ii)",
+        "category": "additive",
+        "amount_g": null,
+        "purpose_text": "Functional food additive used for emulsification, stabilization, or texture control.",
+        "concern_text": "Safe within standard regulatory thresholds (ADI); excessive cumulative intake should be monitored.",
+        "simple_explanation": "E503ii) is a standard culinary ingredient categorized as additive.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 8,
+        "name": "Iodized Salt",
+        "category": "salt_sodium",
+        "amount_g": null,
+        "purpose_text": "Essential seasoning enhancing flavor balance and providing sodium electrolyte.",
+        "concern_text": "Excess dietary sodium is associated with elevated blood pressure and cardiovascular risk.",
+        "simple_explanation": "Iodized Salt is a standard culinary ingredient categorized as salt sodium.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 9,
+        "name": "Emulsifier (E322)",
+        "category": "additive",
+        "amount_g": null,
+        "purpose_text": "Emulsifier; soy/egg/sunflower source; generally safe",
+        "concern_text": "Evaluated safe by FSSAI & JECFA within acceptable daily exposure.",
+        "simple_explanation": "Lecithin is used in food processing for stability and consistency.",
+        "regulatory_refs": {
+          "fssai": "Permitted under FSSAI Food Safety Standards",
+          "who_jecfa": "JECFA ADI Established",
+          "adi_mg_per_kg": 0.0,
+          "food_limit_mg_per_kg": null
+        }
+      },
+      {
+        "id": 10,
+        "name": "Natural Identical Flavouring Substances.",
+        "category": "other",
+        "amount_g": null,
+        "purpose_text": "Food ingredient contributing to flavor, structure, or product formulation.",
+        "concern_text": "No specific toxicity when consumed within standard dietary guidelines.",
+        "simple_explanation": "Natural Identical Flavouring Substances. is a standard culinary ingredient categorized as other.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      }
+    ],
+    "processing_level": "ultra_processed",
+    "verdict": "Ultra-processed biscuits",
+    "additives_count": 2,
+    "has_unknown_amount_count": 10,
+    "processing_level_label": {
+      "key": "ultra_processed",
+      "label": "Ultra-processed"
+    },
+    "summary_info": {
+      "summary": "This product is primarily formulated from refined wheat flour (maida), sugar, fractionated palm oil, cocoa solids (4.5%). It contains 2 detected functional additives/preservatives. The exact quantities of individual additives are not disclosed on the manufacturer label.",
+      "key_highlights": [
+        "High sugar content (38.5% by weight)",
+        "Moderate salt (1.1g / 100g)",
+        "High fat density (20.2% by weight)"
+      ],
+      "age_insights": [
+        "General Guidance: For children, limit high-sugar and high-sodium ultra-processed snacks. For adults, balance with whole fiber-rich foods."
+      ],
+      "scientific_note": "Safety limits (ADI in mg/kg body weight/day) are regulatory thresholds \u2014 intake at or below them over a lifetime is considered to pose no appreciable health risk, while dietary guidelines still recommend moderation for balanced long-term metabolic health. Chemical names denote standard food-grade compounds evaluated by FSSAI & WHO/JECFA.",
+      "disclaimer": "This analysis is for nutritional awareness and educational purposes only. It does not provide medical diagnosis or treatment advice."
+    },
+    "dna_breakdown": {
+      "refined_carb": 10.0,
+      "sugar": 20.0,
+      "oil": 10.0,
+      "other": 30.0,
+      "additive": 20.0,
+      "salt_sodium": 10.0
+    },
+    "health_warnings": [],
+    "healthier_swaps": [
+      {
+        "name": "Roasted Almonds & Medjool Dates",
+        "category": "Whole Food Snack",
+        "benefits": "Zero added sugar or palm oil. Natural sweetness paired with healthy monounsaturated fats & magnesium for steady energy.",
+        "why_better": "No ultra-processing, 100% bioavailable fiber, zero industrial emulsifiers.",
+        "calories_density": "Moderate (Nutrient-Dense)",
+        "nova_group": 1
+      },
+      {
+        "name": "Roasted Makhana (Fox Nuts) with Pink Salt",
+        "category": "Minimally Processed",
+        "benefits": "Light, crunchy, low glycemic index. High in plant protein and rich in antioxidants with zero trans fats.",
+        "why_better": "90% less saturated fat, zero refined sugar, no synthetic leavening agents.",
+        "calories_density": "Low",
+        "nova_group": 1
+      },
+      {
+        "name": "100% Rolled Oats & Jaggery Homemade Cookies",
+        "category": "Minimally Processed Alternative",
+        "benefits": "Beta-glucan soluble fiber supports heart health and slow blood glucose release.",
+        "why_better": "Zero refined white maida, zero palm oil or chemical preservatives.",
+        "calories_density": "Moderate",
+        "nova_group": 2
+      }
+    ],
+    "fopnl_warnings": [
+      {
+        "type": "HIGH_SUGAR",
+        "badge": "HIGH SUGAR",
+        "icon": "\ud83d\uded1",
+        "color": "rose",
+        "title": "High Sugar (38.5g / 100g)",
+        "description": "Exceeds FSSAI/WHO front-of-pack threshold (15g/100g). Supplies rapid empty calories.",
+        "threshold_exceeded": "38.5g vs 15.0g limit"
+      },
+      {
+        "type": "HIGH_FAT",
+        "badge": "HIGH SAT FAT",
+        "icon": "\ud83d\uded1",
+        "color": "amber",
+        "title": "High Total / Saturated Fat (20.2g / 100g)",
+        "description": "High lipid density formulated with refined palm or vegetable fats.",
+        "threshold_exceeded": "20.2g vs 12.0g-17.5g limit"
+      }
+    ],
+    "damage_control": {
+      "headline": "Science-Backed Damage Control",
+      "portion_limit": "Strictly limit to 1-2 pieces (maximum 15g) and avoid on an empty stomach.",
+      "mitigation_steps": [
+        {
+          "icon": "\ud83e\udd5c",
+          "action": "Pair with Raw Nuts or Seeds (5-8 Almonds/Walnuts)",
+          "rationale": "Healthy fats and intact fiber slow gastric emptying, blunting the postprandial glucose spike by up to 35%."
+        },
+        {
+          "icon": "\ud83d\udeb6",
+          "action": "Take a 10-15 Minute Light Walk After Eating",
+          "rationale": "Active skeletal muscles take up circulating glucose via GLUT4 transporters independently of insulin."
+        },
+        {
+          "icon": "\ud83d\udca7",
+          "action": "Drink a Glass of Water (300ml) with Potassium",
+          "rationale": "Helps renal hydration and sodium-potassium balance, reducing blood pressure tension."
+        }
+      ],
+      "disclaimer": "General nutritional awareness only \u2014 not medical advice, diagnosis, or treatment. Consult a qualified physician or registered dietitian before changing your diet."
+    },
+    "disguised_ingredients": {
+      "total_disguised_count": 3,
+      "hidden_sugars": [
+        "Invert Sugar Syrup"
+      ],
+      "hidden_salts": [
+        "Sodium Bicarbonate (INS 500ii)"
+      ],
+      "hidden_fats": [
+        "Refined Palm Oil / Palmolein"
+      ],
+      "summary": "Detected 1 disguised added sugar(s), 1 technical sodium additive(s), 1 industrial refined fat(s) in the formulation."
+    },
+    "glycemic_response": {
+      "tier": "High (Fast Glucose Surge)",
+      "spike_score": 8.3,
+      "curve_shape": "sharp_spike",
+      "buffering_quality": "Poor",
+      "sugars_100g": 38.5,
+      "fiber_100g": 2.1,
+      "protein_100g": 5.4,
+      "explanation": "High proportion of simple sugars (38.5g/100g) and refined carbohydrates with low protective dietary fiber (2.1g). Causes a rapid postprandial blood glucose elevation followed by a reactive insulin dip."
+    }
+  },
+  "8901058852372": {
+    "product": {
+      "id": 9,
+      "barcode": "8901058852372",
+      "product_name": "Maggi 2-Minute Masala Instant Noodles",
+      "brands": "Nestle India",
+      "ingredients_text": "Refined Wheat Flour (Maida), Palm Oil, Iodized Salt, Wheat Gluten, Thickeners (E508, E412), Acidity Regulators (E501i, E500i), Humectant (E451i), Hydrolyzed Groundnut Protein, Mixed Spices, Dehydrated Onion, Sugar, Flavour Enhancer (E635), Caramel Colour (E150d).",
+      "serving_size": "70 g",
+      "product_weight_g": 70.0,
+      "source": "manual",
+      "categories_tags": [
+        "en:noodles",
+        "en:instant-noodles"
+      ]
+    },
+    "nutrition": {
+      "per_100g": {
+        "sugars_g": 2.2,
+        "salt_g": 3.2,
+        "fat_g": 15.7,
+        "proteins_g": 8.2,
+        "fiber_g": 3.6
+      },
+      "per_serving": {
+        "sugars_g": 1.54,
+        "salt_g": 2.24,
+        "fat_g": 10.99,
+        "proteins_g": 5.74,
+        "fiber_g": 2.52
+      },
+      "pct_by_weight": {
+        "sugars_pct": 2.2,
+        "salt_pct": 3.2,
+        "fat_pct": 15.7,
+        "proteins_pct": 8.2,
+        "fiber_pct": 3.6
+      }
+    },
+    "ingredients": [
+      {
+        "id": 1,
+        "name": "Refined Wheat Flour (Maida)",
+        "category": "refined_carb",
+        "amount_g": null,
+        "purpose_text": "Endosperm only; fibre removed; high GI; white bread",
+        "concern_text": "Evaluated safe by FSSAI & JECFA within acceptable daily exposure.",
+        "simple_explanation": "Refined Wheat Flour (Maida) is used in food processing for stability and consistency.",
+        "regulatory_refs": {
+          "fssai": "Permitted under FSSAI Food Safety Standards",
+          "who_jecfa": "JECFA ADI Established",
+          "adi_mg_per_kg": 0.0,
+          "food_limit_mg_per_kg": null
+        }
+      },
+      {
+        "id": 2,
+        "name": "Palm Oil",
+        "category": "oil",
+        "amount_g": null,
+        "purpose_text": "Elaeis guineensis; 50% saturated; orangutan deforestation; heat stable",
+        "concern_text": "Evaluated safe by FSSAI & JECFA within acceptable daily exposure.",
+        "simple_explanation": "Palm Oil is used in food processing for stability and consistency.",
+        "regulatory_refs": {
+          "fssai": "Permitted under FSSAI Food Safety Standards",
+          "who_jecfa": "JECFA ADI Established",
+          "adi_mg_per_kg": 0.0,
+          "food_limit_mg_per_kg": null
+        }
+      },
+      {
+        "id": 3,
+        "name": "Iodized Salt",
+        "category": "salt_sodium",
+        "amount_g": null,
+        "purpose_text": "Essential seasoning enhancing flavor balance and providing sodium electrolyte.",
+        "concern_text": "Excess dietary sodium is associated with elevated blood pressure and cardiovascular risk.",
+        "simple_explanation": "Iodized Salt is a standard culinary ingredient categorized as salt sodium.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 4,
+        "name": "Wheat Gluten",
+        "category": "other",
+        "amount_g": null,
+        "purpose_text": "Food ingredient contributing to flavor, structure, or product formulation.",
+        "concern_text": "No specific toxicity when consumed within standard dietary guidelines.",
+        "simple_explanation": "Wheat Gluten is a standard culinary ingredient categorized as other.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 5,
+        "name": "Thickeners (E508",
+        "category": "additive",
+        "amount_g": null,
+        "purpose_text": "Salt substitute; LoSalt; KCl; kidney risk for CKD",
+        "concern_text": "Evaluated safe by FSSAI & JECFA within acceptable daily exposure.",
+        "simple_explanation": "Potassium Chloride is used in food processing for stability and consistency.",
+        "regulatory_refs": {
+          "fssai": "Permitted under FSSAI Food Safety Standards",
+          "who_jecfa": "JECFA ADI Established",
+          "adi_mg_per_kg": 0.0,
+          "food_limit_mg_per_kg": null
+        }
+      },
+      {
+        "id": 6,
+        "name": "E412)",
+        "category": "additive",
+        "amount_g": null,
+        "purpose_text": "Guar bean thickener; high fibre; gluten-free baking",
+        "concern_text": "Evaluated safe by FSSAI & JECFA within acceptable daily exposure.",
+        "simple_explanation": "Guar Gum is used in food processing for stability and consistency.",
+        "regulatory_refs": {
+          "fssai": "Permitted under FSSAI Food Safety Standards",
+          "who_jecfa": "JECFA ADI Established",
+          "adi_mg_per_kg": 0.0,
+          "food_limit_mg_per_kg": null
+        }
+      },
+      {
+        "id": 7,
+        "name": "Acidity Regulators (E501i",
+        "category": "additive",
+        "amount_g": null,
+        "purpose_text": "Functional food additive used for emulsification, stabilization, or texture control.",
+        "concern_text": "Safe within standard regulatory thresholds (ADI); excessive cumulative intake should be monitored.",
+        "simple_explanation": "Acidity Regulators (E501i is a standard culinary ingredient categorized as additive.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 8,
+        "name": "E500i)",
+        "category": "additive",
+        "amount_g": null,
+        "purpose_text": "Functional food additive used for emulsification, stabilization, or texture control.",
+        "concern_text": "Safe within standard regulatory thresholds (ADI); excessive cumulative intake should be monitored.",
+        "simple_explanation": "E500i) is a standard culinary ingredient categorized as additive.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 9,
+        "name": "Humectant (E451i)",
+        "category": "additive",
+        "amount_g": null,
+        "purpose_text": "Functional food additive used for emulsification, stabilization, or texture control.",
+        "concern_text": "Safe within standard regulatory thresholds (ADI); excessive cumulative intake should be monitored.",
+        "simple_explanation": "Humectant (E451i) is a standard culinary ingredient categorized as additive.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 10,
+        "name": "Hydrolyzed Groundnut Protein",
+        "category": "other",
+        "amount_g": null,
+        "purpose_text": "Food ingredient contributing to flavor, structure, or product formulation.",
+        "concern_text": "No specific toxicity when consumed within standard dietary guidelines.",
+        "simple_explanation": "Hydrolyzed Groundnut Protein is a standard culinary ingredient categorized as other.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 11,
+        "name": "Mixed Spices",
+        "category": "other",
+        "amount_g": null,
+        "purpose_text": "Food ingredient contributing to flavor, structure, or product formulation.",
+        "concern_text": "No specific toxicity when consumed within standard dietary guidelines.",
+        "simple_explanation": "Mixed Spices is a standard culinary ingredient categorized as other.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 12,
+        "name": "Dehydrated Onion",
+        "category": "other",
+        "amount_g": null,
+        "purpose_text": "Food ingredient contributing to flavor, structure, or product formulation.",
+        "concern_text": "No specific toxicity when consumed within standard dietary guidelines.",
+        "simple_explanation": "Dehydrated Onion is a standard culinary ingredient categorized as other.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 13,
+        "name": "Sugar",
+        "category": "sugar",
+        "amount_g": null,
+        "purpose_text": "Sweetener providing quick carbohydrate energy, sweetness, and browning.",
+        "concern_text": "Excess free sugar consumption is linked to elevated dental caries, insulin resistance, and weight gain.",
+        "simple_explanation": "Sugar is a standard culinary ingredient categorized as sugar.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 14,
+        "name": "Flavour Enhancer (E635)",
+        "category": "additive",
+        "amount_g": null,
+        "purpose_text": "50:50 IMP+GMP; ultra umami; instant noodles",
+        "concern_text": "Evaluated safe by FSSAI & JECFA within acceptable daily exposure.",
+        "simple_explanation": "Disodium 5'-Ribonucleotides (I+G) is used in food processing for stability and consistency.",
+        "regulatory_refs": {
+          "fssai": "Permitted under FSSAI Food Safety Standards",
+          "who_jecfa": "JECFA ADI Established",
+          "adi_mg_per_kg": 0.0,
+          "food_limit_mg_per_kg": null
+        }
+      },
+      {
+        "id": 15,
+        "name": "Caramel Colour (E150d).",
+        "category": "additive",
+        "amount_g": null,
+        "purpose_text": "Caramel colour Class IV; cola colour; 4-MEI concerns",
+        "concern_text": "Evaluated safe by FSSAI & JECFA within acceptable daily exposure.",
+        "simple_explanation": "Sulfite Ammonia Caramel is used in food processing for stability and consistency.",
+        "regulatory_refs": {
+          "fssai": "Permitted under FSSAI Food Safety Standards",
+          "who_jecfa": "JECFA ADI Established",
+          "adi_mg_per_kg": 0.0,
+          "food_limit_mg_per_kg": null
+        }
+      }
+    ],
+    "processing_level": "ultra_processed",
+    "verdict": "Ultra-processed noodles",
+    "additives_count": 7,
+    "has_unknown_amount_count": 15,
+    "processing_level_label": {
+      "key": "ultra_processed",
+      "label": "Ultra-processed"
+    },
+    "summary_info": {
+      "summary": "This product is primarily formulated from refined wheat flour (maida), palm oil, iodized salt, wheat gluten. It contains 7 detected functional additives/preservatives. The exact quantities of individual additives are not disclosed on the manufacturer label.",
+      "key_highlights": [
+        "Low sugar (2.2g / 100g)",
+        "High sodium/salt (3.2g / 100g)",
+        "High fat density (15.7% by weight)",
+        "Good source of dietary fiber (3.6g / 100g)",
+        "High protein source (8.2g / 100g)"
+      ],
+      "age_insights": [
+        "General Guidance: For children, limit high-sugar and high-sodium ultra-processed snacks. For adults, balance with whole fiber-rich foods."
+      ],
+      "scientific_note": "Safety limits (ADI in mg/kg body weight/day) are regulatory thresholds \u2014 intake at or below them over a lifetime is considered to pose no appreciable health risk, while dietary guidelines still recommend moderation for balanced long-term metabolic health. Chemical names denote standard food-grade compounds evaluated by FSSAI & WHO/JECFA.",
+      "disclaimer": "This analysis is for nutritional awareness and educational purposes only. It does not provide medical diagnosis or treatment advice."
+    },
+    "dna_breakdown": {
+      "refined_carb": 6.7,
+      "oil": 6.7,
+      "salt_sodium": 6.7,
+      "other": 26.7,
+      "additive": 46.7,
+      "sugar": 6.7
+    },
+    "health_warnings": [],
+    "healthier_swaps": [
+      {
+        "name": "Sprouted Foxtail / Little Millet Noodles with Veggies",
+        "category": "Whole Grain Alternative",
+        "benefits": "Rich in minerals, low glycemic index, 3x dietary fiber compared to refined maida noodles.",
+        "why_better": "Not flash-fried in palm oil; free of hydrolysed vegetable protein and artificial flavour enhancers.",
+        "calories_density": "Moderate",
+        "nova_group": 2
+      },
+      {
+        "name": "Vegetable Upma / Semiya with Mustard & Curry Leaves",
+        "category": "Traditional Whole Meal",
+        "benefits": "Prepared fresh with vegetables and spices, providing sustained complex carbohydrates.",
+        "why_better": "Zero TBHQ preservative, controlled fresh seasoning, 60% lower sodium.",
+        "calories_density": "Moderate",
+        "nova_group": 2
+      }
+    ],
+    "fopnl_warnings": [
+      {
+        "type": "HIGH_SALT",
+        "badge": "HIGH SODIUM",
+        "icon": "\ud83d\uded1",
+        "color": "red",
+        "title": "High Salt (3.20g / 100g)",
+        "description": "Provides 1280mg sodium per 100g, exceeding FSSAI threshold (1.25g salt).",
+        "threshold_exceeded": "3.20g vs 1.25g limit"
+      },
+      {
+        "type": "HIGH_FAT",
+        "badge": "HIGH SAT FAT",
+        "icon": "\ud83d\uded1",
+        "color": "amber",
+        "title": "High Total / Saturated Fat (15.7g / 100g)",
+        "description": "High lipid density formulated with refined palm or vegetable fats.",
+        "threshold_exceeded": "15.7g vs 12.0g-17.5g limit"
+      }
+    ],
+    "damage_control": {
+      "headline": "Science-Backed Damage Control",
+      "portion_limit": "Limit portion to 1 standard serving (20-30g) rather than finishing the whole pack.",
+      "mitigation_steps": [
+        {
+          "icon": "\ud83d\udca7",
+          "action": "Drink a Glass of Water (300ml) with Potassium",
+          "rationale": "Helps renal hydration and sodium-potassium balance, reducing blood pressure tension."
+        },
+        {
+          "icon": "\ud83c\udf4c",
+          "action": "Eat a Potassium-Rich Whole Food (Banana or Tender Coconut)",
+          "rationale": "Potassium counteracts sodium vasoconstriction."
+        },
+        {
+          "icon": "\ud83e\udd57",
+          "action": "Balance with High-Fiber Greens / Raw Salad Next Meal",
+          "rationale": "Prebiotic fiber nourishes the gut microbiome to buffer industrial emulsifier exposure."
+        }
+      ],
+      "disclaimer": "General nutritional awareness only \u2014 not medical advice, diagnosis, or treatment. Consult a qualified physician or registered dietitian before changing your diet."
+    },
+    "disguised_ingredients": {
+      "total_disguised_count": 1,
+      "hidden_sugars": [],
+      "hidden_salts": [],
+      "hidden_fats": [
+        "Refined Palm Oil / Palmolein"
+      ],
+      "summary": "Detected 1 industrial refined fat(s) in the formulation."
+    },
+    "glycemic_response": {
+      "tier": "Low (Sustained Energy)",
+      "spike_score": 1.0,
+      "curve_shape": "flat_sustained",
+      "buffering_quality": "Strong",
+      "sugars_100g": 2.2,
+      "fiber_100g": 3.6,
+      "protein_100g": 8.2,
+      "explanation": "Favorable nutrient balance with low free sugar (2.2g) and good dietary buffering (3.6g fiber, 8.2g protein). Supports sustained metabolic energy without sudden glycemic spikes."
+    }
+  },
+  "8901262010053": {
+    "product": {
+      "id": 2,
+      "barcode": "8901262010053",
+      "product_name": "Amul High Protein Plain Greek Yogurt",
+      "brands": "Amul",
+      "ingredients_text": "Pasteurized Skimmed Milk, Milk Solids, Active Lactic Cultures (Lactobacillus bulgaricus, Streptococcus thermophilus).",
+      "serving_size": "100 g",
+      "product_weight_g": 100.0,
+      "source": "manual",
+      "categories_tags": [
+        "en:yogurts",
+        "en:greek-yogurts",
+        "en:dairy-products"
+      ]
+    },
+    "nutrition": {
+      "per_100g": {
+        "sugars_g": 4.5,
+        "salt_g": 0.08,
+        "fat_g": 0.2,
+        "proteins_g": 10.0,
+        "fiber_g": 0.0
+      },
+      "per_serving": {
+        "sugars_g": 4.5,
+        "salt_g": 0.08,
+        "fat_g": 0.2,
+        "proteins_g": 10.0,
+        "fiber_g": 0.0
+      },
+      "pct_by_weight": {
+        "sugars_pct": 4.5,
+        "salt_pct": 0.08,
+        "fat_pct": 0.2,
+        "proteins_pct": 10.0,
+        "fiber_pct": 0.0
+      }
+    },
+    "ingredients": [
+      {
+        "id": 1,
+        "name": "Pasteurized Skimmed Milk",
+        "category": "protein_source",
+        "amount_g": null,
+        "purpose_text": "Nutrient source providing essential amino acids for tissue maintenance.",
+        "concern_text": "Nutrient-dense; check for relevant allergen declarations (milk, soy, gluten).",
+        "simple_explanation": "Pasteurized Skimmed Milk is a standard culinary ingredient categorized as protein source.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 2,
+        "name": "Milk Solids",
+        "category": "protein_source",
+        "amount_g": null,
+        "purpose_text": "Nutrient source providing essential amino acids for tissue maintenance.",
+        "concern_text": "Nutrient-dense; check for relevant allergen declarations (milk, soy, gluten).",
+        "simple_explanation": "Milk Solids is a standard culinary ingredient categorized as protein source.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 3,
+        "name": "Active Lactic Cultures (Lactobacillus bulgaricus",
+        "category": "other",
+        "amount_g": null,
+        "purpose_text": "Food ingredient contributing to flavor, structure, or product formulation.",
+        "concern_text": "No specific toxicity when consumed within standard dietary guidelines.",
+        "simple_explanation": "Active Lactic Cultures (Lactobacillus bulgaricus is a standard culinary ingredient categorized as other.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 4,
+        "name": "Streptococcus thermophilus).",
+        "category": "other",
+        "amount_g": null,
+        "purpose_text": "Food ingredient contributing to flavor, structure, or product formulation.",
+        "concern_text": "No specific toxicity when consumed within standard dietary guidelines.",
+        "simple_explanation": "Streptococcus thermophilus). is a standard culinary ingredient categorized as other.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      }
+    ],
+    "processing_level": "processed",
+    "verdict": "Processed yogurts",
+    "additives_count": 0,
+    "has_unknown_amount_count": 4,
+    "processing_level_label": {
+      "key": "processed",
+      "label": "Processed"
+    },
+    "summary_info": {
+      "summary": "This product is primarily formulated from pasteurized skimmed milk, milk solids, active lactic cultures (lactobacillus bulgaricus, streptococcus thermophilus).. No common synthetic additives or chemical preservatives were detected.",
+      "key_highlights": [
+        "Low sugar (4.5g / 100g)",
+        "High protein source (10.0g / 100g)"
+      ],
+      "age_insights": [
+        "General Guidance: For children, limit high-sugar and high-sodium ultra-processed snacks. For adults, balance with whole fiber-rich foods."
+      ],
+      "scientific_note": "Safety limits (ADI in mg/kg body weight/day) are regulatory thresholds \u2014 intake at or below them over a lifetime is considered to pose no appreciable health risk, while dietary guidelines still recommend moderation for balanced long-term metabolic health. Chemical names denote standard food-grade compounds evaluated by FSSAI & WHO/JECFA.",
+      "disclaimer": "This analysis is for nutritional awareness and educational purposes only. It does not provide medical diagnosis or treatment advice."
+    },
+    "dna_breakdown": {
+      "protein_source": 50.0,
+      "other": 50.0
+    },
+    "health_warnings": [],
+    "healthier_swaps": [
+      {
+        "name": "Seasonal Fresh Fruit Bowl with Pumpkin Seeds",
+        "category": "Whole Food Snack",
+        "benefits": "Abundant active vitamins, bioflavonoids, natural enzymes, and protective dietary fiber.",
+        "why_better": "Unprocessed, zero additives, natural water content promoting fullness.",
+        "calories_density": "Low",
+        "nova_group": 1
+      },
+      {
+        "name": "Mixed Sprouted Moong & Pomegranate Salad",
+        "category": "Living Whole Food",
+        "benefits": "High enzymatic activity, easily digestible plant protein, and natural antioxidant pigments.",
+        "why_better": "Clean unadulterated whole food nutrition without chemical preservatives.",
+        "calories_density": "Low-Moderate",
+        "nova_group": 1
+      }
+    ],
+    "fopnl_warnings": [],
+    "damage_control": {
+      "headline": "Science-Backed Damage Control",
+      "portion_limit": "Limit portion to 1 standard serving (20-30g) rather than finishing the whole pack.",
+      "mitigation_steps": [
+        {
+          "icon": "\ud83d\udca7",
+          "action": "Stay Hydrated and Savor Mindfully",
+          "rationale": "Eating slowly increases satiety peptide secretion."
+        }
+      ],
+      "disclaimer": "General nutritional awareness only \u2014 not medical advice, diagnosis, or treatment. Consult a qualified physician or registered dietitian before changing your diet."
+    },
+    "disguised_ingredients": {
+      "total_disguised_count": 0,
+      "hidden_sugars": [],
+      "hidden_salts": [],
+      "hidden_fats": [],
+      "summary": "No common disguised industrial sugars, hidden sodium salts, or trans-fat sources detected."
+    },
+    "glycemic_response": {
+      "tier": "Low (Sustained Energy)",
+      "spike_score": 1.0,
+      "curve_shape": "flat_sustained",
+      "buffering_quality": "Strong",
+      "sugars_100g": 4.5,
+      "fiber_100g": 0.0,
+      "protein_100g": 10.0,
+      "explanation": "Favorable nutrient balance with low free sugar (4.5g) and good dietary buffering (0.0g fiber, 10.0g protein). Supports sustained metabolic energy without sudden glycemic spikes."
+    }
+  },
+  "5449000000996": {
+    "product": {
+      "id": 22,
+      "barcode": "5449000000996",
+      "product_name": "Coca-Cola Zero Sugar",
+      "brands": "The Coca-Cola Company",
+      "ingredients_text": "Carbonated Water, Colour (Caramel E150d), Acid (Phosphoric Acid E338), Sweeteners (Aspartame E951, Acesulfame K E950), Natural Flavourings Including Caffeine, Acidity Regulator (Sodium Citrates E331).",
+      "serving_size": "330 ml",
+      "product_weight_g": 330.0,
+      "source": "off",
+      "categories_tags": [
+        "en:beverages",
+        "en:carbonated-drinks",
+        "en:diet-beverages"
+      ]
+    },
+    "nutrition": {
+      "per_100g": {
+        "sugars_g": 0.0,
+        "salt_g": 0.02,
+        "fat_g": 0.0,
+        "proteins_g": 0.0,
+        "fiber_g": 0.0
+      },
+      "per_serving": {
+        "sugars_g": 0.0,
+        "salt_g": 0.066,
+        "fat_g": 0.0,
+        "proteins_g": 0.0,
+        "fiber_g": 0.0
+      },
+      "pct_by_weight": {
+        "sugars_pct": 0.0,
+        "salt_pct": 0.02,
+        "fat_pct": 0.0,
+        "proteins_pct": 0.0,
+        "fiber_pct": 0.0
+      }
+    },
+    "ingredients": [
+      {
+        "id": 1,
+        "name": "Carbonated Water",
+        "category": "other",
+        "amount_g": null,
+        "purpose_text": "Food ingredient contributing to flavor, structure, or product formulation.",
+        "concern_text": "No specific toxicity when consumed within standard dietary guidelines.",
+        "simple_explanation": "Carbonated Water is a standard culinary ingredient categorized as other.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 2,
+        "name": "Colour (Caramel E150d)",
+        "category": "additive",
+        "amount_g": null,
+        "purpose_text": "Caramel colour Class IV; cola colour; 4-MEI concerns",
+        "concern_text": "Evaluated safe by FSSAI & JECFA within acceptable daily exposure.",
+        "simple_explanation": "Sulfite Ammonia Caramel is used in food processing for stability and consistency.",
+        "regulatory_refs": {
+          "fssai": "Permitted under FSSAI Food Safety Standards",
+          "who_jecfa": "JECFA ADI Established",
+          "adi_mg_per_kg": 0.0,
+          "food_limit_mg_per_kg": null
+        }
+      },
+      {
+        "id": 3,
+        "name": "Acid (Phosphoric Acid E338)",
+        "category": "additive",
+        "amount_g": null,
+        "purpose_text": "Cola acidulant; bone health concerns at high intake",
+        "concern_text": "Evaluated safe by FSSAI & JECFA within acceptable daily exposure.",
+        "simple_explanation": "Phosphoric Acid is used in food processing for stability and consistency.",
+        "regulatory_refs": {
+          "fssai": "Permitted under FSSAI Food Safety Standards",
+          "who_jecfa": "JECFA ADI Established",
+          "adi_mg_per_kg": 0.0,
+          "food_limit_mg_per_kg": null
+        }
+      },
+      {
+        "id": 4,
+        "name": "Sweeteners (Aspartame E951",
+        "category": "additive",
+        "amount_g": null,
+        "purpose_text": "NutraSweet/Equal; phenylalanine warning PKU; 200x sugar; debated",
+        "concern_text": "Evaluated safe by FSSAI & JECFA within acceptable daily exposure.",
+        "simple_explanation": "Aspartame is used in food processing for stability and consistency.",
+        "regulatory_refs": {
+          "fssai": "Permitted under FSSAI Food Safety Standards",
+          "who_jecfa": "JECFA ADI Established",
+          "adi_mg_per_kg": 40.0,
+          "food_limit_mg_per_kg": null
+        }
+      },
+      {
+        "id": 5,
+        "name": "Acesulfame K E950)",
+        "category": "additive",
+        "amount_g": null,
+        "purpose_text": "Non-nutritive sweetener; 200x sugar; blends with sucralose/aspartame",
+        "concern_text": "Evaluated safe by FSSAI & JECFA within acceptable daily exposure.",
+        "simple_explanation": "Acesulfame K (Ace-K) is used in food processing for stability and consistency.",
+        "regulatory_refs": {
+          "fssai": "Permitted under FSSAI Food Safety Standards",
+          "who_jecfa": "JECFA ADI Established",
+          "adi_mg_per_kg": 15.0,
+          "food_limit_mg_per_kg": null
+        }
+      },
+      {
+        "id": 6,
+        "name": "Natural Flavourings Including Caffeine",
+        "category": "other",
+        "amount_g": null,
+        "purpose_text": "Food ingredient contributing to flavor, structure, or product formulation.",
+        "concern_text": "No specific toxicity when consumed within standard dietary guidelines.",
+        "simple_explanation": "Natural Flavourings Including Caffeine is a standard culinary ingredient categorized as other.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      },
+      {
+        "id": 7,
+        "name": "Acidity Regulator (Sodium Citrates E331).",
+        "category": "additive",
+        "amount_g": null,
+        "purpose_text": "Mono/di/tri sodium citrate; buffer; anticoagulant",
+        "concern_text": "Evaluated safe by FSSAI & JECFA within acceptable daily exposure.",
+        "simple_explanation": "Sodium Citrates is used in food processing for stability and consistency.",
+        "regulatory_refs": {
+          "fssai": "Permitted under FSSAI Food Safety Standards",
+          "who_jecfa": "JECFA ADI Established",
+          "adi_mg_per_kg": 0.0,
+          "food_limit_mg_per_kg": null
+        }
+      }
+    ],
+    "processing_level": "ultra_processed",
+    "verdict": "Ultra-processed beverages",
+    "additives_count": 5,
+    "has_unknown_amount_count": 7,
+    "processing_level_label": {
+      "key": "ultra_processed",
+      "label": "Ultra-processed"
+    },
+    "summary_info": {
+      "summary": "This product is primarily formulated from carbonated water, colour (caramel e150d), acid (phosphoric acid e338), sweeteners (aspartame e951. It contains 5 detected functional additives/preservatives. The exact quantities of individual additives are not disclosed on the manufacturer label.",
+      "key_highlights": [
+        "Low sugar (0.0g / 100g)"
+      ],
+      "age_insights": [
+        "General Guidance: For children, limit high-sugar and high-sodium ultra-processed snacks. For adults, balance with whole fiber-rich foods."
+      ],
+      "scientific_note": "Safety limits (ADI in mg/kg body weight/day) are regulatory thresholds \u2014 intake at or below them over a lifetime is considered to pose no appreciable health risk, while dietary guidelines still recommend moderation for balanced long-term metabolic health. Chemical names denote standard food-grade compounds evaluated by FSSAI & WHO/JECFA.",
+      "disclaimer": "This analysis is for nutritional awareness and educational purposes only. It does not provide medical diagnosis or treatment advice."
+    },
+    "dna_breakdown": {
+      "other": 28.6,
+      "additive": 71.4
+    },
+    "health_warnings": [],
+    "healthier_swaps": [
+      {
+        "name": "Fresh Tender Coconut Water",
+        "category": "Natural Isotonic Drink",
+        "benefits": "Natural bioavailable electrolytes (potassium, magnesium) with very low natural glycemic impact.",
+        "why_better": "Zero synthetic color, zero phosphoric acid, 100% natural hydration.",
+        "calories_density": "Low",
+        "nova_group": 1
+      },
+      {
+        "name": "Chaas (Spiced Buttermilk with Cumin & Mint)",
+        "category": "Probiotic Dairy",
+        "benefits": "Promotes gut microbiome health, rich in calcium and natural lactic cultures.",
+        "why_better": "Zero high-fructose corn syrup, no artificial sweeteners or sodium benzoate.",
+        "calories_density": "Low",
+        "nova_group": 1
+      },
+      {
+        "name": "Lemon & Fresh Mint Infused Water",
+        "category": "Hydration",
+        "benefits": "Refreshing natural flavor with vitamin C and zero caloric or glycemic load.",
+        "why_better": "Eliminates all liquid sugars that bypass satiety signaling.",
+        "calories_density": "Zero",
+        "nova_group": 1
+      }
+    ],
+    "fopnl_warnings": [],
+    "damage_control": {
+      "headline": "Science-Backed Damage Control",
+      "portion_limit": "Limit portion to 1 standard serving (20-30g) rather than finishing the whole pack.",
+      "mitigation_steps": [
+        {
+          "icon": "\ud83e\udd57",
+          "action": "Balance with High-Fiber Greens / Raw Salad Next Meal",
+          "rationale": "Prebiotic fiber nourishes the gut microbiome to buffer industrial emulsifier exposure."
+        }
+      ],
+      "disclaimer": "General nutritional awareness only \u2014 not medical advice, diagnosis, or treatment. Consult a qualified physician or registered dietitian before changing your diet."
+    },
+    "disguised_ingredients": {
+      "total_disguised_count": 1,
+      "hidden_sugars": [],
+      "hidden_salts": [
+        "Sodium Citrate (INS 331)"
+      ],
+      "hidden_fats": [],
+      "summary": "Detected 1 technical sodium additive(s) in the formulation."
+    },
+    "glycemic_response": {
+      "tier": "Low (Sustained Energy)",
+      "spike_score": 1.0,
+      "curve_shape": "flat_sustained",
+      "buffering_quality": "Strong",
+      "sugars_100g": 0.0,
+      "fiber_100g": 0.0,
+      "protein_100g": 0.0,
+      "explanation": "Favorable nutrient balance with low free sugar (0.0g) and good dietary buffering (0.0g fiber, 0.0g protein). Supports sustained metabolic energy without sudden glycemic spikes."
+    }
+  },
+  "8908007789012": {
+    "product": {
+      "id": 19,
+      "barcode": "8908007789012",
+      "product_name": "Pintola All-Natural Creamy Peanut Butter",
+      "brands": "Pintola",
+      "ingredients_text": "100% Roasted Peanuts.",
+      "serving_size": "32 g (2 tbsp)",
+      "product_weight_g": 350.0,
+      "source": "manual",
+      "categories_tags": [
+        "en:spreads",
+        "en:peanut-butters"
+      ]
+    },
+    "nutrition": {
+      "per_100g": {
+        "sugars_g": 6.2,
+        "salt_g": 0.03,
+        "fat_g": 49.5,
+        "proteins_g": 30.0,
+        "fiber_g": 9.0
+      },
+      "per_serving": {
+        "sugars_g": 1.984,
+        "salt_g": 0.0096,
+        "fat_g": 15.84,
+        "proteins_g": 9.6,
+        "fiber_g": 2.88
+      },
+      "pct_by_weight": {
+        "sugars_pct": 6.2,
+        "salt_pct": 0.03,
+        "fat_pct": 49.5,
+        "proteins_pct": 30.0,
+        "fiber_pct": 9.0
+      }
+    },
+    "ingredients": [
+      {
+        "id": 1,
+        "name": "100% Roasted Peanuts.",
+        "category": "whole_food",
+        "amount_g": null,
+        "purpose_text": "Minimally processed whole food providing dietary fiber, micronutrients, and satiety.",
+        "concern_text": "Nutrient-dense; generally recommended in daily dietary patterns.",
+        "simple_explanation": "100% Roasted Peanuts. is a standard culinary ingredient categorized as whole food.",
+        "regulatory_refs": {
+          "regulatory_status": "Standard food ingredient governed by FSSAI general standards",
+          "adi_limit": "Not specified (Food component)"
+        }
+      }
+    ],
+    "processing_level": "minimally_processed",
+    "verdict": "Minimally processed spreads",
+    "additives_count": 0,
+    "has_unknown_amount_count": 1,
+    "processing_level_label": {
+      "key": "minimally_processed",
+      "label": "Minimally processed"
+    },
+    "summary_info": {
+      "summary": "This product is primarily formulated from 100% roasted peanuts.. No common synthetic additives or chemical preservatives were detected.",
+      "key_highlights": [
+        "Low sugar (6.2g / 100g)",
+        "High fat density (49.5% by weight)",
+        "Good source of dietary fiber (9.0g / 100g)",
+        "High protein source (30.0g / 100g)"
+      ],
+      "age_insights": [
+        "General Guidance: For children, limit high-sugar and high-sodium ultra-processed snacks. For adults, balance with whole fiber-rich foods."
+      ],
+      "scientific_note": "Safety limits (ADI in mg/kg body weight/day) are regulatory thresholds \u2014 intake at or below them over a lifetime is considered to pose no appreciable health risk, while dietary guidelines still recommend moderation for balanced long-term metabolic health. Chemical names denote standard food-grade compounds evaluated by FSSAI & WHO/JECFA.",
+      "disclaimer": "This analysis is for nutritional awareness and educational purposes only. It does not provide medical diagnosis or treatment advice."
+    },
+    "dna_breakdown": {
+      "whole_food": 100.0
+    },
+    "health_warnings": [],
+    "healthier_swaps": [
+      {
+        "name": "Roasted Almonds & Medjool Dates",
+        "category": "Whole Food Snack",
+        "benefits": "Zero added sugar or palm oil. Natural sweetness paired with healthy monounsaturated fats & magnesium for steady energy.",
+        "why_better": "No ultra-processing, 100% bioavailable fiber, zero industrial emulsifiers.",
+        "calories_density": "Moderate (Nutrient-Dense)",
+        "nova_group": 1
+      },
+      {
+        "name": "Roasted Makhana (Fox Nuts) with Pink Salt",
+        "category": "Minimally Processed",
+        "benefits": "Light, crunchy, low glycemic index. High in plant protein and rich in antioxidants with zero trans fats.",
+        "why_better": "90% less saturated fat, zero refined sugar, no synthetic leavening agents.",
+        "calories_density": "Low",
+        "nova_group": 1
+      },
+      {
+        "name": "100% Rolled Oats & Jaggery Homemade Cookies",
+        "category": "Minimally Processed Alternative",
+        "benefits": "Beta-glucan soluble fiber supports heart health and slow blood glucose release.",
+        "why_better": "Zero refined white maida, zero palm oil or chemical preservatives.",
+        "calories_density": "Moderate",
+        "nova_group": 2
+      }
+    ],
+    "fopnl_warnings": [
+      {
+        "type": "HIGH_FAT",
+        "badge": "HIGH SAT FAT",
+        "icon": "\ud83d\uded1",
+        "color": "amber",
+        "title": "High Total / Saturated Fat (49.5g / 100g)",
+        "description": "High lipid density formulated with refined palm or vegetable fats.",
+        "threshold_exceeded": "49.5g vs 12.0g-17.5g limit"
+      }
+    ],
+    "damage_control": {
+      "headline": "Science-Backed Damage Control",
+      "portion_limit": "Limit portion to 1 standard serving (20-30g) rather than finishing the whole pack.",
+      "mitigation_steps": [
+        {
+          "icon": "\ud83d\udca7",
+          "action": "Stay Hydrated and Savor Mindfully",
+          "rationale": "Eating slowly increases satiety peptide secretion."
+        }
+      ],
+      "disclaimer": "General nutritional awareness only \u2014 not medical advice, diagnosis, or treatment. Consult a qualified physician or registered dietitian before changing your diet."
+    },
+    "disguised_ingredients": {
+      "total_disguised_count": 0,
+      "hidden_sugars": [],
+      "hidden_salts": [],
+      "hidden_fats": [],
+      "summary": "No common disguised industrial sugars, hidden sodium salts, or trans-fat sources detected."
+    },
+    "glycemic_response": {
+      "tier": "Low (Sustained Energy)",
+      "spike_score": 1.0,
+      "curve_shape": "flat_sustained",
+      "buffering_quality": "Strong",
+      "sugars_100g": 6.2,
+      "fiber_100g": 9.0,
+      "protein_100g": 30.0,
+      "explanation": "Favorable nutrient balance with low free sugar (6.2g) and good dietary buffering (9.0g fiber, 30.0g protein). Supports sustained metabolic energy without sudden glycemic spikes."
+    }
+  }
+}

@@ -15,14 +15,26 @@ import {
   GroceryCartItem,
 } from '../types/food'
 import { toast } from 'sonner'
+import demoProductsData from '../constants/demoProducts.json'
+
+const demoProducts = demoProductsData as Record<string, ProductAnalysisResult>
 
 export default function ProductResults() {
   const { scanId } = useParams<{ scanId: string }>()
   const location = useLocation()
-  const [data, setData] = useState<ProductAnalysisResult | null>(
-    (location.state as any)?.result || null
-  )
-  const [loading, setLoading] = useState(!data)
+  const [data, setData] = useState<ProductAnalysisResult | null>(() => {
+    const passed = (location.state as any)?.result
+    if (passed) return passed
+    if (scanId && demoProducts[scanId]) {
+      return demoProducts[scanId]
+    }
+    return null
+  })
+  const [loading, setLoading] = useState(() => {
+    if ((location.state as any)?.result) return false
+    if (scanId && demoProducts[scanId]) return false
+    return true
+  })
   const [activeConditions, setActiveConditions] = useState<string[]>([])
   const [notFound, setNotFound] = useState(false)
   const [notFoundDetail, setNotFoundDetail] = useState<string>('')
@@ -43,191 +55,40 @@ export default function ProductResults() {
     const ageNum = savedAge ? Number(savedAge) : null
     const weightNum = savedWeight ? Number(savedWeight) : null
 
-    if (data && data.product) return
+    // If we already have data from state and it matches current scanId without custom conditions, avoid redundant network calls
+    if (data && data.product && (!scanId || data.product.barcode === scanId)) {
+      if (!conditions.length && !ageNum && !weightNum) {
+        return
+      }
+    }
 
     if (scanId) {
-      setLoading(true)
+      if (!data && !demoProducts[scanId]) {
+        setLoading(true)
+      }
       getProductDetail(scanId, ageNum, weightNum, conditions)
         .then((res) => {
           setData(res)
+          setNotFound(false)
           setLoading(false)
         })
         .catch(() => {
           scanBarcode(scanId, ageNum, weightNum, conditions)
             .then((res) => {
               setData(res)
+              setNotFound(false)
             })
             .catch((err: any) => {
-              setNotFound(true)
-              setNotFoundDetail(
-                err?.response?.data?.detail ||
-                  'This product is not in our verified database. To keep results trustworthy, we never guess product data \u2014 use the label photo (OCR) or paste the ingredients manually.'
-              )
-              // Legacy demo payload kept only so this branch stays inert; it is intentionally NOT rendered.
-              void ({
-                product: {
-                  barcode: scanId,
-                  product_name: 'Britannia Glucose / Tiger Biscuits',
-                  brands: 'Britannia Industries Ltd.',
-                  ingredients_text: 'Refined Wheat Flour (Maida), Sugar, Refined Palm Oil, Invert Sugar Syrup, Milk Solids, Iodised Salt, Minerals, Emulsifier (E322 Lecithin), Raising Agents (E500ii, E503ii), Dough Conditioner (E223 Sodium Metabisulphite), Caramel Colour (E150d), Artificial Vanilla Flavour.',
-                  serving_size: '36.6 g (1 pack)',
-                  product_weight_g: 36.6,
-                  source: 'manual',
-                  categories_tags: ['en:biscuits', 'en:sweet-biscuits'],
-                },
-                nutrition: {
-                  per_100g: {
-                    sugars_g: 26.5,
-                    salt_g: 0.65,
-                    fat_g: 13.5,
-                    proteins_g: 7.0,
-                    fiber_g: 1.5,
-                  },
-                  per_serving: {
-                    sugars_g: 9.7,
-                    salt_g: 0.24,
-                    fat_g: 4.9,
-                    proteins_g: 2.6,
-                    fiber_g: 0.5,
-                  },
-                  pct_by_weight: {
-                    sugars_pct: 26.5,
-                    salt_pct: 0.65,
-                    fat_pct: 13.5,
-                    proteins_pct: 7.0,
-                    fiber_pct: 1.5,
-                  },
-                },
-                ingredients: [
-                  {
-                    id: 1,
-                    name: 'Refined Wheat Flour (Maida)',
-                    category: 'refined_carb',
-                    amount_g: null,
-                    purpose_text: 'Structural base and refined carbohydrate energy.',
-                    concern_text: 'Refined flour has high glycemic response and reduced natural fiber.',
-                    regulatory_refs: { fssai: 'Standard cereal flour standards' },
-                  },
-                  {
-                    id: 2,
-                    name: 'Sugar',
-                    category: 'sugar',
-                    amount_g: 26.5,
-                    purpose_text: 'Sweetener and browning agent.',
-                    concern_text: '26.5% of total product weight; excess free sugars increase metabolic health risks.',
-                    regulatory_refs: { fssai: 'Permitted sweetener' },
-                  },
-                  {
-                    id: 3,
-                    name: 'Refined Palm Oil',
-                    category: 'oil',
-                    amount_g: null,
-                    purpose_text: 'Texture, mouthfeel and shelf-life stability.',
-                    concern_text: 'Contains saturated fat; consume in moderation.',
-                    regulatory_refs: { fssai: 'Vegetable fat standard' },
-                  },
-                  {
-                    id: 4,
-                    name: 'Emulsifier (E322 Lecithin)',
-                    category: 'additive',
-                    amount_g: null,
-                    purpose_text: 'Blends fat and water phases seamlessly.',
-                    concern_text: 'Safe food additive evaluated by FSSAI & JECFA.',
-                    regulatory_refs: { fssai: 'INS 322', adi_mg_per_kg: null },
-                  },
-                  {
-                    id: 5,
-                    name: 'Raising Agent (E500ii)',
-                    category: 'additive',
-                    amount_g: null,
-                    purpose_text: 'Sodium bicarbonate providing light, crispy texture.',
-                    concern_text: 'Safe raising agent.',
-                    regulatory_refs: { fssai: 'INS 500ii' },
-                  },
-                ],
-                processing_level: 'ultra_processed',
-                verdict: 'Ultra-processed sweet biscuit',
-                additives_count: 3,
-                has_unknown_amount_count: 4,
-                processing_level_label: {
-                  key: 'ultra_processed',
-                  label: 'Ultra-Processed',
-                },
-                fopnl_warnings: [
-                  {
-                    type: 'HIGH_SUGAR',
-                    badge: 'HIGH SUGAR',
-                    icon: '🛑',
-                    color: 'rose',
-                    title: 'High Sugar (26.5g / 100g)',
-                    description: 'Exceeds FSSAI/WHO front-of-pack threshold (15g/100g).',
-                    threshold_exceeded: '26.5g vs 15.0g limit',
-                  },
-                  {
-                    type: 'HIGH_FAT',
-                    badge: 'HIGH SAT FAT',
-                    icon: '🛑',
-                    color: 'amber',
-                    title: 'High Saturated Fat (13.5g / 100g)',
-                    description: 'Formulated with refined palm oil.',
-                    threshold_exceeded: '13.5g vs 12.0g limit',
-                  }
-                ],
-                damage_control: {
-                  headline: 'Science-Backed Damage Control',
-                  portion_limit: 'Strictly limit to 2-3 biscuits (max 20g) and pair with whole foods.',
-                  disclaimer: 'General nutritional awareness only — not medical advice, diagnosis, or treatment. Consult a qualified physician or registered dietitian before changing your diet.',
-                  mitigation_steps: [
-                    {
-                      icon: '🥜',
-                      action: 'Pair with 5-6 Raw Almonds or Walnuts',
-                      rationale: 'Monounsaturated fats and fiber blunt the glucose spike by ~35%.',
-                    },
-                    {
-                      icon: '🚶',
-                      action: 'Take a 10-Minute Walk After Eating',
-                      rationale: 'Stimulates non-insulin glucose uptake by active leg muscles.',
-                    }
-                  ],
-                },
-                health_warnings: [
-                  {
-                    condition: 'diabetes',
-                    condition_title: 'Diabetes / Pre-diabetes',
-                    severity: 'danger',
-                    badge: 'High Blood Sugar Risk',
-                    title: 'High Simple Sugar Content (26.5%)',
-                    message: 'Contains 26.5g sugar per 100g. Invert sugar syrup and refined carbohydrates cause rapid blood glucose spikes.',
-                    action: 'Avoid or strictly limit portion to < 15g. Prefer whole grain or diabetic-safe snacks.',
-                    scientific_ref: 'WHO Free Sugars Intake & ADA Guidelines.',
-                  }
-                ],
-                healthier_swaps: [
-                  {
-                    name: 'Roasted Almonds & Medjool Dates',
-                    category: 'Whole Food Snack',
-                    benefits: 'Zero added sugar or palm oil. Natural sweetness paired with healthy monounsaturated fats & magnesium.',
-                    why_better: 'No ultra-processing, 100% bioavailable fiber, zero industrial emulsifiers.',
-                    calories_density: 'Nutrient-Dense',
-                    nova_group: 1,
-                  },
-                  {
-                    name: 'Roasted Makhana (Fox Nuts) with Pink Salt',
-                    category: 'Minimally Processed',
-                    benefits: 'Light, crunchy, low glycemic index. High in plant protein and rich in antioxidants.',
-                    why_better: '90% less saturated fat, zero refined sugar.',
-                    calories_density: 'Low',
-                    nova_group: 1,
-                  }
-                ],
-                summary_info: {
-                  summary: 'This product is mainly made from refined wheat flour, added sugar (26.5% by weight) and palm oil. It contains 3 functional additives.',
-                  key_highlights: ['26.5% sugar by weight', 'Refined palm oil base', '3 functional additives'],
-                  age_insights: ['For Children: WHO recommends limiting daily free sugar; portion control is advised.'],
-                  scientific_note: 'Non-alarmist safety: Additives are permitted under FSSAI food regulations.',
-                  disclaimer: 'This analysis is for nutritional awareness and does not replace medical advice.',
-                },
-              })
+              if (demoProducts[scanId]) {
+                setData(demoProducts[scanId])
+                setNotFound(false)
+              } else {
+                setNotFound(true)
+                setNotFoundDetail(
+                  err?.response?.data?.detail ||
+                    'This product is not in our verified database. To keep results trustworthy, we never guess product data \u2014 use the label photo (OCR) or paste the ingredients manually.'
+                )
+              }
             })
             .finally(() => setLoading(false))
         })
