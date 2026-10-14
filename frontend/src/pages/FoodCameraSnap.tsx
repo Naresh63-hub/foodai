@@ -42,6 +42,8 @@ export default function FoodCameraSnap() {
   const [analysis, setAnalysis] = useState<FoodVisionAnalysisResult | null>(null)
   const [savedToCloud, setSavedToCloud] = useState(false)
   const [loggedToTracker, setLoggedToTracker] = useState(false)
+  const [torchOn, setTorchOn] = useState(false)
+  const [torchSupported, setTorchSupported] = useState(true)
 
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -55,11 +57,21 @@ export default function FoodCameraSnap() {
         streamRef.current.getTracks().forEach((t) => t.stop())
       }
       setCameraActive(true)
+      setTorchOn(false)
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: mode, width: { ideal: 1280 }, height: { ideal: 720 } },
         audio: false,
       })
       streamRef.current = stream
+      const track = stream.getVideoTracks()[0]
+      if (track) {
+        const capabilities = (track.getCapabilities && track.getCapabilities()) as any
+        if (capabilities && 'torch' in capabilities) {
+          setTorchSupported(Boolean(capabilities.torch))
+        } else {
+          setTorchSupported(mode === 'environment')
+        }
+      }
       if (videoRef.current) {
         videoRef.current.srcObject = stream
         videoRef.current.play()
@@ -71,12 +83,45 @@ export default function FoodCameraSnap() {
     }
   }
 
+  // Toggle Torch / Flashlight
+  const toggleTorch = async () => {
+    if (!streamRef.current) {
+      toast.info('Camera is not active')
+      return
+    }
+    const track = streamRef.current.getVideoTracks()[0]
+    if (!track) {
+      toast.info('No video track found')
+      return
+    }
+
+    try {
+      const nextState = !torchOn
+      await track.applyConstraints({
+        advanced: [{ torch: nextState } as any],
+      })
+      setTorchOn(nextState)
+      toast.success(nextState ? 'Torch ON 🔦' : 'Torch OFF')
+    } catch (err: any) {
+      console.warn('Torch constraint error:', err)
+      toast.error('Torch / Flashlight is not supported on this camera/device')
+      setTorchSupported(false)
+    }
+  }
+
   // Stop Camera
   const stopCamera = () => {
     if (streamRef.current) {
+      const track = streamRef.current.getVideoTracks()[0]
+      if (track && torchOn) {
+        try {
+          track.applyConstraints({ advanced: [{ torch: false } as any] })
+        } catch {}
+      }
       streamRef.current.getTracks().forEach((t) => t.stop())
       streamRef.current = null
     }
+    setTorchOn(false)
     setCameraActive(false)
   }
 
@@ -107,6 +152,7 @@ export default function FoodCameraSnap() {
   const handleToggleFacingMode = () => {
     const nextMode = facingMode === 'environment' ? 'user' : 'environment'
     setFacingMode(nextMode)
+    setTorchOn(false)
     startCamera(nextMode)
   }
 
@@ -320,14 +366,30 @@ export default function FoodCameraSnap() {
                 />
 
                 {/* Viewfinder Target Overlay */}
-                <div className="absolute inset-0 pointer-events-none p-6 flex flex-col justify-between">
+                <div className="absolute inset-0 pointer-events-none p-4 sm:p-6 flex flex-col justify-between">
                   <div className="flex justify-between items-start">
                     <div className="w-8 h-8 border-t-4 border-l-4 border-emerald-400 rounded-tl-xl" />
                     <div className="px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-[10px] text-white font-bold flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                       <span>Align meal in frame</span>
                     </div>
-                    <div className="w-8 h-8 border-t-4 border-r-4 border-emerald-400 rounded-tr-xl" />
+                    {/* Floating Torch toggle top-right */}
+                    {torchSupported ? (
+                      <button
+                        onClick={toggleTorch}
+                        className={`pointer-events-auto px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 backdrop-blur-md shadow-md border transition-all active:scale-95 ${
+                          torchOn
+                            ? 'bg-amber-400 text-gray-950 border-amber-300 ring-2 ring-amber-300 font-black'
+                            : 'bg-black/60 hover:bg-black/80 text-white border-white/20'
+                        }`}
+                        title={torchOn ? 'Turn torch off' : 'Turn torch on'}
+                      >
+                        <span>{torchOn ? '⚡' : '🔦'}</span>
+                        <span>{torchOn ? 'ON' : 'Torch'}</span>
+                      </button>
+                    ) : (
+                      <div className="w-8 h-8 border-t-4 border-r-4 border-emerald-400 rounded-tr-xl" />
+                    )}
                   </div>
                   <div className="flex justify-between items-end">
                     <div className="w-8 h-8 border-b-4 border-l-4 border-emerald-400 rounded-bl-xl" />
@@ -336,7 +398,7 @@ export default function FoodCameraSnap() {
                 </div>
 
                 {/* Camera Control Toolbar */}
-                <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-6 px-6">
+                <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-3.5 sm:gap-5 px-4">
                   {/* Gallery Button */}
                   <button
                     onClick={() => fileInputRef.current?.click()}
@@ -345,6 +407,21 @@ export default function FoodCameraSnap() {
                   >
                     🖼️
                   </button>
+
+                  {/* Torch / Flashlight Button */}
+                  {torchSupported && (
+                    <button
+                      onClick={toggleTorch}
+                      className={`w-11 h-11 rounded-full backdrop-blur-md text-lg flex items-center justify-center border active:scale-95 transition-all ${
+                        torchOn
+                          ? 'bg-amber-400 text-gray-950 border-amber-300 ring-2 ring-amber-300 shadow-md font-bold'
+                          : 'bg-black/50 text-white border-white/20 hover:bg-black/70'
+                      }`}
+                      title={torchOn ? 'Turn torch off' : 'Turn torch on'}
+                    >
+                      {torchOn ? '⚡' : '🔦'}
+                    </button>
+                  )}
 
                   {/* Shutter Button */}
                   <button

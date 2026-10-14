@@ -45,3 +45,4 @@ coverage/
 frontend/coverage/
 screenshot_*.png
 *.tsbuildinfo
+.freebuff/

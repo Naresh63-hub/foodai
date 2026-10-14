@@ -24,6 +24,8 @@ export default function Scan() {
   const [loading, setLoading] = useState(false)
   const [fileName, setFileName] = useState<string | null>(null)
   const [cameraActive, setCameraActive] = useState(false)
+  const [torchOn, setTorchOn] = useState(false)
+  const [torchSupported, setTorchSupported] = useState(true)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
 
@@ -105,10 +107,20 @@ export default function Scan() {
   const startCamera = async () => {
     try {
       setCameraActive(true)
+      setTorchOn(false)
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment' },
       })
       streamRef.current = stream
+      const track = stream.getVideoTracks()[0]
+      if (track) {
+        const capabilities = (track.getCapabilities && track.getCapabilities()) as any
+        if (capabilities && 'torch' in capabilities) {
+          setTorchSupported(Boolean(capabilities.torch))
+        } else {
+          setTorchSupported(true)
+        }
+      }
       if (videoRef.current) {
         videoRef.current.srcObject = stream
         videoRef.current.play()
@@ -120,11 +132,43 @@ export default function Scan() {
     }
   }
 
+  const toggleTorch = async () => {
+    if (!streamRef.current) {
+      toast.info('Camera is not active')
+      return
+    }
+    const track = streamRef.current.getVideoTracks()[0]
+    if (!track) {
+      toast.info('No video track available')
+      return
+    }
+
+    try {
+      const nextState = !torchOn
+      await track.applyConstraints({
+        advanced: [{ torch: nextState } as any],
+      })
+      setTorchOn(nextState)
+      toast.success(nextState ? 'Torch ON 🔦' : 'Torch OFF')
+    } catch (err) {
+      console.warn('Torch constraint error:', err)
+      toast.error('Torch / Flashlight is not supported on this device/camera')
+      setTorchSupported(false)
+    }
+  }
+
   const stopCamera = () => {
     if (streamRef.current) {
+      const track = streamRef.current.getVideoTracks()[0]
+      if (track && torchOn) {
+        try {
+          track.applyConstraints({ advanced: [{ torch: false } as any] })
+        } catch {}
+      }
       streamRef.current.getTracks().forEach((track) => track.stop())
       streamRef.current = null
     }
+    setTorchOn(false)
     setCameraActive(false)
   }
 
@@ -376,10 +420,27 @@ export default function Scan() {
             <div className="relative rounded-3xl bg-gray-950 overflow-hidden text-center text-white p-5 shadow-card border border-gray-800 min-h-[220px] flex flex-col items-center justify-center">
               {cameraActive ? (
                 <div className="relative w-full h-48 rounded-2xl overflow-hidden">
-                  <video ref={videoRef} className="w-full h-full object-cover" />
+                  <video ref={videoRef} playsInline autoPlay muted className="w-full h-full object-cover" />
                   <div className="absolute inset-0 border-2 border-emerald-400/80 rounded-2xl pointer-events-none" />
                   {/* Glowing Laser Scan Line */}
                   <div className="absolute left-4 right-4 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_12px_#34d399] animate-pulse pointer-events-none top-1/2 -translate-y-1/2" />
+
+                  {/* Floating Torch / Flashlight Button on Viewport */}
+                  {torchSupported && (
+                    <button
+                      type="button"
+                      onClick={toggleTorch}
+                      className={`absolute top-2.5 right-2.5 z-10 px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 backdrop-blur-md shadow-md transition-all active:scale-95 ${
+                        torchOn
+                          ? 'bg-amber-400 text-gray-950 font-black ring-2 ring-amber-300'
+                          : 'bg-black/60 hover:bg-black/80 text-white border border-white/20'
+                      }`}
+                      title={torchOn ? 'Turn torch off' : 'Turn torch on'}
+                    >
+                      <span>{torchOn ? '⚡' : '🔦'}</span>
+                      <span className="text-[11px]">{torchOn ? 'Torch ON' : 'Torch'}</span>
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="w-48 h-28 border-2 border-dashed border-emerald-400/80 rounded-2xl flex flex-col items-center justify-center relative p-3 overflow-hidden">
@@ -404,13 +465,30 @@ export default function Scan() {
                     Open Live Camera
                   </button>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={stopCamera}
-                    className="px-4 py-1.5 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition-all"
-                  >
-                    Close Camera
-                  </button>
+                  <>
+                    {torchSupported && (
+                      <button
+                        type="button"
+                        onClick={toggleTorch}
+                        className={`px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 ${
+                          torchOn
+                            ? 'bg-amber-400 text-gray-950 font-black shadow-md'
+                            : 'bg-gray-800 hover:bg-gray-700 text-white border border-gray-700'
+                        }`}
+                        title={torchOn ? 'Turn torch off' : 'Turn torch on'}
+                      >
+                        <span>{torchOn ? '⚡' : '🔦'}</span>
+                        <span>{torchOn ? 'Torch ON' : 'Torch'}</span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={stopCamera}
+                      className="px-4 py-1.5 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition-all"
+                    >
+                      Close Camera
+                    </button>
+                  </>
                 )}
               </div>
             </div>
