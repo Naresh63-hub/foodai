@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
+import { BrowserMultiFormatReader } from '@zxing/library'
 import SafeAreaView from '../components/SafeAreaView'
 import { scanBarcode, scanOCR, scanText } from '../api/food'
 import { playScanSound } from '../utils/audio'
@@ -26,8 +27,21 @@ export default function Scan() {
   const [cameraActive, setCameraActive] = useState(false)
   const [torchOn, setTorchOn] = useState(false)
   const [torchSupported, setTorchSupported] = useState(true)
+  const [detectedCode, setDetectedCode] = useState<string | null>(null)
+  const [scannerStatus, setScannerStatus] = useState<string>('Align barcode in frame')
+
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
+  const readerRef = useRef<BrowserMultiFormatReader | null>(null)
+  const detectLoopRef = useRef<number | null>(null)
+  const lastScannedCodeRef = useRef<string | null>(null)
+  const lastScannedTimeRef = useRef<number>(0)
+  const isProcessingRef = useRef<boolean>(false)
+  const tabRef = useRef(tab)
+
+  useEffect(() => {
+    tabRef.current = tab
+  }, [tab])
 
   useEffect(() => {
     try {
@@ -103,15 +117,153 @@ export default function Scan() {
     }
   }
 
+  // Handle detected barcode from live camera stream
+  const handleDetectedBarcode = (rawCode: string) => {
+    const code = rawCode.trim()
+    if (!code) return
+
+    const now = Date.now()
+    // Debounce duplicate reads of the same barcode within 2 seconds
+    if (code === lastScannedCodeRef.current && now - lastScannedTimeRef.current < 2000) {
+      return
+    }
+    // Prevent duplicate triggers if already executing a navigation or submit
+    if (isProcessingRef.current) {
+      return
+    }
+
+    lastScannedCodeRef.current = code
+    lastScannedTimeRef.current = now
+
+    // Audio & Haptic feedback
+    playScanSound()
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      try {
+        navigator.vibrate([80, 40, 80])
+      } catch {}
+    }
+
+    setDetectedCode(code)
+    setScannerStatus(`Detected: ${code}`)
+
+    const currentTab = tabRef.current
+    if (currentTab === 'batch') {
+      // Supermarket Basket Mode: add directly to cart and keep camera live
+      toast.success(`Scanned: ${code}`)
+      handleBatchScanSubmit(code)
+      setTimeout(() => {
+        setDetectedCode(null)
+        setScannerStatus('Ready for next item')
+      }, 1500)
+    } else {
+      // Single Item Barcode Mode: show visual check, stop camera and navigate
+      isProcessingRef.current = true
+      setBarcode(code)
+      toast.success(`Barcode detected: ${code}`)
+      setTimeout(() => {
+        stopCamera()
+        handleBarcodeSubmit(code)
+      }, 400)
+    }
+  }
+
+  // Live real-time barcode decoding loop
+  const startBarcodeScanning = () => {
+    if (!videoRef.current) return
+
+    // Clean up any existing detection loop or reader
+    if (detectLoopRef.current) {
+      cancelAnimationFrame(detectLoopRef.current)
+      detectLoopRef.current = null
+    }
+    if (readerRef.current) {
+      try {
+        readerRef.current.reset()
+      } catch {}
+    }
+
+    // 1. Try Native BarcodeDetector API (fastest, hardware accelerated on Chrome/Android/Edge)
+    const hasNative = typeof window !== 'undefined' && 'BarcodeDetector' in window
+    if (hasNative) {
+      try {
+        const detector = new (window as any).BarcodeDetector({
+          formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'qr_code'],
+        })
+
+        let lastCheck = 0
+        const detectFrame = async (timestamp: number) => {
+          if (!streamRef.current || !videoRef.current) return
+
+          // Throttle checks to ~120ms to keep CPU low and frame rate smooth
+          if (timestamp - lastCheck >= 120) {
+            lastCheck = timestamp
+            if (videoRef.current.readyState >= 2 && !videoRef.current.paused) {
+              try {
+                const barcodes = await detector.detect(videoRef.current)
+                if (barcodes && barcodes.length > 0) {
+                  const rawVal = barcodes[0].rawValue
+                  if (rawVal) {
+                    handleDetectedBarcode(rawVal)
+                  }
+                }
+              } catch {
+                // Ignore transient frame errors
+              }
+            }
+          }
+
+          detectLoopRef.current = requestAnimationFrame(detectFrame)
+        }
+
+        detectLoopRef.current = requestAnimationFrame(detectFrame)
+        setScannerStatus('Align barcode in frame')
+        return
+      } catch (err) {
+        console.warn('Native BarcodeDetector init failed, falling back to ZXing:', err)
+      }
+    }
+
+    // 2. Cross-browser fallback using ZXing BrowserMultiFormatReader (iOS Safari, Firefox, Desktop)
+    try {
+      if (!readerRef.current) {
+        readerRef.current = new BrowserMultiFormatReader()
+      }
+      readerRef.current.timeBetweenDecodingAttempts = 150
+      readerRef.current.decodeFromVideoElementContinuously(videoRef.current, (result) => {
+        if (result) {
+          const text = result.getText()
+          if (text) {
+            handleDetectedBarcode(text)
+          }
+        }
+      })
+      setScannerStatus('Align barcode in frame')
+    } catch (err) {
+      console.warn('ZXing decoding failed to start:', err)
+      setScannerStatus('Position barcode clearly under light')
+    }
+  }
+
   // Start Live Webcam Video Stream for Barcode Scanner
   const startCamera = async () => {
     try {
       setCameraActive(true)
       setTorchOn(false)
+      setDetectedCode(null)
+      isProcessingRef.current = false
+      lastScannedCodeRef.current = null
+      lastScannedTimeRef.current = 0
+      setScannerStatus('Starting camera...')
+
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
       })
       streamRef.current = stream
+
       const track = stream.getVideoTracks()[0]
       if (track) {
         const capabilities = (track.getCapabilities && track.getCapabilities()) as any
@@ -121,12 +273,29 @@ export default function Scan() {
           setTorchSupported(true)
         }
       }
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        videoRef.current.play()
+
+      const initVideo = async () => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream
+          videoRef.current.setAttribute('playsinline', 'true')
+          try {
+            await videoRef.current.play()
+          } catch (e) {
+            console.warn('Auto-play error:', e)
+          }
+          startBarcodeScanning()
+        }
       }
+
+      if (videoRef.current) {
+        await initVideo()
+      } else {
+        setTimeout(initVideo, 100)
+      }
+
       toast.success('Camera activated. Point at barcode!')
     } catch (err) {
+      console.warn('getUserMedia error:', err)
       toast.info('Camera unavailable in current environment. Use photo upload or enter digits.')
       setCameraActive(false)
     }
@@ -158,6 +327,17 @@ export default function Scan() {
   }
 
   const stopCamera = () => {
+    if (detectLoopRef.current) {
+      cancelAnimationFrame(detectLoopRef.current)
+      detectLoopRef.current = null
+    }
+
+    if (readerRef.current) {
+      try {
+        readerRef.current.reset()
+      } catch {}
+    }
+
     if (streamRef.current) {
       const track = streamRef.current.getVideoTracks()[0]
       if (track && torchOn) {
@@ -168,8 +348,15 @@ export default function Scan() {
       streamRef.current.getTracks().forEach((track) => track.stop())
       streamRef.current = null
     }
+
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
+    }
+
     setTorchOn(false)
     setCameraActive(false)
+    setDetectedCode(null)
+    isProcessingRef.current = false
   }
 
   useEffect(() => {
@@ -219,6 +406,7 @@ export default function Scan() {
       toast.error(err.response?.data?.detail || 'Barcode lookup failed. Try photo OCR or paste text below.')
     } finally {
       setLoading(false)
+      isProcessingRef.current = false
     }
   }
 
@@ -282,6 +470,15 @@ export default function Scan() {
     }
   }
 
+  const handleTabChange = (newTab: 'barcode' | 'batch' | 'ocr' | 'text') => {
+    if (newTab !== tab) {
+      if (cameraActive) {
+        stopCamera()
+      }
+      setTab(newTab)
+    }
+  }
+
   const selectPreset = (code: string) => {
     setBarcode(code)
     const demoData = demoProducts[code]
@@ -292,6 +489,139 @@ export default function Scan() {
       return
     }
     handleBarcodeSubmit(code)
+  }
+
+  const renderCameraView = (mode: 'single' | 'batch') => {
+    return (
+      <div className="relative rounded-3xl bg-gray-950 overflow-hidden text-center text-white p-4 shadow-card border border-gray-800 min-h-[220px] flex flex-col items-center justify-center">
+        {cameraActive ? (
+          <div className="relative w-full h-56 rounded-2xl overflow-hidden bg-black flex items-center justify-center">
+            <video
+              ref={videoRef}
+              playsInline
+              autoPlay
+              muted
+              className="w-full h-full object-cover"
+            />
+
+            {/* Target Reticle / Barcode Scanner Frame */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-4">
+              <div
+                className={`relative w-64 h-36 border-2 rounded-2xl transition-all duration-300 flex items-center justify-center ${
+                  detectedCode
+                    ? 'border-emerald-400 bg-emerald-500/20 shadow-[0_0_30px_rgba(52,211,153,0.6)] scale-105'
+                    : 'border-emerald-400/70 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
+                }`}
+              >
+                {/* 4 Corner Markers */}
+                <div className="absolute -top-1 -left-1 w-4 h-4 border-t-4 border-l-4 border-emerald-400 rounded-tl-sm" />
+                <div className="absolute -top-1 -right-1 w-4 h-4 border-t-4 border-r-4 border-emerald-400 rounded-tr-sm" />
+                <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b-4 border-l-4 border-emerald-400 rounded-bl-sm" />
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-4 border-r-4 border-emerald-400 rounded-br-sm" />
+
+                {/* Animated Laser Scan Line */}
+                {!detectedCode && (
+                  <div className="absolute left-2 right-2 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_12px_#34d399] animate-pulse pointer-events-none top-1/2 -translate-y-1/2" />
+                )}
+
+                {/* Detected Barcode Success Overlay */}
+                {detectedCode && (
+                  <div className="flex flex-col items-center justify-center bg-gray-950/85 backdrop-blur-sm px-4 py-2.5 rounded-xl border border-emerald-400/50 shadow-lg animate-in fade-in zoom-in duration-200">
+                    <span className="text-2xl text-emerald-400 font-bold">✓</span>
+                    <span className="text-xs font-mono font-black text-emerald-300 tracking-wider mt-0.5">
+                      {detectedCode}
+                    </span>
+                    <span className="text-[10px] text-gray-300 font-medium mt-0.5">
+                      {mode === 'batch' ? 'Added to Cart!' : 'Opening details...'}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Top Status Pill */}
+            <div className="absolute top-2.5 left-2.5 z-10 px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5 backdrop-blur-md shadow-md bg-black/60 text-white border border-white/20">
+              <span
+                className={`inline-block w-2 h-2 rounded-full ${
+                  detectedCode ? 'bg-emerald-400 animate-ping' : 'bg-emerald-400 animate-pulse'
+                }`}
+              />
+              <span className="truncate max-w-[170px]">{scannerStatus}</span>
+            </div>
+
+            {/* Floating Torch / Flashlight Button on Viewport */}
+            {torchSupported && (
+              <button
+                type="button"
+                onClick={toggleTorch}
+                className={`absolute top-2.5 right-2.5 z-10 px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 backdrop-blur-md shadow-md transition-all active:scale-95 ${
+                  torchOn
+                    ? 'bg-amber-400 text-gray-950 font-black ring-2 ring-amber-300'
+                    : 'bg-black/60 hover:bg-black/80 text-white border border-white/20'
+                }`}
+                title={torchOn ? 'Turn torch off' : 'Turn torch on'}
+              >
+                <span>{torchOn ? '⚡' : '🔦'}</span>
+                <span className="text-[11px]">{torchOn ? 'Torch ON' : 'Torch'}</span>
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="w-56 h-32 border-2 border-dashed border-emerald-400/80 rounded-2xl flex flex-col items-center justify-center relative p-3 overflow-hidden bg-gray-900/40">
+            <span className="text-3xl">📷</span>
+            <p className="text-[11px] font-semibold text-emerald-300 mt-1">
+              {mode === 'batch' ? 'Continuous Barcode Scanner' : 'Live Auto-Detect Barcode'}
+            </p>
+            <p className="text-[9px] text-gray-400">
+              {mode === 'batch' ? 'Scan items rapidly into cart' : 'Point camera to detect automatically'}
+            </p>
+            <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-emerald-400" />
+            <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-emerald-400" />
+            <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-emerald-400" />
+            <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-emerald-400" />
+            <div className="absolute left-2 right-2 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_8px_#34d399] animate-pulse pointer-events-none top-1/2" />
+          </div>
+        )}
+
+        <div className="mt-3 flex items-center gap-2">
+          {!cameraActive ? (
+            <button
+              type="button"
+              onClick={startCamera}
+              className="px-5 py-2 rounded-full bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs shadow-soft transition-all flex items-center gap-1.5"
+            >
+              <span>📷</span>
+              <span>Open Live Camera</span>
+            </button>
+          ) : (
+            <>
+              {torchSupported && (
+                <button
+                  type="button"
+                  onClick={toggleTorch}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 ${
+                    torchOn
+                      ? 'bg-amber-400 text-gray-950 font-black shadow-md'
+                      : 'bg-gray-800 hover:bg-gray-700 text-white border border-gray-700'
+                  }`}
+                  title={torchOn ? 'Turn torch off' : 'Turn torch on'}
+                >
+                  <span>{torchOn ? '⚡' : '🔦'}</span>
+                  <span>{torchOn ? 'Torch ON' : 'Torch'}</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={stopCamera}
+                className="px-4 py-1.5 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition-all active:scale-95"
+              >
+                Close Camera
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -307,7 +637,7 @@ export default function Scan() {
         {/* Tab Selector */}
         <div className="rounded-2xl bg-gray-100 p-1 grid grid-cols-4 gap-1 mb-5">
           <button
-            onClick={() => setTab('barcode')}
+            onClick={() => handleTabChange('barcode')}
             className={`py-2 rounded-xl text-[11px] font-bold transition-all text-center ${
               tab === 'barcode' ? 'bg-white shadow-card text-gray-900' : 'text-gray-500 hover:text-gray-800'
             }`}
@@ -315,7 +645,7 @@ export default function Scan() {
             📊 Barcode
           </button>
           <button
-            onClick={() => setTab('batch')}
+            onClick={() => handleTabChange('batch')}
             className={`py-2 rounded-xl text-[11px] font-bold transition-all text-center ${
               tab === 'batch' ? 'bg-white shadow-card text-emerald-800 font-extrabold' : 'text-gray-500 hover:text-gray-800'
             }`}
@@ -323,7 +653,7 @@ export default function Scan() {
             🛒 Cart ({batchCount})
           </button>
           <button
-            onClick={() => setTab('ocr')}
+            onClick={() => handleTabChange('ocr')}
             className={`py-2 rounded-xl text-[11px] font-bold transition-all text-center ${
               tab === 'ocr' ? 'bg-white shadow-card text-gray-900' : 'text-gray-500 hover:text-gray-800'
             }`}
@@ -331,7 +661,7 @@ export default function Scan() {
             📷 OCR
           </button>
           <button
-            onClick={() => setTab('text')}
+            onClick={() => handleTabChange('text')}
             className={`py-2 rounded-xl text-[11px] font-bold transition-all text-center ${
               tab === 'text' ? 'bg-white shadow-card text-gray-900' : 'text-gray-500 hover:text-gray-800'
             }`}
@@ -360,6 +690,9 @@ export default function Scan() {
                 </button>
               </div>
             </div>
+
+            {/* Live Camera Viewfinder in Batch Mode */}
+            {renderCameraView('batch')}
 
             {/* Quick Batch Barcode Form */}
             <form
@@ -417,81 +750,7 @@ export default function Scan() {
         {tab === 'barcode' && (
           <div className="space-y-4">
             {/* Viewfinder simulation & Live Camera */}
-            <div className="relative rounded-3xl bg-gray-950 overflow-hidden text-center text-white p-5 shadow-card border border-gray-800 min-h-[220px] flex flex-col items-center justify-center">
-              {cameraActive ? (
-                <div className="relative w-full h-48 rounded-2xl overflow-hidden">
-                  <video ref={videoRef} playsInline autoPlay muted className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 border-2 border-emerald-400/80 rounded-2xl pointer-events-none" />
-                  {/* Glowing Laser Scan Line */}
-                  <div className="absolute left-4 right-4 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_12px_#34d399] animate-pulse pointer-events-none top-1/2 -translate-y-1/2" />
-
-                  {/* Floating Torch / Flashlight Button on Viewport */}
-                  {torchSupported && (
-                    <button
-                      type="button"
-                      onClick={toggleTorch}
-                      className={`absolute top-2.5 right-2.5 z-10 px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 backdrop-blur-md shadow-md transition-all active:scale-95 ${
-                        torchOn
-                          ? 'bg-amber-400 text-gray-950 font-black ring-2 ring-amber-300'
-                          : 'bg-black/60 hover:bg-black/80 text-white border border-white/20'
-                      }`}
-                      title={torchOn ? 'Turn torch off' : 'Turn torch on'}
-                    >
-                      <span>{torchOn ? '⚡' : '🔦'}</span>
-                      <span className="text-[11px]">{torchOn ? 'Torch ON' : 'Torch'}</span>
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div className="w-48 h-28 border-2 border-dashed border-emerald-400/80 rounded-2xl flex flex-col items-center justify-center relative p-3 overflow-hidden">
-                  <span className="text-3xl">📷</span>
-                  <p className="text-[11px] font-semibold text-emerald-300 mt-1">Align Barcode in Box</p>
-                  <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-emerald-400" />
-                  <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-emerald-400" />
-                  <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-emerald-400" />
-                  <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-emerald-400" />
-                  {/* Animated laser line */}
-                  <div className="absolute left-2 right-2 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_8px_#34d399] animate-pulse pointer-events-none top-1/2" />
-                </div>
-              )}
-
-              <div className="mt-3 flex items-center gap-2">
-                {!cameraActive ? (
-                  <button
-                    type="button"
-                    onClick={startCamera}
-                    className="px-4 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-soft transition-all"
-                  >
-                    Open Live Camera
-                  </button>
-                ) : (
-                  <>
-                    {torchSupported && (
-                      <button
-                        type="button"
-                        onClick={toggleTorch}
-                        className={`px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 ${
-                          torchOn
-                            ? 'bg-amber-400 text-gray-950 font-black shadow-md'
-                            : 'bg-gray-800 hover:bg-gray-700 text-white border border-gray-700'
-                        }`}
-                        title={torchOn ? 'Turn torch off' : 'Turn torch on'}
-                      >
-                        <span>{torchOn ? '⚡' : '🔦'}</span>
-                        <span>{torchOn ? 'Torch ON' : 'Torch'}</span>
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={stopCamera}
-                      className="px-4 py-1.5 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition-all"
-                    >
-                      Close Camera
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
+            {renderCameraView('single')}
 
             {/* Barcode Number Search Form */}
             <form
