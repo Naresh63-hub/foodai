@@ -349,7 +349,7 @@ Ensure all numbers are realistic and physiologically sound.
 
   try {
     const response = await client.models.generateContent({
-      model: 'gemini-3.8-flash',
+      model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
         systemInstruction:

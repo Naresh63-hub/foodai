@@ -267,7 +267,7 @@ Ensure all estimates are realistic and grounded in clinical nutrition science.
     const textPart = { text: prompt };
 
     const response = await client.models.generateContent({
-      model: 'gemini-3.8-flash',
+      model: 'gemini-2.5-flash',
       contents: { parts: [imagePart, textPart] },
       config: {
         systemInstruction:
