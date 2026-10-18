@@ -473,7 +473,7 @@ apiRouter.put('/users/profile/', updateProfile);
 apiRouter.post('/users/profile/', updateProfile);
 
 // 15. POST /api/ai/nutrition-analyze (Gemini Powered Food Nutrition Analysis)
-apiRouter.post('/ai/nutrition-analyze', async (req: Request, res: Response) => {
+apiRouter.post(['/ai/nutrition-analyze', '/nutrition-analyze'], async (req: Request, res: Response) => {
   const foodQuery = (req.body.food_query || '').trim();
   if (!foodQuery) {
     return res.status(400).json({ detail: 'Please provide a food name or description to analyze.' });
@@ -491,7 +491,7 @@ apiRouter.post('/ai/nutrition-analyze', async (req: Request, res: Response) => {
 });
 
 // 16. POST /api/ai/food-vision-analyze (Gemini Vision Camera Snap Analyzer)
-apiRouter.post('/ai/food-vision-analyze', (upload.single('image') as any), async (req: Request, res: Response) => {
+apiRouter.post(['/ai/food-vision-analyze', '/food-vision-analyze'], (upload.single('image') as any), async (req: Request, res: Response) => {
   let base64Image = '';
   let mimeType = 'image/jpeg';
 

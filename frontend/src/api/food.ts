@@ -1,4 +1,4 @@
-import client from './client'
+import client, { aiClient } from './client'
 import {
   AdditiveReferenceItem,
   ComparisonResult,
@@ -210,7 +210,7 @@ export async function analyzeFoodNutrition(payload: {
   weight_kg?: number | null
   health_conditions?: string[] | null
 }): Promise<GeminiNutritionResult> {
-  const response = await client.post<GeminiNutritionResult>('/ai/nutrition-analyze', payload)
+  const response = await aiClient.post<GeminiNutritionResult>('/nutrition-analyze', payload)
   return response.data
 }
 
@@ -267,12 +267,12 @@ export async function analyzeFoodPhoto(payload: {
     if (payload.age) formData.append('age', String(payload.age))
     if (payload.weight_kg) formData.append('weight_kg', String(payload.weight_kg))
     if (payload.health_conditions) formData.append('health_conditions', payload.health_conditions.join(','))
-    const res = await client.post<FoodVisionAnalysisResult>('/ai/food-vision-analyze', formData, {
+    const res = await aiClient.post<FoodVisionAnalysisResult>('/food-vision-analyze', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
     return res.data
   }
 
-  const res = await client.post<FoodVisionAnalysisResult>('/ai/food-vision-analyze', payload)
+  const res = await aiClient.post<FoodVisionAnalysisResult>('/food-vision-analyze', payload)
   return res.data
 }

@@ -13,8 +13,12 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
+      '/api/ai': {
+        target: process.env.VITE_AI_API_URL || 'http://localhost:3000',
+        changeOrigin: true,
+      },
       '/api': {
-        target: 'http://localhost:8000',
+        target: process.env.VITE_API_URL || 'http://localhost:8000',
         changeOrigin: true,
       },
     },
