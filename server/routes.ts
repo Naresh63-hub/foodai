@@ -8,7 +8,63 @@ import * as T from './analysis/thresholds';
 import { analyzeFoodWithGemini } from './services/geminiNutrition';
 import { analyzeFoodPhotoWithGemini } from './services/geminiVision';
 
-const upload = multer({ limits: { fileSize: 8 * 1024 * 1024 } });
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024; // 8MB
+
+export function detectSupportedImageMime(buffer: Buffer): 'image/jpeg' | 'image/png' | 'image/webp' | null {
+  if (!buffer || buffer.length < 8) return null;
+
+  // JPEG signature: FF D8 FF
+  if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+    return 'image/jpeg';
+  }
+
+  // PNG signature: 89 50 4E 47 0D 0A 1A 0A
+  if (
+    buffer.length >= 8 &&
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47 &&
+    buffer[4] === 0x0d &&
+    buffer[5] === 0x0a &&
+    buffer[6] === 0x1a &&
+    buffer[7] === 0x0a
+  ) {
+    return 'image/png';
+  }
+
+  // WEBP signature: RIFF....WEBP
+  if (
+    buffer.length >= 12 &&
+    buffer.toString('ascii', 0, 4) === 'RIFF' &&
+    buffer.toString('ascii', 8, 12) === 'WEBP'
+  ) {
+    return 'image/webp';
+  }
+
+  return null;
+}
+
+const upload = multer({
+  limits: { fileSize: MAX_IMAGE_BYTES },
+  fileFilter: (_req, file, cb) => {
+    const allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!file.mimetype || !allowedMimes.includes(file.mimetype)) {
+      return cb(new Error('INVALID_FILE_TYPE'));
+    }
+    cb(null, true);
+  },
+});
+
+function getBase64DecodedByteCount(base64Str: string): number {
+  const pure = base64Str.replace(/^data:[^;]+;base64,/, '').replace(/\s+/g, '');
+  if (!pure) return 0;
+  let padding = 0;
+  if (pure.endsWith('==')) padding = 2;
+  else if (pure.endsWith('=')) padding = 1;
+  return Math.floor((pure.length * 3) / 4) - padding;
+}
+
 export const apiRouter = Router();
 
 const products: ProductData[] = (productsData as any[]).map((p, idx) => ({
@@ -496,14 +552,44 @@ apiRouter.post(['/ai/food-vision-analyze', '/food-vision-analyze'], (upload.sing
   let mimeType = 'image/jpeg';
 
   if (req.file) {
+    // Content-signature verification for multipart files: check binary magic bytes
+    const detected = detectSupportedImageMime(req.file.buffer);
+    if (!detected) {
+      return res.status(400).json({ detail: 'Invalid or unsupported image format. Please upload a valid JPEG, PNG, or WEBP image.' });
+    }
+    mimeType = detected;
     base64Image = req.file.buffer.toString('base64');
-    mimeType = req.file.mimetype || 'image/jpeg';
-  } else if (req.body.image_base64) {
-    base64Image = req.body.image_base64;
-    mimeType = req.body.mime_type || 'image/jpeg';
-  }
+  } else if (req.body.image_base64 && typeof req.body.image_base64 === 'string') {
+    const rawBase64 = req.body.image_base64.trim();
+    if (!rawBase64) {
+      return res.status(400).json({ detail: 'Please upload or capture a food photo (image file or image_base64).' });
+    }
 
-  if (!base64Image) {
+    // Strip data URI scheme prefix if present
+    const pure = rawBase64.replace(/^data:[^;]+;base64,/, '').replace(/\s+/g, '');
+
+    // Validate base64 structure and character set
+    const base64Regex = /^[A-Za-z0-9+/]+={0,2}$/;
+    if (!pure || pure.length % 4 !== 0 || !base64Regex.test(pure)) {
+      return res.status(400).json({ detail: 'Malformed or invalid base64 image data.' });
+    }
+
+    // Enforce 8MB max decoded binary size
+    const decodedBytes = getBase64DecodedByteCount(pure);
+    if (decodedBytes > MAX_IMAGE_BYTES) {
+      return res.status(413).json({ detail: 'Image payload too large. Maximum supported image size is 8MB.' });
+    }
+
+    // Decode header slice to verify image signature before allocating large buffers or calling Gemini
+    const headerBuffer = Buffer.from(pure.slice(0, 80), 'base64');
+    const detected = detectSupportedImageMime(headerBuffer);
+    if (!detected) {
+      return res.status(400).json({ detail: 'Invalid or unsupported image content. Supported formats are JPEG, PNG, and WEBP.' });
+    }
+
+    mimeType = detected;
+    base64Image = pure;
+  } else {
     return res.status(400).json({ detail: 'Please upload or capture a food photo (image file or image_base64).' });
   }
 
@@ -513,8 +599,8 @@ apiRouter.post(['/ai/food-vision-analyze', '/food-vision-analyze'], (upload.sing
     const analysis = await analyzeFoodPhotoWithGemini(base64Image, mimeType, age, weight, conditions);
     res.json(analysis);
   } catch (error: any) {
-    console.error('Error in /api/ai/food-vision-analyze:', error);
-    res.status(500).json({ detail: error.message || 'Failed to analyze food photo' });
+    console.error('Error in /api/ai/food-vision-analyze:', error.message || error);
+    res.status(500).json({ detail: 'Failed to analyze food photo' });
   }
 });
 
