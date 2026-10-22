@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.http import JsonResponse
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
@@ -17,9 +18,21 @@ from foodai_backend.scans.views import ScanDetailView, ScanListView
 from foodai_backend.scans.views_ocr import OCRScanView
 from foodai_backend.users.views import ProfileView
 
+
+def root_health_view(request):
+    return JsonResponse({
+        "status": "healthy",
+        "service": "FoodAI Backend API",
+        "version": "1.0.0",
+        "documentation": "/api/docs/",
+        "sample_products": "/api/products/sample/",
+    })
+
+
 router = DefaultRouter()
 
 urlpatterns = [
+    path('', root_health_view, name='root_health'),
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
 

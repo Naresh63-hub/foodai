@@ -18,11 +18,9 @@ if not raw_secret or raw_secret == 'django-insecure-dev-key-change-me':
 else:
     SECRET_KEY = raw_secret
 
-# In production ALLOWED_HOSTS defaults to Render wildcard, localhost, and custom domains
-ALLOWED_HOSTS = env.list(
-    'ALLOWED_HOSTS',
-    default=['.onrender.com', 'localhost', '127.0.0.1', '*']
-)
+# In production, ensure Render wildcard and localhost are always permitted
+configured_hosts = env.list('ALLOWED_HOSTS', default=[])
+ALLOWED_HOSTS = list(set(configured_hosts + ['.onrender.com', 'foodai-1-cht5.onrender.com', 'localhost', '127.0.0.1', '*']))
 
 # Security hardening for the deployed backend.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
