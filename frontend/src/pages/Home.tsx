@@ -20,6 +20,11 @@ export default function Home() {
   const [showInstallModal, setShowInstallModal] = useState(false)
 
   useEffect(() => {
+    if (!user) {
+      setRecentScans([])
+      setLoadingScans(false)
+      return
+    }
     setLoadingScans(true)
     getScanHistory()
       .then((res) => {
@@ -31,7 +36,7 @@ export default function Home() {
       .finally(() => {
         setLoadingScans(false)
       })
-  }, [])
+  }, [user])
 
   const handleQuickPreset = (barcode: string) => {
     const demoData = demoProducts[barcode]

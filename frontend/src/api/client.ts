@@ -50,7 +50,9 @@ function attachInterceptors(instance: typeof client) {
     (response) => response,
     (error: AxiosError) => {
       if (error.response?.status === 401) {
-        if (!AUTH_BYPASS) {
+        const hadAuthHeader = Boolean(error.config?.headers?.Authorization)
+        const isBypass = error.config?.headers?.Authorization?.toString().includes('local-dev-bypass-token')
+        if (!AUTH_BYPASS && hadAuthHeader && !isBypass) {
           toast.error('Session expired. Please log in again.')
           window.location.href = '/login'
         }

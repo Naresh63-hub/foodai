@@ -4,37 +4,35 @@ test.describe('Authentication Flow', () => {
   test('should display login page', async ({ page }) => {
     await page.goto('/login')
     await expect(page.getByText('Welcome Back')).toBeVisible()
-    await expect(page.getByText('Sign in to continue to FoodAI')).toBeVisible()
+    await expect(page.getByText(/Know What You're Eating/i)).toBeVisible()
   })
 
   test('should display register page', async ({ page }) => {
     await page.goto('/register')
-    await expect(page.getByText('Create Account')).toBeVisible()
-    await expect(page.getByText('Join FoodAI today to make healthier food choices')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Create Account' })).toBeVisible()
+    await expect(page.getByText(/Join FoodAI/i)).toBeVisible()
   })
 
   test('should have email and password fields on login page', async ({ page }) => {
     await page.goto('/login')
     await expect(page.getByLabel('Email')).toBeVisible()
-    await expect(page.getByLabel('Password')).toBeVisible()
-    await expect(page.getByText('Sign In')).toBeVisible()
+    await expect(page.getByLabel('Password', { exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Sign In', exact: true })).toBeVisible()
   })
 
   test('should have email, password, and confirm password fields on register page', async ({ page }) => {
     await page.goto('/register')
     await expect(page.getByLabel('Email')).toBeVisible()
-    await expect(page.getByLabel('Password')).toBeVisible()
+    await expect(page.getByLabel('Password', { exact: true })).toBeVisible()
     await expect(page.getByLabel('Confirm Password')).toBeVisible()
-    await expect(page.getByText('Create Account')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Create Account' })).toBeVisible()
   })
 
   test('should navigate between login and register pages', async ({ page }) => {
     await page.goto('/login')
-    
-    await page.click('text=Sign up')
+    await page.getByRole('link', { name: 'Create Account' }).click()
     await expect(page).toHaveURL('/register')
-    
-    await page.click('text=Sign in')
+    await page.getByRole('button', { name: 'Sign in' }).click()
     await expect(page).toHaveURL('/login')
   })
 })

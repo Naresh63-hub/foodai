@@ -89,13 +89,15 @@ function getFriendlyAuthErrorMessage(error: any): string {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(AUTH_BYPASS ? makeMockUser() : null)
   const [loading, setLoading] = useState(AUTH_BYPASS ? false : true)
+  const [isDemoMode, setIsDemoMode] = useState(AUTH_BYPASS)
 
   useEffect(() => {
     if (AUTH_BYPASS) return
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser)
-      setLoading(false)
       if (currentUser) {
+        setUser(currentUser)
+        setIsDemoMode(false)
+        setLoading(false)
         try {
           await syncUserProfile({
             userId: currentUser.uid,
@@ -106,6 +108,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch (err) {
           console.warn('Profile sync notice:', err)
         }
+      } else {
+        setUser((prev) => (prev?.uid === 'local-dev-user' ? prev : null))
+        setLoading(false)
       }
     })
 
@@ -217,16 +222,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInDemo = () => {
     setUser(makeMockUser())
+    setIsDemoMode(true)
     toast.success('Signed in as demo user')
   }
 
   const signOut = async () => {
+    setIsDemoMode(false)
     if (AUTH_BYPASS) {
       setUser(null)
       toast.info('Signed out')
       return
     }
     try {
+      setUser(null)
       await firebaseSignOut(auth)
       toast.success('Signed out successfully')
     } catch (error: any) {
@@ -240,7 +248,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         loading,
-        isDemoMode: AUTH_BYPASS,
+        isDemoMode,
         signIn,
         signUp,
         signInWithGoogle,
