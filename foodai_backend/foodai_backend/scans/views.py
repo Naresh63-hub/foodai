@@ -19,7 +19,12 @@ class ScanListView(APIView):
 
     def get(self, request):
         # AC-9: only the authenticated user's own scans, never other users'.
-        scans = Scan.objects.filter(user=request.user).order_by("-scanned_at")[:50]
+        # Use select_related('product') to avoid N+1 queries when accessing product details.
+        scans = (
+            Scan.objects.filter(user=request.user)
+            .select_related('product')
+            .order_by("-scanned_at")[:50]
+        )
 
         results = []
         for s in scans:
