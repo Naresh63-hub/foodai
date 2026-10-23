@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
-import { BrowserMultiFormatReader } from '@zxing/library'
+import type { BrowserMultiFormatReader } from '@zxing/library'
 import SafeAreaView from '../components/SafeAreaView'
 import { scanBarcode, scanOCR, scanText } from '../api/food'
 import { playScanSound } from '../utils/audio'
@@ -44,6 +44,7 @@ export default function Scan() {
   const lastScannedTimeRef = useRef<number>(0)
   const isProcessingRef = useRef<boolean>(false)
   const tabRef = useRef(tab)
+  const lightIntervalRef = useRef<any>(null)
 
   useEffect(() => {
     tabRef.current = tab
@@ -246,7 +247,7 @@ export default function Scan() {
   }
 
   // Live real-time barcode decoding loop
-  const startBarcodeScanning = () => {
+  const startBarcodeScanning = async () => {
     if (!videoRef.current) return
 
     // Clean up any existing detection loop or reader
@@ -261,7 +262,8 @@ export default function Scan() {
     }
 
     // Start light level detection interval
-    const lightCheckInterval = setInterval(() => {
+    if (lightIntervalRef.current) clearInterval(lightIntervalRef.current)
+    lightIntervalRef.current = setInterval(() => {
       if (cameraActive) {
         detectLightLevel()
       }
@@ -317,6 +319,8 @@ export default function Scan() {
 
     // 2. Cross-browser fallback using ZXing BrowserMultiFormatReader (iOS Safari, Firefox, Desktop)
     try {
+      const { BrowserMultiFormatReader } = await import('@zxing/library')
+      if (!videoRef.current || !streamRef.current) return
       if (!readerRef.current) {
         readerRef.current = new BrowserMultiFormatReader()
       }
@@ -457,6 +461,10 @@ export default function Scan() {
     if (detectLoopRef.current) {
       cancelAnimationFrame(detectLoopRef.current)
       detectLoopRef.current = null
+    }
+    if (lightIntervalRef.current) {
+      clearInterval(lightIntervalRef.current)
+      lightIntervalRef.current = null
     }
 
     if (readerRef.current) {
