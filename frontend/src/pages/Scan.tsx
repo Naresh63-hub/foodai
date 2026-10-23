@@ -110,7 +110,7 @@ export default function Scan() {
     try {
       const result = await scanBarcode(cleanBarcode, age, weightKg, healthConditions)
       playScanSound()
-      
+
       // Add directly to Grocery Cart
       const existing = JSON.parse(localStorage.getItem('foodai_grocery_cart') || '[]')
       const hasPalm = result.ingredients.some((i: any) => i.name.toLowerCase().includes('palm'))
@@ -310,10 +310,10 @@ export default function Scan() {
 
         detectLoopRef.current = requestAnimationFrame(detectFrame)
         setScannerStatus('Align barcode in frame')
-        return () => clearInterval(lightCheckInterval)
+
       } catch (err) {
         console.warn('Native BarcodeDetector init failed, falling back to ZXing:', err)
-        clearInterval(lightCheckInterval)
+        if (lightIntervalRef.current) { clearInterval(lightIntervalRef.current); lightIntervalRef.current = null; }
       }
     }
 
@@ -334,11 +334,11 @@ export default function Scan() {
         }
       })
       setScannerStatus('Align barcode in frame')
-      return () => clearInterval(lightCheckInterval)
+
     } catch (err) {
       console.warn('ZXing decoding failed to start:', err)
       setScannerStatus('Position barcode clearly under light')
-      clearInterval(lightCheckInterval)
+      if (lightIntervalRef.current) { clearInterval(lightIntervalRef.current); lightIntervalRef.current = null; }
     }
   }
 

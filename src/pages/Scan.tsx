@@ -400,10 +400,10 @@ export default function Scan() {
 
         detectLoopRef.current = requestAnimationFrame(detectFrame)
         setScannerStatus('Align barcode in frame')
-        return () => clearInterval(lightCheckInterval)
+
       } catch (err) {
         console.warn('Native BarcodeDetector init failed, falling back to ZXing:', err)
-        clearInterval(lightCheckInterval)
+        if (lightIntervalRef.current) { clearInterval(lightIntervalRef.current); lightIntervalRef.current = null; }
       }
     }
 
@@ -424,11 +424,11 @@ export default function Scan() {
         }
       })
       setScannerStatus('Align barcode in frame')
-      return () => clearInterval(lightCheckInterval)
+
     } catch (err) {
       console.warn('ZXing decoding failed to start:', err)
       setScannerStatus('Position barcode clearly under light')
-      clearInterval(lightCheckInterval)
+      if (lightIntervalRef.current) { clearInterval(lightIntervalRef.current); lightIntervalRef.current = null; }
     }
   }
 
