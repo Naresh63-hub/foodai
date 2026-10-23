@@ -29,6 +29,12 @@ export default function Scan() {
   const [torchSupported, setTorchSupported] = useState(true)
   const [detectedCode, setDetectedCode] = useState<string | null>(null)
   const [scannerStatus, setScannerStatus] = useState<string>('Align barcode in frame')
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment')
+  const [availableCameras, setAvailableCameras] = useState<MediaDeviceInfo[]>([])
+  const [permissionStatus, setPermissionStatus] = useState<'prompt' | 'granted' | 'denied'>('prompt')
+  const [lightLevel, setLightLevel] = useState<'good' | 'low' | 'dark'>('good')
+  const [detectionRetryCount, setDetectionRetryCount] = useState(0)
+  const [multipleBarcodes, setMultipleBarcodes] = useState<string[]>([])
 
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -51,6 +57,46 @@ export default function Scan() {
       setBatchCount(0)
     }
   }, [])
+
+  // Check camera permission preference and enumerate cameras
+  useEffect(() => {
+    const checkCameraPermissions = async () => {
+      try {
+        // Check stored permission preference
+        const storedPermission = localStorage.getItem('camera_permission')
+        if (storedPermission === 'granted') {
+          setPermissionStatus('granted')
+        } else if (storedPermission === 'denied') {
+          setPermissionStatus('denied')
+        }
+
+        // Enumerate available cameras
+        if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+          const devices = await navigator.mediaDevices.enumerateDevices()
+          const videoDevices = devices.filter((device) => device.kind === 'videoinput')
+          setAvailableCameras(videoDevices)
+        }
+      } catch (err) {
+        console.warn('Error checking camera permissions:', err)
+      }
+    }
+
+    checkCameraPermissions()
+  }, [])
+
+  // Auto-activate camera if permission was previously granted
+  useEffect(() => {
+    if (permissionStatus === 'granted' && (tab === 'barcode' || tab === 'batch') && !cameraActive) {
+      startCamera()
+    }
+  }, [permissionStatus, tab])
+
+  // Suggest flashlight when light level is low
+  useEffect(() => {
+    if (lightLevel === 'dark' && cameraActive && !torchOn && torchSupported) {
+      toast.info('Low light detected. Consider using the flashlight for better scanning.')
+    }
+  }, [lightLevel, cameraActive, torchOn, torchSupported])
 
   const handleBatchScanSubmit = async (codeToScan?: string) => {
     const cleanBarcode = (codeToScan || batchCode).trim()
@@ -167,6 +213,38 @@ export default function Scan() {
     }
   }
 
+  // Light level detection for low light warning
+  const detectLightLevel = () => {
+    if (!videoRef.current) return
+
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    canvas.width = 100
+    canvas.height = 100
+    ctx.drawImage(videoRef.current, 0, 0, 100, 100)
+
+    const imageData = ctx.getImageData(0, 0, 100, 100)
+    const data = imageData.data
+    let totalBrightness = 0
+
+    for (let i = 0; i < data.length; i += 4) {
+      const brightness = (data[i] + data[i + 1] + data[i + 2]) / 3
+      totalBrightness += brightness
+    }
+
+    const avgBrightness = totalBrightness / (data.length / 4)
+
+    if (avgBrightness < 50) {
+      setLightLevel('dark')
+    } else if (avgBrightness < 100) {
+      setLightLevel('low')
+    } else {
+      setLightLevel('good')
+    }
+  }
+
   // Live real-time barcode decoding loop
   const startBarcodeScanning = () => {
     if (!videoRef.current) return
@@ -181,6 +259,13 @@ export default function Scan() {
         readerRef.current.reset()
       } catch {}
     }
+
+    // Start light level detection interval
+    const lightCheckInterval = setInterval(() => {
+      if (cameraActive) {
+        detectLightLevel()
+      }
+    }, 1000)
 
     // 1. Try Native BarcodeDetector API (fastest, hardware accelerated on Chrome/Android/Edge)
     const hasNative = typeof window !== 'undefined' && 'BarcodeDetector' in window
@@ -201,9 +286,15 @@ export default function Scan() {
               try {
                 const barcodes = await detector.detect(videoRef.current)
                 if (barcodes && barcodes.length > 0) {
-                  const rawVal = barcodes[0].rawValue
-                  if (rawVal) {
-                    handleDetectedBarcode(rawVal)
+                  // Handle multiple barcodes
+                  if (barcodes.length > 1) {
+                    const codes = barcodes.map((b: any) => b.rawValue).filter(Boolean)
+                    setMultipleBarcodes(codes)
+                  } else {
+                    const rawVal = barcodes[0].rawValue
+                    if (rawVal) {
+                      handleDetectedBarcode(rawVal)
+                    }
                   }
                 }
               } catch {
@@ -217,9 +308,10 @@ export default function Scan() {
 
         detectLoopRef.current = requestAnimationFrame(detectFrame)
         setScannerStatus('Align barcode in frame')
-        return
+        return () => clearInterval(lightCheckInterval)
       } catch (err) {
         console.warn('Native BarcodeDetector init failed, falling back to ZXing:', err)
+        clearInterval(lightCheckInterval)
       }
     }
 
@@ -238,9 +330,11 @@ export default function Scan() {
         }
       })
       setScannerStatus('Align barcode in frame')
+      return () => clearInterval(lightCheckInterval)
     } catch (err) {
       console.warn('ZXing decoding failed to start:', err)
       setScannerStatus('Position barcode clearly under light')
+      clearInterval(lightCheckInterval)
     }
   }
 
@@ -253,16 +347,21 @@ export default function Scan() {
       isProcessingRef.current = false
       lastScannedCodeRef.current = null
       lastScannedTimeRef.current = 0
+      setDetectionRetryCount(0)
       setScannerStatus('Starting camera...')
 
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: { ideal: 'environment' },
+          facingMode: { ideal: facingMode },
           width: { ideal: 1280 },
           height: { ideal: 720 },
         },
       })
       streamRef.current = stream
+
+      // Store permission preference
+      localStorage.setItem('camera_permission', 'granted')
+      setPermissionStatus('granted')
 
       const track = stream.getVideoTracks()[0]
       if (track) {
@@ -294,9 +393,24 @@ export default function Scan() {
       }
 
       toast.success('Camera activated. Point at barcode!')
-    } catch (err) {
+    } catch (err: any) {
       console.warn('getUserMedia error:', err)
-      toast.info('Camera unavailable in current environment. Use photo upload or enter digits.')
+
+      // Handle specific error types with user-friendly messages
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        toast.error('Camera access denied. Please enable camera permissions in your browser settings.')
+        localStorage.setItem('camera_permission', 'denied')
+        setPermissionStatus('denied')
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        toast.error('No camera available on this device. Use manual entry or photo upload.')
+      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        toast.error('Camera is in use by another application. Close other apps and try again.')
+      } else if (err.name === 'SecurityError' || err.name === 'NotAllowedError') {
+        toast.error('Camera requires HTTPS. Please use a secure connection.')
+      } else {
+        toast.info('Camera unavailable in current environment. Use photo upload or enter digits.')
+      }
+
       setCameraActive(false)
     }
   }
@@ -324,6 +438,19 @@ export default function Scan() {
       toast.error('Torch / Flashlight is not supported on this device/camera')
       setTorchSupported(false)
     }
+  }
+
+  const switchCamera = async () => {
+    if (!cameraActive) return
+
+    const newFacingMode = facingMode === 'environment' ? 'user' : 'environment'
+    setFacingMode(newFacingMode)
+
+    // Stop current camera and restart with new facing mode
+    stopCamera()
+    setTimeout(() => {
+      startCamera()
+    }, 100)
   }
 
   const stopCamera = () => {
@@ -356,6 +483,9 @@ export default function Scan() {
     setTorchOn(false)
     setCameraActive(false)
     setDetectedCode(null)
+    setMultipleBarcodes([])
+    setLightLevel('good')
+    setDetectionRetryCount(0)
     isProcessingRef.current = false
   }
 
@@ -388,6 +518,18 @@ export default function Scan() {
       toast.error('Please enter a barcode number')
       return
     }
+
+    // Validate barcode format
+    if (!/^\d+$/.test(cleanBarcode)) {
+      toast.error('Invalid barcode format. Please enter only numbers.')
+      return
+    }
+
+    if (cleanBarcode.length < 8 || cleanBarcode.length > 14) {
+      toast.error('Invalid barcode length. Standard barcodes are 8-14 digits.')
+      return
+    }
+
     setLoading(true)
     const { age, weightKg, healthConditions } = getUserPreferences()
     try {
@@ -403,7 +545,17 @@ export default function Scan() {
         navigate(`/results/${cleanBarcode}`, { state: { result: fallback } })
         return
       }
-      toast.error(err.response?.data?.detail || 'Barcode lookup failed. Try photo OCR or paste text below.')
+
+      // Handle specific error types
+      if (err.response?.status === 404) {
+        toast.error('Product not found in database. Try manual entry or ingredient scanning.')
+      } else if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+        toast.error('Connection timeout. Please check your internet connection and try again.')
+      } else if (err.response?.status >= 500) {
+        toast.error('Server error. Please try again later.')
+      } else {
+        toast.error(err.response?.data?.detail || 'Barcode lookup failed. Try photo OCR or paste text below.')
+      }
     } finally {
       setLoading(false)
       isProcessingRef.current = false
@@ -565,6 +717,50 @@ export default function Scan() {
                 <span className="text-[11px]">{torchOn ? 'Torch ON' : 'Torch'}</span>
               </button>
             )}
+
+            {/* Camera Switch Button (when multiple cameras available) */}
+            {availableCameras.length > 1 && (
+              <button
+                type="button"
+                onClick={switchCamera}
+                className="absolute top-2.5 left-2.5 z-10 px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 backdrop-blur-md shadow-md transition-all active:scale-95 bg-black/60 hover:bg-black/80 text-white border border-white/20"
+                title={facingMode === 'environment' ? 'Switch to front camera' : 'Switch to rear camera'}
+              >
+                <span>{facingMode === 'environment' ? '🔄' : '📷'}</span>
+                <span className="text-[11px]">{facingMode === 'environment' ? 'Front' : 'Rear'}</span>
+              </button>
+            )}
+
+            {/* Multiple Barcodes Selection Overlay */}
+            {multipleBarcodes.length > 0 && (
+              <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-20 p-4">
+                <div className="bg-white rounded-2xl p-4 w-full max-w-sm shadow-2xl">
+                  <h3 className="text-sm font-black text-gray-900 mb-3">Multiple Barcodes Detected</h3>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {multipleBarcodes.map((code, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          setMultipleBarcodes([])
+                          handleDetectedBarcode(code)
+                        }}
+                        className="w-full p-3 rounded-xl bg-gray-50 hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 transition-all text-left"
+                      >
+                        <p className="text-xs font-mono font-bold text-gray-900">{code}</p>
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setMultipleBarcodes([])}
+                    className="w-full mt-3 px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold text-xs transition-all"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="w-56 h-32 border-2 border-dashed border-emerald-400/80 rounded-2xl flex flex-col items-center justify-center relative p-3 overflow-hidden bg-gray-900/40">
@@ -595,6 +791,17 @@ export default function Scan() {
             </button>
           ) : (
             <>
+              {availableCameras.length > 1 && (
+                <button
+                  type="button"
+                  onClick={switchCamera}
+                  className="px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 bg-gray-800 hover:bg-gray-700 text-white border border-gray-700"
+                  title={facingMode === 'environment' ? 'Switch to front camera' : 'Switch to rear camera'}
+                >
+                  <span>{facingMode === 'environment' ? '🔄' : '📷'}</span>
+                  <span>{facingMode === 'environment' ? 'Front' : 'Rear'}</span>
+                </button>
+              )}
               {torchSupported && (
                 <button
                   type="button"

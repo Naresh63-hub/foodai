@@ -1,87 +1,102 @@
+import os
+import logging
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.models import User
 from django.conf import settings
+import firebase_admin
 from firebase_admin import auth as firebase_auth
 from firebase_admin.auth import ExpiredIdTokenError, InvalidIdTokenError, RevokedIdTokenError
 from rest_framework import authentication, exceptions
-import logging
 
 logger = logging.getLogger(__name__)
 
 
 class FirebaseAuthenticationBackend(BaseBackend):
     """
-    Custom authentication backend using Firebase tokens
+    Custom authentication backend using Firebase tokens with multi-tier verification:
+    1. Firebase Admin SDK verify_id_token
+    2. Google OAuth public-key verify_firebase_token (works without service account file)
     """
-    
+
     def authenticate(self, request, token=None, **kwargs):
         """
         Authenticate user using Firebase ID token
-        
-        Args:
-            request: The HTTP request
-            token: Firebase ID token from Authorization header
-            
-        Returns:
-            User object if authentication successful, None otherwise
         """
-        # Get token from parameter or from middleware
         if not token and hasattr(request, 'firebase_token'):
             token = request.firebase_token
-        
+
         if not token:
             return None
-        
+
+        # Guard against bypass token on actual verification
+        if token == 'local-dev-bypass-token':
+            logger.warning("Rejecting bypass token on authenticated endpoint")
+            return None
+
+        decoded_token = None
+
+        # 1. Try Firebase Admin SDK verification (or mock in unit tests)
         try:
-            # Verify the Firebase token
             decoded_token = firebase_auth.verify_id_token(token)
-            uid = decoded_token.get('uid')
-            email = decoded_token.get('email')
-            
-            if not uid:
-                logger.warning("Firebase token missing UID")
-                return None
-            
-            # Get or create Django user
+        except (ExpiredIdTokenError, RevokedIdTokenError) as token_err:
+            logger.warning(f"Firebase token expired/revoked: {token_err}")
+            return None
+        except Exception as admin_err:
+            logger.debug(f"Firebase Admin verify notice: {admin_err}")
+
+        # 2. Fallback to Google OAuth public certificate verification
+        if not decoded_token:
             try:
-                user = User.objects.get(username=uid)
-            except User.DoesNotExist:
-                # Create new user if doesn't exist
-                if email:
-                    user = User.objects.create_user(
-                        username=uid,
-                        email=email,
-                        first_name=decoded_token.get('name', '').split()[0] if decoded_token.get('name') else '',
-                    )
-                    logger.info(f"Created new Django user for Firebase UID: {uid}")
-                else:
-                    logger.warning(f"Cannot create user without email for Firebase UID: {uid}")
-                    return None
-            
-            return user
-            
-        except ExpiredIdTokenError:
-            logger.warning("Firebase token expired")
+                from google.oauth2 import id_token
+                from google.auth.transport import requests as google_requests
+                project_id = (
+                    os.environ.get('FIREBASE_PROJECT_ID')
+                    or os.environ.get('VITE_FIREBASE_PROJECT_ID')
+                    or 'food-ai-433b7'
+                )
+                decoded_token = id_token.verify_firebase_token(
+                    token,
+                    google_requests.Request(),
+                    audience=project_id,
+                )
+            except Exception as g_err:
+                logger.warning(f"Google public key token verification notice: {g_err}")
+                return None
+
+        if not decoded_token:
             return None
-        except InvalidIdTokenError:
-            logger.warning("Invalid Firebase token")
+
+        uid = decoded_token.get('uid') or decoded_token.get('user_id') or decoded_token.get('sub')
+        if not uid:
+            logger.warning("Firebase token missing UID")
             return None
-        except RevokedIdTokenError:
-            logger.warning("Firebase token revoked")
-            return None
-        except Exception as e:
-            logger.error(f"Firebase authentication error: {e}")
-            return None
-    
+
+        email = decoded_token.get('email') or f"{uid}@foodai.app"
+        first_name = (
+            decoded_token.get('name', '').split()[0]
+            if decoded_token.get('name')
+            else ''
+        )
+
+        # Get or create Django user
+        try:
+            user = User.objects.get(username=uid)
+            if email and user.email != email:
+                user.email = email
+                user.save(update_fields=['email'])
+        except User.DoesNotExist:
+            user = User.objects.create_user(
+                username=uid,
+                email=email,
+                first_name=first_name,
+            )
+            logger.info(f"Created new Django user for Firebase UID: {uid}")
+
+        return user
+
     def get_user(self, user_id):
         """
         Retrieve user by ID
-        
-        Args:
-            user_id: Django user ID
-            
-        Returns:
-            User object if exists, None otherwise
         """
         try:
             return User.objects.get(pk=user_id)
@@ -92,11 +107,6 @@ class FirebaseAuthenticationBackend(BaseBackend):
 class FirebaseAuthentication(authentication.BaseAuthentication):
     """
     Django REST Framework authentication class.
-
-    Wraps the Django ``FirebaseAuthenticationBackend`` so DRF can verify the
-    ``Authorization: Bearer <firebase id token>`` header, return a proper 401
-    (with a WWW-Authenticate header) for anonymous requests, and attach the
-    verified user to ``request.user``.
     """
 
     keyword = 'Bearer'

@@ -50,12 +50,10 @@ function attachInterceptors(instance: typeof client) {
     (response) => response,
     (error: AxiosError) => {
       if (error.response?.status === 401) {
-        const hadAuthHeader = Boolean(error.config?.headers?.Authorization)
-        const isBypass = error.config?.headers?.Authorization?.toString().includes('local-dev-bypass-token')
-        if (!AUTH_BYPASS && hadAuthHeader && !isBypass) {
-          toast.error('Session expired. Please log in again.')
-          window.location.href = '/login'
-        }
+        console.warn('API request returned 401 Unauthorized:', error.config?.url)
+        // Do not force hard page reload with window.location.href!
+        // Hard redirects destroy SPA flow and cause infinite reload loops.
+        // Protected pages are handled by <ProtectedRoute> in React Router.
       } else if (error.response?.data) {
         const data = error.response.data as { detail?: string; message?: string }
         const message = data.detail || data.message || 'Something went wrong'
