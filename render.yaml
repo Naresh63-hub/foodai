@@ -23,7 +23,7 @@ services:
       - key: CORS_ALLOW_ALL_ORIGINS
         value: "false"
       - key: CORS_ALLOWED_ORIGINS
-        value: https://your-frontend-domain.vercel.app
+        value: https://foodai-prb1.vercel.app
 
 databases:
   - name: foodai-db
