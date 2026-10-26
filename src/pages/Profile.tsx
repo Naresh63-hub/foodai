@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import SafeAreaView from '../components/SafeAreaView'
 import { useAuth } from '../contexts/AuthContext'
 import { useUserPreferences } from '../hooks/useUserPreferences'
-import { getUserFoodScans, StoredFoodScan } from '../services/firestoreService'
 import InstallAppModal from '../components/InstallAppModal'
 
 const CONDITION_NAMES: Record<string, { title: string; icon: string }> = {
@@ -23,25 +22,10 @@ export default function Profile() {
   const navigate = useNavigate()
   const { user, signOut } = useAuth()
   const { values } = useUserPreferences()
+  const [showInstallModal, setShowInstallModal] = useState(false)
   const email = user?.email ?? 'Not signed in'
   const { age, weight } = values
   const conditions = values.conditions
-
-  const [cloudScans, setCloudScans] = useState<StoredFoodScan[]>([])
-  const [loadingScans, setLoadingScans] = useState(false)
-  const [showInstallModal, setShowInstallModal] = useState(false)
-
-  useEffect(() => {
-    if (user?.uid) {
-      setLoadingScans(true)
-      getUserFoodScans(user.uid)
-        .then((res) => {
-          if (Array.isArray(res)) setCloudScans(res)
-        })
-        .catch(() => {})
-        .finally(() => setLoadingScans(false))
-    }
-  }, [user?.uid])
 
   const handleLogout = async () => {
     await signOut()
@@ -50,15 +34,33 @@ export default function Profile() {
 
   return (
     <SafeAreaView>
-      <div className="px-4 sm:px-5 py-6 pb-36 max-w-md mx-auto w-full box-border">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white text-2xl font-black shadow-soft">
-            {email.charAt(0).toUpperCase()}
+      <div className="px-5 py-6 pb-36 max-w-md mx-auto">
+        {/* Profile & Settings Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white text-2xl font-black shadow-soft relative shrink-0">
+              {email.charAt(0).toUpperCase()}
+              <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white shadow-xs flex items-center justify-center text-[10px] border border-gray-200">
+                ⚙️
+              </span>
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight truncate">
+                  Profile & Settings
+                </h1>
+              </div>
+              <p className="text-xs text-gray-500 font-medium truncate">{email}</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Health Profile</h1>
-            <p className="text-xs text-gray-500 font-medium">{email}</p>
-          </div>
+          <Link
+            to="/profile/preferences"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold transition-all shrink-0 active:scale-95"
+            title="Configure Dietary Preferences & Settings"
+          >
+            <span>⚙️</span>
+            <span>Settings</span>
+          </Link>
         </div>
 
         {/* ACTIVE HEALTH CONDITIONS CARD */}
@@ -106,140 +108,132 @@ export default function Profile() {
           )}
         </div>
 
-        {/* PREFERENCES LIST */}
-        <div className="rounded-2xl bg-white shadow-card border border-gray-100 divide-y divide-gray-100 overflow-hidden mb-6">
-          <Link
-            to="/profile/preferences"
-            className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">🩸</span>
-              <div>
-                <p className="text-sm font-bold text-gray-900">Health Conditions</p>
-                <p className="text-xs text-gray-500">
-                  {conditions.length > 0
-                    ? `${conditions.length} condition(s) configured`
-                    : 'Tap to configure conditions'}
-                </p>
-              </div>
-            </div>
-            <span className="text-gray-400 text-base font-bold">›</span>
-          </Link>
-
-          <Link
-            to="/profile/preferences"
-            className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">🎂</span>
-              <div>
-                <p className="text-sm font-bold text-gray-900">Age</p>
-                <p className="text-xs text-gray-500">
-                  {age ? `${age} years` : 'Not set · Optional'}
-                </p>
-              </div>
-            </div>
-            <span className="text-gray-400 text-base font-bold">›</span>
-          </Link>
-
-          <Link
-            to="/profile/preferences"
-            className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">⚖️</span>
-              <div>
-                <p className="text-sm font-bold text-gray-900">Body Weight</p>
-                <p className="text-xs text-gray-500">
-                  {weight ? `${weight} kg` : 'Not set · Optional'}
-                </p>
-              </div>
-            </div>
-            <span className="text-gray-400 text-base font-bold">›</span>
-          </Link>
-        </div>
-
-        {/* CLOUD FOOD SCANS (FIRESTORE PERSISTENCE) */}
-        <div className="mb-6 p-4 rounded-3xl bg-white shadow-soft border border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">☁️</span>
-              <h2 className="text-xs font-black uppercase tracking-wider text-gray-800">
-                Firestore Saved Food Scans ({cloudScans.length})
-              </h2>
-            </div>
-            <Link to="/camera-snap" className="text-xs font-bold text-emerald-700 hover:underline">
-              + New Snap
+        {/* DIETARY PREFERENCES & HEALTH SETTINGS */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2 px-1">
+            <h2 className="text-xs font-extrabold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
+              <span>⚙️</span>
+              <span>Personal Dietary Settings</span>
+            </h2>
+            <Link
+              to="/profile/preferences"
+              className="text-xs font-bold text-emerald-600 hover:text-emerald-700"
+            >
+              Edit all →
             </Link>
           </div>
-
-          {loadingScans ? (
-            <p className="text-xs text-gray-400 py-3 text-center">Loading saved scans...</p>
-          ) : cloudScans.length > 0 ? (
-            <div className="space-y-2">
-              {cloudScans.slice(0, 5).map((scan) => (
-                <div
-                  key={scan.id}
-                  className="p-3 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between"
-                >
-                  <div>
-                    <p className="text-xs font-black text-gray-900">{scan.foodName}</p>
-                    <p className="text-[10px] text-gray-500">
-                      {scan.servingDescription} • {new Date(scan.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-xs font-black text-emerald-700 block">
-                      {scan.caloriesKcal} kcal
-                    </span>
-                    <span className="text-[10px] font-bold text-gray-500">
-                      Score: {scan.healthScore}/100
-                    </span>
-                  </div>
+          <div className="rounded-2xl bg-white shadow-card border border-gray-100 divide-y divide-gray-100 overflow-hidden">
+            <Link
+              to="/profile/preferences"
+              className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🩸</span>
+                <div>
+                  <p className="text-sm font-bold text-gray-900">Health Conditions</p>
+                  <p className="text-xs text-gray-500">
+                    {conditions.length > 0
+                      ? `${conditions.length} condition(s) configured`
+                      : 'Tap to configure conditions'}
+                  </p>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-4 text-gray-400 text-xs">
-              <p>No food photo scans saved yet.</p>
-              <Link
-                to="/camera-snap"
-                className="inline-block mt-1 text-emerald-700 font-bold hover:underline"
-              >
-                Snap your first food photo with Gemini ➔
-              </Link>
-            </div>
-          )}
+              </div>
+              <span className="text-gray-400 text-base font-bold">›</span>
+            </Link>
+
+            <Link
+              to="/profile/preferences"
+              className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🎂</span>
+                <div>
+                  <p className="text-sm font-bold text-gray-900">Age & Child Safety Mode</p>
+                  <p className="text-xs text-gray-500">
+                    {age ? `${age} years` : 'Not set · Optional'}
+                  </p>
+                </div>
+              </div>
+              <span className="text-gray-400 text-base font-bold">›</span>
+            </Link>
+
+            <Link
+              to="/profile/preferences"
+              className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">⚖️</span>
+                <div>
+                  <p className="text-sm font-bold text-gray-900">Body Weight</p>
+                  <p className="text-xs text-gray-500">
+                    {weight ? `${weight} kg` : 'Not set · Optional'}
+                  </p>
+                </div>
+              </div>
+              <span className="text-gray-400 text-base font-bold">›</span>
+            </Link>
+          </div>
         </div>
 
-        <div className="space-y-3">
-          <button
-            type="button"
-            onClick={() => setShowInstallModal(true)}
-            className="w-full rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold py-3.5 shadow-soft transition-all active:scale-[0.98] flex items-center justify-center gap-2.5 text-sm"
-          >
-            <span className="text-lg">📱</span>
-            <span>Install App / Download APK</span>
-          </button>
+        {/* APP & ACCOUNT SETTINGS */}
+        <div className="mb-6">
+          <h2 className="text-xs font-extrabold uppercase tracking-wider text-gray-500 mb-2 px-1 flex items-center gap-1.5">
+            <span>📱</span>
+            <span>App & Account Settings</span>
+          </h2>
+          <div className="rounded-2xl bg-white shadow-card border border-gray-100 divide-y divide-gray-100 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowInstallModal(true)}
+              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors text-left"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">📲</span>
+                <div>
+                  <p className="text-sm font-bold text-gray-900">Install FoodAI App</p>
+                  <p className="text-xs text-gray-500">Android APK & Home Screen PWA</p>
+                </div>
+              </div>
+              <span className="text-gray-400 text-base font-bold">›</span>
+            </button>
 
+            <Link
+              to="/forgot-password"
+              className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🔐</span>
+                <div>
+                  <p className="text-sm font-bold text-gray-900">Account Security</p>
+                  <p className="text-xs text-gray-500">Reset password or update credentials</p>
+                </div>
+              </div>
+              <span className="text-gray-400 text-base font-bold">›</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* LOG OUT BUTTON */}
+        <div>
           <button
             onClick={handleLogout}
-            className="w-full rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold py-3.5 border border-rose-200 transition-colors flex items-center justify-center gap-2 text-sm"
+            className="w-full rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold py-3.5 border border-rose-200 transition-colors flex items-center justify-center gap-2 text-sm active:scale-98"
           >
             <span className="text-base">🚪</span>
             Log out
           </button>
         </div>
 
-        <InstallAppModal
-          isOpen={showInstallModal}
-          onClose={() => setShowInstallModal(false)}
-        />
-
         <div className="mt-8 text-center text-[10px] text-gray-400 font-medium">
           FoodAI Personal Food Intelligence · FSSAI & WHO/JECFA Compliant
         </div>
       </div>
+
+      {/* Install Modal */}
+      <InstallAppModal
+        isOpen={showInstallModal}
+        onClose={() => setShowInstallModal(false)}
+      />
     </SafeAreaView>
   )
 }

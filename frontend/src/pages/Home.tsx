@@ -77,21 +77,36 @@ export default function Home() {
               {user ? (
                 <Link
                   to="/profile"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-gray-200 text-[11px] font-bold text-gray-700 shadow-xs hover:border-emerald-300 transition-all active:scale-95"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white hover:bg-gray-50 border border-gray-200 text-[11px] font-bold text-gray-800 shadow-xs hover:border-emerald-300 transition-all active:scale-95 group"
+                  title="Profile & Settings"
+                  aria-label="Profile and Settings"
                 >
-                  <span>👤</span>
-                  <span className="max-w-[90px] truncate">
+                  <span className="text-xs">👤</span>
+                  <span className="max-w-[80px] truncate">
                     {user.displayName || user.email?.split('@')[0] || 'Profile'}
                   </span>
+                  <span className="text-[10px] text-gray-400 group-hover:text-gray-600">⚙️</span>
                 </Link>
               ) : (
-                <Link
-                  to="/login"
-                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-600 hover:bg-emerald-700 text-xs font-extrabold text-white shadow-xs transition-all active:scale-95"
-                >
-                  <span>🔑</span>
-                  <span>Sign In</span>
-                </Link>
+                <>
+                  <Link
+                    to="/profile"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white hover:bg-gray-50 border border-gray-200 text-[11px] font-bold text-gray-700 shadow-xs hover:border-emerald-300 transition-all active:scale-95"
+                    title="Profile & Settings"
+                    aria-label="Profile and Settings"
+                  >
+                    <span className="text-xs">👤</span>
+                    <span>Settings</span>
+                    <span className="text-[10px] text-gray-400">⚙️</span>
+                  </Link>
+                  <Link
+                    to="/login"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-600 hover:bg-emerald-700 text-[11px] font-extrabold text-white shadow-xs transition-all active:scale-95"
+                  >
+                    <span>🔑</span>
+                    <span>Sign In</span>
+                  </Link>
+                </>
               )}
             </div>
           </div>
@@ -213,7 +228,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Feature Cards Grid */}
+        {/* Feature Cards Grid including Direct Profile & Health Settings Link */}
         <div className="mt-8 grid grid-cols-3 gap-2 sm:gap-2.5">
           <Link
             to="/explore"
@@ -234,12 +249,12 @@ export default function Home() {
           </Link>
 
           <Link
-            to="/profile/preferences"
-            className="rounded-2xl bg-gradient-to-br from-rose-50 to-white border border-rose-100 p-2.5 sm:p-3.5 shadow-sm hover:border-rose-300 transition-all text-center flex flex-col items-center overflow-hidden min-w-0"
+            to="/profile"
+            className="rounded-2xl bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 p-2.5 sm:p-3.5 shadow-sm hover:border-emerald-300 transition-all text-center flex flex-col items-center overflow-hidden min-w-0"
           >
-            <span className="text-2xl shrink-0">🩸</span>
-            <p className="mt-1 font-bold text-xs text-gray-900 truncate w-full">Health Alerts</p>
-            <p className="text-[10px] text-gray-500 truncate w-full">Custom risks</p>
+            <span className="text-2xl shrink-0">⚙️</span>
+            <p className="mt-1 font-bold text-xs text-gray-900 truncate w-full">Settings</p>
+            <p className="text-[10px] text-gray-500 truncate w-full">Health & Profile</p>
           </Link>
         </div>
 

@@ -1,12 +1,19 @@
 import { NavLink, useLocation } from 'react-router-dom'
 
-// Streamlined 5-tab bottom navigation with AI Food in the exact center
+// Streamlined 5-tab bottom navigation with AI Food in center and prominent Profile & Settings
 const tabs = [
   { to: '/', label: 'Home', emoji: '🏠' },
   { to: '/scan', label: 'Scan', emoji: '📷' },
   { to: '/ai-nutrition', label: 'AI Food', emoji: '✨', isCenter: true },
   { to: '/tracker', label: 'Progress', emoji: '📊' },
-  { to: '/profile', label: 'Profile', emoji: '👤' },
+  {
+    to: '/profile',
+    label: 'Profile',
+    subLabel: '& Settings',
+    emoji: '👤',
+    badgeEmoji: '⚙️',
+    title: 'Profile & Settings',
+  },
 ]
 
 export default function BottomTabBar() {
@@ -49,6 +56,7 @@ export default function BottomTabBar() {
                 key={tab.to}
                 to={tab.to}
                 end={tab.to === '/'}
+                title={tab.title || tab.label}
                 className={({ isActive }) =>
                   [
                     'flex flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-1.5 py-1.5 transition-all duration-200',
@@ -58,9 +66,21 @@ export default function BottomTabBar() {
                   ].join(' ')
                 }
               >
-                <span className="text-lg leading-none">{tab.emoji}</span>
-                <span className="text-[10px] leading-tight font-semibold mt-0.5">
-                  {tab.label}
+                <div className="relative inline-flex items-center justify-center">
+                  <span className="text-lg leading-none">{tab.emoji}</span>
+                  {tab.badgeEmoji && (
+                    <span className="absolute -bottom-1 -right-1 text-[9px] leading-none select-none">
+                      {tab.badgeEmoji}
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] leading-tight font-semibold mt-0.5 text-center flex flex-col items-center">
+                  <span>{tab.label}</span>
+                  {tab.subLabel && (
+                    <span className="text-[7.5px] font-bold text-gray-500 leading-none -mt-0.5">
+                      {tab.subLabel}
+                    </span>
+                  )}
                 </span>
               </NavLink>
             )
