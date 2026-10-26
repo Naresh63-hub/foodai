@@ -52,6 +52,5 @@ if (typeof window !== 'undefined') {
 
 export const analytics = analyticsInstance
 
-// Google Auth Provider
+// Google Auth Provider (supports 1-tap and automatic account selection)
 export const googleProvider = new GoogleAuthProvider()
-googleProvider.setCustomParameters({ prompt: 'select_account' })

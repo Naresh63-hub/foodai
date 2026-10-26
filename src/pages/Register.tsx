@@ -1,17 +1,28 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useAuth } from '../contexts/AuthContext'
+import { useGoogleOneTap } from '../hooks/useGoogleOneTap'
 import SafeAreaView from '../components/SafeAreaView'
 
 export default function Register() {
   const navigate = useNavigate()
-  const { signUp, signInWithGoogle, signInDemo } = useAuth()
+  const { user, signUp, signInWithGoogle, signInDemo } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  // Automatically prompt Google One Tap on mount
+  useGoogleOneTap({ context: 'signup' })
+
+  // If already authenticated, redirect to home immediately
+  useEffect(() => {
+    if (user) {
+      navigate('/', { replace: true })
+    }
+  }, [user, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -70,14 +81,14 @@ export default function Register() {
           <p className="mt-1 text-xs text-gray-600">Know What You're Eating • Join FoodAI</p>
         </div>
 
-        {/* Primary Google Sign-In Button */}
+        {/* Primary Google Sign-In Button with 1-Tap badge */}
         <button
           type="button"
           onClick={handleGoogleSignIn}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-3 rounded-2xl border border-gray-200 bg-white py-3.5 px-4 text-sm font-bold text-gray-800 shadow-sm hover:bg-gray-50 hover:border-gray-300 active:scale-[0.98] transition-all disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-3 rounded-2xl border border-gray-200 bg-white py-3.5 px-4 text-sm font-bold text-gray-800 shadow-sm hover:bg-gray-50 hover:border-gray-300 active:scale-[0.98] transition-all disabled:opacity-50 relative group"
         >
-          <svg className="h-5 w-5" viewBox="0 0 24 24">
+          <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">
             <path
               fill="#4285F4"
               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -96,6 +107,9 @@ export default function Register() {
             />
           </svg>
           <span>Sign up with Google</span>
+          <span className="ml-auto text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
+            1-Tap
+          </span>
         </button>
 
         {/* Instant Demo Access Button */}

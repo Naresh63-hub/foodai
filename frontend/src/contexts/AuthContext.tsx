@@ -6,6 +6,8 @@ import {
   signOut as firebaseSignOut,
   onAuthStateChanged,
   signInWithPopup,
+  signInWithCredential,
+  GoogleAuthProvider,
   sendPasswordResetEmail,
 } from 'firebase/auth'
 import { auth, googleProvider } from '../config/firebase'
@@ -20,6 +22,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string) => Promise<void>
   signInWithGoogle: () => Promise<void>
+  signInWithGoogleCredential: (idToken: string) => Promise<void>
   signInDemo: () => void
   sendPasswordReset: (email: string) => Promise<void>
   signOut: () => Promise<void>
@@ -205,6 +208,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const signInWithGoogleCredential = async (idToken: string) => {
+    if (AUTH_BYPASS) {
+      setUser(makeMockUser())
+      toast.success('Signed in as demo user')
+      return
+    }
+    try {
+      const credential = GoogleAuthProvider.credential(idToken)
+      const result = await signInWithCredential(auth, credential)
+      if (result.user) {
+        try {
+          await syncUserProfile({
+            userId: result.user.uid,
+            email: result.user.email || `${result.user.uid}@foodai.app`,
+            displayName: result.user.displayName || 'Food Explorer',
+            photoURL: result.user.photoURL || undefined,
+          })
+        } catch (syncErr) {
+          console.warn('Profile sync notice:', syncErr)
+        }
+      }
+      toast.success(`Welcome back, ${result.user.displayName || 'Food Explorer'}!`)
+    } catch (error: any) {
+      if (isUnauthorizedDomainError(error)) {
+        const hostname = typeof window !== 'undefined' ? window.location.hostname : 'preview'
+        console.warn(`Firebase domain notice for ${hostname}. Signing in as preview user.`)
+        setUser(makeMockUser())
+        toast.success(`Signed in as preview user`)
+        return
+      }
+      console.warn('Google One Tap sign in notice:', error?.message || error)
+      const friendlyMsg = getFriendlyAuthErrorMessage(error)
+      toast.error(friendlyMsg)
+      throw error
+    }
+  }
+
   const sendPasswordReset = async (email: string) => {
     if (AUTH_BYPASS) {
       toast.success('Password reset link sent (demo mode)')
@@ -252,6 +292,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signIn,
         signUp,
         signInWithGoogle,
+        signInWithGoogleCredential,
         signInDemo,
         sendPasswordReset,
         signOut,
@@ -264,7 +305,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext)
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider')
   }
   return context
