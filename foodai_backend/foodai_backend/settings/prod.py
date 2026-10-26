@@ -19,8 +19,16 @@ else:
     SECRET_KEY = raw_secret
 
 # In production, ensure Render wildcard and localhost are always permitted
+# Security: No wildcard '*' to prevent Host header attacks
 configured_hosts = env.list('ALLOWED_HOSTS', default=[])
-ALLOWED_HOSTS = list(set(configured_hosts + ['.onrender.com', 'foodai-1-cht5.onrender.com', 'localhost', '127.0.0.1', '*']))
+# Security: Reject wildcard from environment variable to prevent configuration bypass
+if '*' in configured_hosts:
+    raise ValueError(
+        "ALLOWED_HOSTS environment variable cannot contain wildcard '*' in production. "
+        "This would allow any Host header and is a security vulnerability. "
+        "Use specific hostnames instead."
+    )
+ALLOWED_HOSTS = list(set(configured_hosts + ['.onrender.com', 'foodai-1-cht5.onrender.com', 'localhost', '127.0.0.1']))
 
 # Security hardening for the deployed backend.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
