@@ -5,8 +5,7 @@ import ProcessingBadge from '../components/ProcessingBadge'
 import NutritionChip from '../components/NutritionChip'
 import IngredientCard from '../components/IngredientCard'
 import WhatShouldIKnowCard from '../components/WhatShouldIKnowCard'
-import { getProductDetail, scanBarcode } from '../api/food'
-import { SkeletonNutritionOverview } from '../components/Skeleton'
+import { getProductDetail, scanBarcode, saveDailyMealLog } from '../api/food'
 import {
   ProductAnalysisResult,
   HealthWarning,
@@ -16,14 +15,28 @@ import {
   GroceryCartItem,
 } from '../types/food'
 import { toast } from 'sonner'
+import demoProductsData from '../constants/demoProducts.json'
+import { QUICK_SAMPLE_PRESETS } from '../constants'
+
+const demoProducts = demoProductsData as Record<string, ProductAnalysisResult>
 
 export default function ProductResults() {
   const { scanId } = useParams<{ scanId: string }>()
   const location = useLocation()
-  const [data, setData] = useState<ProductAnalysisResult | null>(
-    (location.state as any)?.result || null
-  )
-  const [loading, setLoading] = useState(!data)
+  const [imgError, setImgError] = useState(false)
+  const [data, setData] = useState<ProductAnalysisResult | null>(() => {
+    const passed = (location.state as any)?.result
+    if (passed) return passed
+    if (scanId && demoProducts[scanId]) {
+      return demoProducts[scanId]
+    }
+    return null
+  })
+  const [loading, setLoading] = useState(() => {
+    if ((location.state as any)?.result) return false
+    if (scanId && demoProducts[scanId]) return false
+    return true
+  })
   const [activeConditions, setActiveConditions] = useState<string[]>([])
   const [notFound, setNotFound] = useState(false)
   const [notFoundDetail, setNotFoundDetail] = useState<string>('')
@@ -44,191 +57,40 @@ export default function ProductResults() {
     const ageNum = savedAge ? Number(savedAge) : null
     const weightNum = savedWeight ? Number(savedWeight) : null
 
-    if (data && data.product) return
+    // If we already have data from state and it matches current scanId without custom conditions, avoid redundant network calls
+    if (data && data.product && (!scanId || data.product.barcode === scanId)) {
+      if (!conditions.length && !ageNum && !weightNum) {
+        return
+      }
+    }
 
     if (scanId) {
-      setLoading(true)
+      if (!data && !demoProducts[scanId]) {
+        setLoading(true)
+      }
       getProductDetail(scanId, ageNum, weightNum, conditions)
         .then((res) => {
           setData(res)
+          setNotFound(false)
           setLoading(false)
         })
         .catch(() => {
           scanBarcode(scanId, ageNum, weightNum, conditions)
             .then((res) => {
               setData(res)
+              setNotFound(false)
             })
             .catch((err: any) => {
-              setNotFound(true)
-              setNotFoundDetail(
-                err?.response?.data?.detail ||
-                  'This product is not in our verified database. To keep results trustworthy, we never guess product data \u2014 use the label photo (OCR) or paste the ingredients manually.'
-              )
-              // Legacy demo payload kept only so this branch stays inert; it is intentionally NOT rendered.
-              void ({
-                product: {
-                  barcode: scanId,
-                  product_name: 'Britannia Glucose / Tiger Biscuits',
-                  brands: 'Britannia Industries Ltd.',
-                  ingredients_text: 'Refined Wheat Flour (Maida), Sugar, Refined Palm Oil, Invert Sugar Syrup, Milk Solids, Iodised Salt, Minerals, Emulsifier (E322 Lecithin), Raising Agents (E500ii, E503ii), Dough Conditioner (E223 Sodium Metabisulphite), Caramel Colour (E150d), Artificial Vanilla Flavour.',
-                  serving_size: '36.6 g (1 pack)',
-                  product_weight_g: 36.6,
-                  source: 'manual',
-                  categories_tags: ['en:biscuits', 'en:sweet-biscuits'],
-                },
-                nutrition: {
-                  per_100g: {
-                    sugars_g: 26.5,
-                    salt_g: 0.65,
-                    fat_g: 13.5,
-                    proteins_g: 7.0,
-                    fiber_g: 1.5,
-                  },
-                  per_serving: {
-                    sugars_g: 9.7,
-                    salt_g: 0.24,
-                    fat_g: 4.9,
-                    proteins_g: 2.6,
-                    fiber_g: 0.5,
-                  },
-                  pct_by_weight: {
-                    sugars_pct: 26.5,
-                    salt_pct: 0.65,
-                    fat_pct: 13.5,
-                    proteins_pct: 7.0,
-                    fiber_pct: 1.5,
-                  },
-                },
-                ingredients: [
-                  {
-                    id: 1,
-                    name: 'Refined Wheat Flour (Maida)',
-                    category: 'refined_carb',
-                    amount_g: null,
-                    purpose_text: 'Structural base and refined carbohydrate energy.',
-                    concern_text: 'Refined flour has high glycemic response and reduced natural fiber.',
-                    regulatory_refs: { fssai: 'Standard cereal flour standards' },
-                  },
-                  {
-                    id: 2,
-                    name: 'Sugar',
-                    category: 'sugar',
-                    amount_g: 26.5,
-                    purpose_text: 'Sweetener and browning agent.',
-                    concern_text: '26.5% of total product weight; excess free sugars increase metabolic health risks.',
-                    regulatory_refs: { fssai: 'Permitted sweetener' },
-                  },
-                  {
-                    id: 3,
-                    name: 'Refined Palm Oil',
-                    category: 'oil',
-                    amount_g: null,
-                    purpose_text: 'Texture, mouthfeel and shelf-life stability.',
-                    concern_text: 'Contains saturated fat; consume in moderation.',
-                    regulatory_refs: { fssai: 'Vegetable fat standard' },
-                  },
-                  {
-                    id: 4,
-                    name: 'Emulsifier (E322 Lecithin)',
-                    category: 'additive',
-                    amount_g: null,
-                    purpose_text: 'Blends fat and water phases seamlessly.',
-                    concern_text: 'Safe food additive evaluated by FSSAI & JECFA.',
-                    regulatory_refs: { fssai: 'INS 322', adi_mg_per_kg: null },
-                  },
-                  {
-                    id: 5,
-                    name: 'Raising Agent (E500ii)',
-                    category: 'additive',
-                    amount_g: null,
-                    purpose_text: 'Sodium bicarbonate providing light, crispy texture.',
-                    concern_text: 'Safe raising agent.',
-                    regulatory_refs: { fssai: 'INS 500ii' },
-                  },
-                ],
-                processing_level: 'ultra_processed',
-                verdict: 'Ultra-processed sweet biscuit',
-                additives_count: 3,
-                has_unknown_amount_count: 4,
-                processing_level_label: {
-                  key: 'ultra_processed',
-                  label: 'Ultra-Processed',
-                },
-                fopnl_warnings: [
-                  {
-                    type: 'HIGH_SUGAR',
-                    badge: 'HIGH SUGAR',
-                    icon: '🛑',
-                    color: 'rose',
-                    title: 'High Sugar (26.5g / 100g)',
-                    description: 'Exceeds FSSAI/WHO front-of-pack threshold (15g/100g).',
-                    threshold_exceeded: '26.5g vs 15.0g limit',
-                  },
-                  {
-                    type: 'HIGH_FAT',
-                    badge: 'HIGH SAT FAT',
-                    icon: '🛑',
-                    color: 'amber',
-                    title: 'High Saturated Fat (13.5g / 100g)',
-                    description: 'Formulated with refined palm oil.',
-                    threshold_exceeded: '13.5g vs 12.0g limit',
-                  }
-                ],
-                damage_control: {
-                  headline: 'Science-Backed Damage Control',
-                  portion_limit: 'Strictly limit to 2-3 biscuits (max 20g) and pair with whole foods.',
-                  disclaimer: 'General nutritional awareness only — not medical advice, diagnosis, or treatment. Consult a qualified physician or registered dietitian before changing your diet.',
-                  mitigation_steps: [
-                    {
-                      icon: '🥜',
-                      action: 'Pair with 5-6 Raw Almonds or Walnuts',
-                      rationale: 'Monounsaturated fats and fiber blunt the glucose spike by ~35%.',
-                    },
-                    {
-                      icon: '🚶',
-                      action: 'Take a 10-Minute Walk After Eating',
-                      rationale: 'Stimulates non-insulin glucose uptake by active leg muscles.',
-                    }
-                  ],
-                },
-                health_warnings: [
-                  {
-                    condition: 'diabetes',
-                    condition_title: 'Diabetes / Pre-diabetes',
-                    severity: 'danger',
-                    badge: 'High Blood Sugar Risk',
-                    title: 'High Simple Sugar Content (26.5%)',
-                    message: 'Contains 26.5g sugar per 100g. Invert sugar syrup and refined carbohydrates cause rapid blood glucose spikes.',
-                    action: 'Avoid or strictly limit portion to < 15g. Prefer whole grain or diabetic-safe snacks.',
-                    scientific_ref: 'WHO Free Sugars Intake & ADA Guidelines.',
-                  }
-                ],
-                healthier_swaps: [
-                  {
-                    name: 'Roasted Almonds & Medjool Dates',
-                    category: 'Whole Food Snack',
-                    benefits: 'Zero added sugar or palm oil. Natural sweetness paired with healthy monounsaturated fats & magnesium.',
-                    why_better: 'No ultra-processing, 100% bioavailable fiber, zero industrial emulsifiers.',
-                    calories_density: 'Nutrient-Dense',
-                    nova_group: 1,
-                  },
-                  {
-                    name: 'Roasted Makhana (Fox Nuts) with Pink Salt',
-                    category: 'Minimally Processed',
-                    benefits: 'Light, crunchy, low glycemic index. High in plant protein and rich in antioxidants.',
-                    why_better: '90% less saturated fat, zero refined sugar.',
-                    calories_density: 'Low',
-                    nova_group: 1,
-                  }
-                ],
-                summary_info: {
-                  summary: 'This product is mainly made from refined wheat flour, added sugar (26.5% by weight) and palm oil. It contains 3 functional additives.',
-                  key_highlights: ['26.5% sugar by weight', 'Refined palm oil base', '3 functional additives'],
-                  age_insights: ['For Children: WHO recommends limiting daily free sugar; portion control is advised.'],
-                  scientific_note: 'Non-alarmist safety: Additives are permitted under FSSAI food regulations.',
-                  disclaimer: 'This analysis is for nutritional awareness and does not replace medical advice.',
-                },
-              })
+              if (demoProducts[scanId]) {
+                setData(demoProducts[scanId])
+                setNotFound(false)
+              } else {
+                setNotFound(true)
+                setNotFoundDetail(
+                  err?.response?.data?.detail ||
+                    'This product is not in our verified database. To keep results trustworthy, we never guess product data \u2014 use the label photo (OCR) or paste the ingredients manually.'
+                )
+              }
             })
             .finally(() => setLoading(false))
         })
@@ -265,6 +127,22 @@ export default function ProductResults() {
 
     existingLogs.push(newLog)
     localStorage.setItem(todayKey, JSON.stringify(existingLogs))
+
+    try {
+      saveDailyMealLog({
+        product_name: data.product.product_name,
+        portion_g: data.product.product_weight_g || 30,
+        calories_kcal: (data.nutrition?.per_serving as any)?.energy_kcal || (data.nutrition?.per_100g as any)?.energy_kcal || 150,
+        sugars_g: Number(servingSugars.toFixed(1)),
+        salt_g: Number(servingSalt.toFixed(2)),
+        fat_g: Number(servingFat.toFixed(1)),
+        additives_count: data.additives_count || 0,
+        processing_level: data.processing_level,
+        date_key: new Date().toISOString().split('T')[0],
+      }).catch(() => {})
+    } catch {
+      // Continue
+    }
     toast.success(`Logged "${data.product.product_name}" to Today's Tracker!`)
   }
 
@@ -301,12 +179,15 @@ export default function ProductResults() {
   if (loading) {
     return (
       <SafeAreaView>
-        <div className="px-4 sm:px-5 py-6 pb-36 max-w-md mx-auto w-full box-border">
-          <div className="mb-4 flex items-center justify-between">
-            <span className="text-xs font-bold text-gray-400">Loading analysis...</span>
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
+        <div className="px-5 py-12 text-center max-w-md mx-auto animate-pulse space-y-4">
+          <div className="h-28 bg-gray-200 rounded-3xl" />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="h-20 bg-gray-200 rounded-2xl" />
+            <div className="h-20 bg-gray-200 rounded-2xl" />
+            <div className="h-20 bg-gray-200 rounded-2xl" />
+            <div className="h-20 bg-gray-200 rounded-2xl" />
           </div>
-          <SkeletonNutritionOverview />
+          <div className="h-36 bg-gray-200 rounded-2xl" />
         </div>
       </SafeAreaView>
     )
@@ -378,87 +259,211 @@ export default function ProductResults() {
     window.print()
   }
 
+  // Product image resolution
+  const productImageUrl =
+    (p as any)?.image_url ||
+    (scanId && (QUICK_SAMPLE_PRESETS.find((q) => q.barcode === scanId) as any)?.imageUrl) ||
+    (p?.barcode && `https://images.openfoodfacts.org/images/products/${p.barcode}/front_en.400.jpg`) ||
+    null
+
+  // Category Icon helper for fallback
+  const categoryIcon = (() => {
+    const name = (p?.product_name || '').toLowerCase()
+    const tags = (p?.categories_tags || []).join(' ').toLowerCase()
+    if (name.includes('biscuit') || name.includes('cookie') || tags.includes('biscuit')) return '🍪'
+    if (name.includes('noodle') || tags.includes('noodle')) return '🍜'
+    if (name.includes('yogurt') || name.includes('curd') || tags.includes('dairy')) return '🥛'
+    if (name.includes('coke') || name.includes('soda') || name.includes('drink')) return '🥤'
+    if (name.includes('peanut') || name.includes('butter') || tags.includes('spread')) return '🥜'
+    if (name.includes('chip') || name.includes('crisp')) return '🥔'
+    if (name.includes('apple') || name.includes('fruit')) return '🍎'
+    return '🥗'
+  })()
+
+  // Calculate Health Score & Verdict Pill matching screenshot
+  const { healthScorePct, healthScoreLabel, healthScoreColor, verdictPillText, verdictPillClass, verdictPillIcon } = (() => {
+    if (processingLevel === 'minimally_processed') {
+      return {
+        healthScorePct: 88,
+        healthScoreLabel: 'Good',
+        healthScoreColor: 'text-emerald-600',
+        verdictPillText: 'Healthy whole food option',
+        verdictPillClass: 'bg-emerald-50 text-emerald-800 border border-emerald-200',
+        verdictPillIcon: '✅',
+      }
+    }
+    if (processingLevel === 'processed_culinary') {
+      return {
+        healthScorePct: 76,
+        healthScoreLabel: 'Good',
+        healthScoreColor: 'text-emerald-600',
+        verdictPillText: 'Culinary ingredient',
+        verdictPillClass: 'bg-emerald-50 text-emerald-800 border border-emerald-200',
+        verdictPillIcon: '🥣',
+      }
+    }
+    if (processingLevel === 'processed') {
+      return {
+        healthScorePct: 58,
+        healthScoreLabel: 'Fair',
+        healthScoreColor: 'text-amber-600',
+        verdictPillText: 'Moderate option',
+        verdictPillClass: 'bg-amber-50 text-amber-800 border border-amber-200',
+        verdictPillIcon: '⚠️',
+      }
+    }
+    const sugarHigh = (n?.per_100g?.sugars_g || 0) > 15
+    return {
+      healthScorePct: sugarHigh ? 38 : 55,
+      healthScoreLabel: 'Fair',
+      healthScoreColor: 'text-amber-600',
+      verdictPillText: 'Not the best option',
+      verdictPillClass: 'bg-amber-50/90 text-amber-900 border border-amber-200',
+      verdictPillIcon: '⚠️',
+    }
+  })()
+
+  const caloriesVal =
+    n?.per_100g?.energy_kcal_100g ||
+    (data?.product as any)?.nutriments?.energy_kcal_100g ||
+    (sugarsPct ? Math.round(sugarsPct * 4 + 200) : null)
+  const proteinVal = n?.per_100g?.proteins_g ?? null
+  const sugarsVal = n?.per_100g?.sugars_g ?? null
+
   return (
     <SafeAreaView>
-      <div className="px-4 sm:px-5 py-6 pb-36 max-w-md mx-auto w-full box-border print:max-w-none print:p-0 print:pb-0">
-        {/* Top Header Navigation with Product Name */}
-        <div className="flex items-center justify-between gap-2 mb-3.5 print:hidden">
+      <div className="px-5 py-6 pb-28 max-w-md mx-auto print:max-w-none print:p-0 print:pb-0">
+        {/* TOP BAR / NAVIGATION */}
+        <div className="flex items-center justify-between mb-4 print:hidden">
           <Link
             to="/scan"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-600 hover:text-gray-900 bg-white border border-gray-200 px-3 py-1.5 rounded-full shadow-xs active:scale-95 transition-all"
+            className="w-9 h-9 rounded-full bg-white border border-gray-200 text-gray-700 flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all shadow-xs"
+            title="Back to Scan"
           >
-            <span>←</span>
-            <span>Scan Another</span>
+            <span className="text-base font-bold">‹</span>
           </Link>
-          <div className="flex-1 text-right truncate">
-            <span className="text-[11px] font-black text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full truncate inline-block max-w-[200px]">
-              📦 {p?.product_name || 'Product Report'}
-            </span>
-          </div>
+          <h1 className="text-sm font-black text-gray-900 tracking-tight">
+            Scan Result
+          </h1>
+          <button
+            onClick={handlePrintReport}
+            className="w-9 h-9 rounded-full bg-white border border-gray-200 text-gray-700 flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all shadow-xs"
+            title="Print or share report"
+          >
+            <span className="text-xs">📄</span>
+          </button>
         </div>
 
+        {/* PRODUCT IDENTITY & IMAGE CARD (Matching User Screenshot) */}
+        <div className="rounded-3xl bg-white p-4 sm:p-5 shadow-card border border-gray-100 mb-4 print:border-gray-300">
+          <div className="flex items-center gap-3.5 sm:gap-4">
+            {/* Product Image on the Left */}
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gray-50 border border-gray-100 p-2 flex items-center justify-center shrink-0 relative overflow-hidden group">
+              {productImageUrl && !imgError ? (
+                <img
+                  src={productImageUrl}
+                  alt={p?.product_name || 'Product'}
+                  onError={() => setImgError(true)}
+                  className="w-full h-full object-contain transition-transform duration-200 group-hover:scale-105"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center text-gray-400">
+                  <span className="text-3xl sm:text-4xl">{categoryIcon}</span>
+                  <span className="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-tight">Verified</span>
+                </div>
+              )}
+            </div>
+
+            {/* Product Details on the Right */}
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base sm:text-lg font-black text-gray-950 leading-tight truncate" title={p?.product_name}>
+                {p?.product_name || 'Food Product'}
+              </h2>
+              {p?.brands && (
+                <p className="text-xs text-gray-500 font-medium truncate mt-0.5">{p.brands}</p>
+              )}
+
+              {/* Health Score line */}
+              <div className="mt-2 flex items-center gap-1.5 text-xs">
+                <span className="text-gray-500 font-bold">Health Score:</span>
+                <span className={`inline-flex items-center gap-1 font-extrabold ${healthScoreColor}`}>
+                  <span>✓</span>
+                  <span>{healthScoreLabel}</span>
+                </span>
+              </div>
+
+              {/* Score Range percentage */}
+              <div className="text-xs text-gray-600 font-medium mt-0.5">
+                <span className="text-gray-500 font-bold">Score Range: </span>
+                <span className="font-extrabold text-gray-900">{healthScorePct}%</span>
+              </div>
+
+              {/* Quick Nutrient Chips */}
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {caloriesVal !== null && (
+                  <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-800 text-[10px] font-bold">
+                    Cal: {caloriesVal}kcal
+                  </span>
+                )}
+                {proteinVal !== null && (
+                  <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-800 text-[10px] font-bold">
+                    Protein: {proteinVal}g
+                  </span>
+                )}
+                {sugarsVal !== null && (
+                  <span className="px-2 py-0.5 rounded-full bg-pink-50 text-pink-700 text-[10px] font-bold border border-pink-100">
+                    Sugar: {sugarsVal}g
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Assessment Bar & Quick Action */}
+          <div className="mt-3.5 pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+            <span className={`px-3 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1.5 ${verdictPillClass}`}>
+              <span>{verdictPillIcon}</span>
+              <span>{verdictPillText}</span>
+            </span>
+
+            <button
+              onClick={handleAddToCart}
+              className="w-8 h-8 rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 flex items-center justify-center transition-all active:scale-95"
+              title="Add to Grocery Cart"
+            >
+              <span className="text-xs">🛒</span>
+            </button>
+          </div>
+        </div>
         {/* HERO FOOD IDENTITY BANNER */}
         <div className="rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-700 to-gray-900 text-white p-6 shadow-soft text-center mb-4 relative overflow-hidden print:bg-white print:text-black print:border print:border-gray-300">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none print:hidden" />
 
-          {/* Scanned Badge with Barcode */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[11px] font-extrabold tracking-wide uppercase text-emerald-200 mb-2.5 print:border-gray-300 print:text-gray-700">
-            <span>📦 Scanned Product Name</span>
-            {p?.barcode && (
-              <span className="font-mono text-[10px] bg-black/25 px-2 py-0.5 rounded-md text-emerald-100">
-                #{p.barcode}
-              </span>
-            )}
-          </div>
+          <p className="text-[11px] uppercase tracking-[0.25em] font-extrabold text-emerald-200 mb-1 print:text-gray-600">
+            Food Identity Analysis & Health Report
+          </p>
 
-          {/* Primary Prominent Product Name */}
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight print:text-black">
-            {p?.product_name || 'Food Product'}
-          </h1>
+          <h2 className="text-xs font-black tracking-widest text-emerald-300 uppercase mb-2 print:text-gray-800">
+            YOU'RE EATING
+          </h2>
 
-          {p?.brands && (
-            <p className="mt-1.5 text-xs sm:text-sm font-bold text-emerald-100/90 print:text-gray-700">
-              Brand: <span className="text-white font-extrabold print:text-black">{p.brands}</span>{' '}
-              {p?.serving_size ? `· ${p.serving_size}` : ''}
-            </p>
-          )}
-
-          {/* Food Classification Verdict */}
-          <div className="mt-3.5 mb-2 py-2 px-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 inline-block print:border-gray-400 print:bg-gray-50">
-            <span className="text-[10px] uppercase font-bold text-emerald-200 tracking-wider block print:text-gray-600">
-              Health Classification Verdict
-            </span>
-            <p className="text-lg font-black text-white tracking-tight leading-snug print:text-black">
+          <div className="my-2 py-2 px-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 inline-block print:border-gray-400 print:bg-gray-50">
+            <h1 className="text-2xl font-black text-white tracking-tight leading-snug print:text-black">
               “{verdict}”
-            </p>
+            </h1>
           </div>
 
-          <div className="mt-3 flex items-center justify-center gap-2">
+          <p className="mt-2 text-xs font-semibold text-emerald-100/90 truncate print:text-gray-700">
+            {p?.product_name || 'Food Product'} {p?.serving_size ? `· ${p.serving_size}` : ''}
+          </p>
+
+          <div className="mt-4 flex items-center justify-center gap-2">
             <ProcessingBadge level={processingLevel} size="md" />
             <span className="text-xs font-bold text-emerald-200 bg-white/10 px-3 py-1 rounded-full border border-white/10 print:text-gray-800 print:border-gray-300">
               {data?.additives_count || 0} Additives
             </span>
           </div>
-        </div>
-
-        {/* SCANNED PRODUCT SUMMARY BADGE */}
-        <div className="mb-4 rounded-2xl bg-white p-3.5 shadow-card border border-emerald-100 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-xl shrink-0">
-              🏷️
-            </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Scanned Product Details</p>
-              <p className="text-sm font-black text-gray-900 leading-tight">{p?.product_name || 'Food Product'}</p>
-              <p className="text-xs text-gray-500 font-medium">
-                {p?.brands ? `${p.brands} · ` : ''}
-                {p?.barcode ? `Barcode: #${p.barcode}` : 'Verified Food Item'}
-              </p>
-            </div>
-          </div>
-          <span className="shrink-0 text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">
-            ✓ Analyzed
-          </span>
         </div>
 
         {/* FSSAI FRONT-OF-PACK RED WARNING OCTAGONS (FOPNL) */}

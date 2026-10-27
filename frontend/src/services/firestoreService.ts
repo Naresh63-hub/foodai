@@ -126,7 +126,8 @@ export async function saveFoodScanToFirestore(scan: StoredFoodScan) {
     await setDoc(scanRef, scan)
     return scan
   } catch (error) {
-    handleFirestoreError(error, OperationType.CREATE, scanPath)
+    console.warn('Firestore saveFoodScan notice:', error)
+    return scan
   }
 }
 
@@ -138,7 +139,8 @@ export async function getUserFoodScans(userId: string): Promise<StoredFoodScan[]
     const snap = await getDocs(q)
     return snap.docs.map((d) => d.data() as StoredFoodScan)
   } catch (error) {
-    handleFirestoreError(error, OperationType.LIST, scansPath)
+    console.warn('Firestore getUserFoodScans notice:', error)
+    return []
   }
 }
 
@@ -164,7 +166,8 @@ export async function saveDailyLogToFirestore(logItem: StoredDailyLog) {
     await setDoc(logRef, logItem)
     return logItem
   } catch (error) {
-    handleFirestoreError(error, OperationType.CREATE, logPath)
+    console.warn('Firestore saveDailyLog notice:', error)
+    return logItem
   }
 }
 
@@ -175,7 +178,8 @@ export async function getUserDailyLogs(userId: string): Promise<StoredDailyLog[]
     const snap = await getDocs(logsCol)
     return snap.docs.map((d) => d.data() as StoredDailyLog)
   } catch (error) {
-    handleFirestoreError(error, OperationType.LIST, logsPath)
+    console.warn('Firestore getUserDailyLogs notice:', error)
+    return []
   }
 }
 

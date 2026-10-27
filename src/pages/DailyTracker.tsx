@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import SafeAreaView from '../components/SafeAreaView'
 import { toast } from 'sonner'
 import { DailyFoodLogItem } from '../types/food'
+import { getDailyLogs, deleteDailyMealLog } from '../api/food'
 import WeeklyCalorieProgress from '../components/WeeklyCalorieProgress'
 import VoiceMealLoggerModal from '../components/VoiceMealLoggerModal'
 
@@ -19,14 +20,36 @@ export default function DailyTracker() {
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false)
 
   useEffect(() => {
+    // 1. Initial local load
+    let localItems: DailyFoodLogItem[] = []
     try {
       const saved = localStorage.getItem(todayKey)
       if (saved) {
-        setLogs(JSON.parse(saved))
+        localItems = JSON.parse(saved)
+        setLogs(localItems)
       }
     } catch {
       setLogs([])
     }
+
+    // 2. Fetch from Django Backend & merge
+    const todayDate = todayKey.replace('foodai_daily_log_', '')
+    getDailyLogs(todayDate)
+      .then((serverLogs) => {
+        if (Array.isArray(serverLogs) && serverLogs.length > 0) {
+          const merged = [...localItems]
+          for (const s of serverLogs) {
+            if (!merged.some((m) => m.product_name === s.product_name && Math.abs((m.portion_g || 0) - (s.portion_g || 0)) < 1)) {
+              merged.push(s)
+            }
+          }
+          setLogs(merged)
+          localStorage.setItem(todayKey, JSON.stringify(merged))
+        }
+      })
+      .catch((err) => {
+        console.debug('Daily logs fetch notice:', err)
+      })
   }, [todayKey])
 
   const saveLogs = (newLogs: DailyFoodLogItem[]) => {
@@ -37,6 +60,9 @@ export default function DailyTracker() {
   const handleDelete = (id: string) => {
     const updated = logs.filter((item) => item.id !== id)
     saveLogs(updated)
+    if (/^\d+$/.test(id)) {
+      deleteDailyMealLog(id).catch(() => {})
+    }
     toast.success('Food log removed')
   }
 

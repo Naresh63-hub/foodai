@@ -2,12 +2,11 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import SafeAreaView from '../components/SafeAreaView'
-import { analyzeFoodNutrition, GeminiNutritionResult } from '../api/food'
+import { analyzeFoodNutrition, GeminiNutritionResult, saveDailyMealLog, saveScanHistory } from '../api/food'
 import { useUserPreferences } from '../hooks/useUserPreferences'
 import { DailyFoodLogItem } from '../types/food'
 import { useWebSpeech } from '../hooks/useWebSpeech'
 import VoiceMealLoggerModal from '../components/VoiceMealLoggerModal'
-import { SkeletonNutritionOverview } from '../components/Skeleton'
 
 const POPULAR_EXAMPLES = [
   { name: 'Avocado Toast with 2 Poached Eggs', emoji: '🥑', tag: 'High Protein' },
@@ -69,6 +68,18 @@ export default function AINutritionAnalyzer() {
       })
       setAnalysis(result)
       toast.success(`Analyzed "${result.food_name}"!`)
+
+      // Auto-save to Django Scan History
+      try {
+        saveScanHistory({
+          food_name: result.food_name,
+          scan_type: 'ai_nutrition',
+          calories_kcal: result.calories_kcal,
+          payload: result,
+        }).catch(() => {})
+      } catch {
+        // Continue
+      }
     } catch (err: any) {
       const msg = err.response?.data?.detail || 'Failed to analyze nutritional content.'
       toast.error(msg)
@@ -96,6 +107,26 @@ export default function AINutritionAnalyzer() {
       }
       existing.unshift(newItem)
       localStorage.setItem(todayKey, JSON.stringify(existing))
+
+      // Persist to Django Daily Logs
+      try {
+        saveDailyMealLog({
+          product_name: newItem.product_name,
+          portion_g: newItem.portion_g,
+          calories_kcal: analysis.calories_kcal,
+          carbohydrates_g: analysis.macros.carbohydrates_g,
+          proteins_g: analysis.macros.proteins_g,
+          fat_g: newItem.fat_g,
+          sugars_g: newItem.sugars_g,
+          salt_g: newItem.salt_g,
+          additives_count: newItem.additives_count,
+          processing_level: newItem.processing_level,
+          date_key: todayKey.replace('foodai_daily_log_', ''),
+        }).catch(() => {})
+      } catch {
+        // Continue
+      }
+
       setAddedToTracker(true)
       toast.success(`Added "${analysis.food_name}" to today's Daily Tracker!`, {
         action: {
@@ -279,17 +310,17 @@ export default function AINutritionAnalyzer() {
 
         {/* Loading Skeleton */}
         {loading && (
-          <div className="space-y-3">
-            <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center text-sm shrink-0 animate-spin">
-                ⏳
-              </div>
-              <div>
-                <p className="text-xs font-black text-emerald-900">Gemini AI is analyzing nutrition...</p>
-                <p className="text-[11px] text-emerald-700">Calculating macros, glycemic impact, and personalized warnings</p>
-              </div>
+          <div className="p-6 rounded-3xl bg-white shadow-soft border border-gray-100 animate-pulse text-center space-y-4">
+            <div className="w-14 h-14 bg-emerald-100 rounded-2xl mx-auto flex items-center justify-center text-2xl animate-bounce">
+              🥗
             </div>
-            <SkeletonNutritionOverview />
+            <div className="space-y-2">
+              <div className="h-5 bg-gray-200 rounded-full w-2/3 mx-auto" />
+              <div className="h-3 bg-gray-100 rounded-full w-1/2 mx-auto" />
+            </div>
+            <p className="text-xs text-gray-500 font-medium">
+              Calculating glycemic curve, micronutrients, calories, and personalized medical warnings...
+            </p>
           </div>
         )}
 

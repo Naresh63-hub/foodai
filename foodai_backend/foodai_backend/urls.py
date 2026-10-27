@@ -18,7 +18,13 @@ from foodai_backend.food_analysis.views_ai import (
     AINutritionAnalyzeView,
     FoodVisionAnalyzeView,
 )
-from foodai_backend.scans.views import ScanDetailView, ScanListView
+from foodai_backend.scans.views import (
+    DailyMealLogDetailView,
+    DailyMealLogListView,
+    ScanDetailView,
+    ScanListView,
+    WeeklyProgressView,
+)
 from foodai_backend.scans.views_ocr import OCRScanView
 from foodai_backend.users.views import ProfileView
 
@@ -67,6 +73,11 @@ urlpatterns = [
     # Scans History
     path('api/scans/', ScanListView.as_view(), name='scans_list'),
     path('api/scans/<int:pk>/', ScanDetailView.as_view(), name='scan_detail'),
+
+    # Daily Meal Logs & Weekly Progress
+    path('api/daily-logs/', DailyMealLogListView.as_view(), name='daily_logs_list'),
+    path('api/daily-logs/<int:pk>/', DailyMealLogDetailView.as_view(), name='daily_logs_detail'),
+    path('api/weekly-progress/', WeeklyProgressView.as_view(), name='weekly_progress'),
 
     # Users & Profile (Auth handled by Firebase)
     path('api/users/profile/', ProfileView.as_view(), name='user_profile'),

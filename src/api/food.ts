@@ -4,6 +4,7 @@ import {
   ComparisonResult,
   ProductAnalysisResult,
   UserProfileData,
+  DailyFoodLogItem,
 } from '../types/food'
 
 export async function scanBarcode(
@@ -118,6 +119,55 @@ export async function getScanHistory(): Promise<any[]> {
 
 export async function deleteScan(id: number): Promise<void> {
   await client.delete(`/scans/${id}/`)
+}
+
+export async function saveScanHistory(scanData: {
+  product_id?: number
+  barcode?: string
+  food_name?: string
+  scan_type?: string
+  calories_kcal?: number
+  payload?: any
+}): Promise<any> {
+  const response = await client.post('/scans/', scanData)
+  return response.data
+}
+
+export async function getDailyLogs(date?: string): Promise<DailyFoodLogItem[]> {
+  const response = await client.get<DailyFoodLogItem[]>('/daily-logs/', {
+    params: date ? { date } : {},
+  })
+  return response.data
+}
+
+export async function saveDailyMealLog(data: {
+  product_name: string
+  meal_type?: string
+  portion_g?: number
+  calories_kcal?: number
+  carbohydrates_g?: number
+  proteins_g?: number
+  fat_g?: number
+  sugars_g?: number
+  salt_g?: number
+  additives_count?: number
+  processing_level?: string
+  date_key?: string
+  [key: string]: any
+}): Promise<any> {
+  const response = await client.post('/daily-logs/', data)
+  return response.data
+}
+
+export async function deleteDailyMealLog(id: number | string): Promise<void> {
+  await client.delete(`/daily-logs/${id}/`)
+}
+
+export async function getWeeklyProgress(targetCalories = 2000): Promise<any[]> {
+  const response = await client.get<any[]>('/weekly-progress/', {
+    params: { target: targetCalories },
+  })
+  return response.data
 }
 
 export async function getUserProfile(): Promise<UserProfileData> {

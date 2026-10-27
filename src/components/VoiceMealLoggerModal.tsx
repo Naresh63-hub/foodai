@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useWebSpeech } from '../hooks/useWebSpeech'
 import { parseVoiceFoodCommand, estimateCaloriesQuick, MealType } from '../services/voiceFoodParser'
-import { analyzeFoodNutrition } from '../api/food'
+import { analyzeFoodNutrition, saveDailyMealLog, saveScanHistory } from '../api/food'
 import { useAuth } from '../contexts/AuthContext'
 import { saveDailyLogToFirestore, saveFoodScanToFirestore } from '../services/firestoreService'
 import { useUserPreferences } from '../hooks/useUserPreferences'
@@ -174,7 +174,43 @@ export default function VoiceMealLoggerModal({
       existing.unshift(newLogItem)
       localStorage.setItem(localKey, JSON.stringify(existing))
 
-      // 2. Sync to Firestore (Daily Logs & Food Scans) - non-blocking progressive enhancement
+      // 2. Persist to Django Backend (Cloud Storage on Render)
+      try {
+        await saveDailyMealLog({
+          product_name: newLogItem.product_name,
+          meal_type: selectedMealType,
+          portion_g: newLogItem.portion_g,
+          calories_kcal: finalCalories,
+          carbohydrates_g: finalCarbs,
+          proteins_g: finalProtein,
+          fat_g: finalFat,
+          sugars_g: finalSugar,
+          salt_g: finalSalt,
+          processing_level: finalProcessing,
+          date_key: today,
+        })
+        await saveScanHistory({
+          food_name: foodName,
+          scan_type: 'voice',
+          calories_kcal: finalCalories,
+          payload: {
+            food_name: foodName,
+            meal_type: selectedMealType,
+            calories_kcal: finalCalories,
+            macros: {
+              carbohydrates_g: finalCarbs,
+              proteins_g: finalProtein,
+              fat_g: finalFat,
+              sugars_g: finalSugar,
+              sodium_mg: finalSodium,
+            },
+          },
+        })
+      } catch (backendErr) {
+        console.warn('Backend storage sync notice:', backendErr)
+      }
+
+      // 3. Sync to Firestore (Daily Logs & Food Scans) - non-blocking progressive enhancement
       if (user?.uid) {
         try {
           await saveDailyLogToFirestore({

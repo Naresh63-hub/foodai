@@ -10,6 +10,13 @@ from rest_framework import authentication, exceptions
 
 logger = logging.getLogger(__name__)
 
+# Ensure Firebase default app is initialized
+try:
+    from foodai_backend.firebase_config import initialize_firebase
+    initialize_firebase()
+except Exception as _fb_init_err:
+    logger.debug(f"Firebase init notice: {_fb_init_err}")
+
 
 class FirebaseAuthenticationBackend(BaseBackend):
     """
@@ -157,7 +164,12 @@ class FirebaseAuthentication(authentication.BaseAuthentication):
 
         user = self.backend.authenticate(request=django_request, token=token)
         if user is None:
-            raise exceptions.AuthenticationFailed('Invalid or expired session.')
+            # Token could not be authenticated (expired, invalid, or network unreachable).
+            # Return None to treat request as unauthenticated.
+            # Views with IsAuthenticated will cleanly reject with 401 via DRF permission checks,
+            # while views with AllowAny (e.g. BarcodeScan, TextScan, Vision, AI Nutrition)
+            # will proceed seamlessly without breaking.
+            return None
         return (user, token)
 
     def authenticate_header(self, request):

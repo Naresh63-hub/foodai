@@ -187,7 +187,28 @@ def generate_fallback_food_vision(image_name: str = "", age=None, weight_kg=None
     """Accurate, clinical baseline food vision synthesizer for camera photo snaps."""
     name_lower = (image_name or "").lower()
 
-    if any(k in name_lower for k in ["salmon", "quinoa", "bowl"]):
+    if any(k in name_lower for k in ["berry", "smoothie", "acai", "oats"]):
+        food_name = "Berry Smoothie Bowl"
+        calories = 310
+        carbs = 54.0
+        protein = 9.0
+        fat = 6.5
+        sat_fat = 1.0
+        fiber = 8.5
+        sugars = 21.0
+        sodium = 65.0
+        serving_desc = "1 chilled bowl (300g)"
+        serving_weight = 300.0
+        score = 90
+        processing = "Minimally Processed"
+        glycemic = "Low"
+        ingredients = [
+            {"name": "Mixed Berries (Acai, Blueberries)", "amount_estimate": "150g", "category": "Antioxidant Fruits", "visual_cue": "Deep purple smoothie base"},
+            {"name": "Sliced Bananas", "amount_estimate": "60g", "category": "Fresh Fruits", "visual_cue": "Neatly arranged pale yellow circular slices"},
+            {"name": "Chia Seeds & Granola", "amount_estimate": "40g", "category": "Seeds & Crunch", "visual_cue": "Textured speckled seed topping"},
+            {"name": "Plant Milk Base", "amount_estimate": "50g", "category": "Dairy Alternative", "visual_cue": "Smooth blended emulsification"},
+        ]
+    elif any(k in name_lower for k in ["salmon", "quinoa", "fish"]):
         food_name = "Grilled Salmon Quinoa Bowl"
         calories = 440
         carbs = 38.0
@@ -227,27 +248,6 @@ def generate_fallback_food_vision(image_name: str = "", age=None, weight_kg=None
             {"name": "Roasted Chicken Breast", "amount_estimate": "150g", "category": "Lean Poultry", "visual_cue": "Golden browned tender chicken pieces"},
             {"name": "Aromatic Basmati Rice", "amount_estimate": "160g", "category": "Cereal Grains", "visual_cue": "Steamed white basmati grain base"},
             {"name": "Roasted Vegetables & Herbs", "amount_estimate": "70g", "category": "Vegetables", "visual_cue": "Charred bell peppers, onions and fresh cilantro"},
-        ]
-    elif any(k in name_lower for k in ["berry", "smoothie", "acai", "oats"]):
-        food_name = "Berry Smoothie Bowl"
-        calories = 310
-        carbs = 54.0
-        protein = 9.0
-        fat = 6.5
-        sat_fat = 1.0
-        fiber = 8.5
-        sugars = 21.0
-        sodium = 65.0
-        serving_desc = "1 chilled bowl (300g)"
-        serving_weight = 300.0
-        score = 90
-        processing = "Minimally Processed"
-        glycemic = "Low"
-        ingredients = [
-            {"name": "Mixed Berries (Acai, Blueberries)", "amount_estimate": "150g", "category": "Antioxidant Fruits", "visual_cue": "Deep purple smoothie base"},
-            {"name": "Sliced Bananas", "amount_estimate": "60g", "category": "Fresh Fruits", "visual_cue": "Neatly arranged pale yellow circular slices"},
-            {"name": "Chia Seeds & Granola", "amount_estimate": "40g", "category": "Seeds & Crunch", "visual_cue": "Textured speckled seed topping"},
-            {"name": "Plant Milk Base", "amount_estimate": "50g", "category": "Dairy Alternative", "visual_cue": "Smooth blended emulsification"},
         ]
     else:
         food_name = "Fresh Healthy Meal Plate"
@@ -388,13 +388,14 @@ class FoodVisionAnalyzeView(APIView):
     def post(self, request, *args, **kwargs):
         image_file = request.FILES.get("image")
         image_base64 = request.data.get("image_base64")
-        image_name = ""
-
-        if image_file:
-            image_name = getattr(image_file, "name", "")
-        elif image_base64:
-            # Check if preset name or identifier is passed
-            image_name = request.data.get("food_name") or request.data.get("name") or ""
+        mime_type = request.data.get("mime_type", "image/jpeg")
+        food_name = (
+            request.data.get("food_name")
+            or request.data.get("name")
+            or request.data.get("food_query")
+            or (getattr(image_file, "name", "") if image_file else "")
+            or ""
+        )
 
         age = request.data.get("age")
         weight_kg = request.data.get("weight_kg")
@@ -404,6 +405,61 @@ class FoodVisionAnalyzeView(APIView):
         elif not isinstance(conditions, list):
             conditions = []
 
-        # Run vision analysis (with fallback synthesizer)
-        result = generate_fallback_food_vision(image_name, age, weight_kg, conditions)
+        # 1. Try Gemini Vision API if key and image are present
+        api_key = os.environ.get("GEMINI_API_KEY")
+        if api_key and api_key.strip():
+            raw_b64 = None
+            if image_base64 and "," in image_base64:
+                header, raw_b64 = image_base64.split(",", 1)
+                if "image/png" in header:
+                    mime_type = "image/png"
+                elif "image/webp" in header:
+                    mime_type = "image/webp"
+            elif image_base64:
+                raw_b64 = image_base64
+            elif image_file:
+                import base64
+                raw_b64 = base64.b64encode(image_file.read()).decode("utf-8")
+                image_file.seek(0)
+
+            if raw_b64:
+                try:
+                    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+                    prompt = (
+                        "Analyze this food picture in detail. "
+                        f"Recognized title hint: '{food_name}'. User Age: {age}, Weight: {weight_kg}kg, Conditions: {conditions}. "
+                        "Return detailed, realistic nutritional breakdown as JSON with fields: "
+                        "food_name (string), confidence_score (number 0-1), serving_description (string), serving_weight_g (number), "
+                        "calories_kcal (number), macros (object with carbohydrates_g, proteins_g, fat_g, saturated_fat_g, fiber_g, sugars_g, sodium_mg), "
+                        "macro_ratios (object with carbs_pct, protein_pct, fat_pct), processing_level (string), health_score (number 0-100), "
+                        "glycemic_impact ('Low'|'Moderate'|'High'), glycemic_explanation (string), recognized_ingredients (array of {name, amount_estimate, category, visual_cue}), "
+                        "dietary_tags (array of strings), key_insights (array of strings), cautions_and_allergens (array of strings), "
+                        "personalized_advice (string), burn_off_estimate (string)."
+                    )
+                    payload = {
+                        "contents": [
+                            {
+                                "parts": [
+                                    {"text": prompt},
+                                    {
+                                        "inlineData": {
+                                            "mimeType": mime_type,
+                                            "data": raw_b64,
+                                        }
+                                    },
+                                ]
+                            }
+                        ],
+                        "generationConfig": {"responseMimeType": "application/json", "temperature": 0.2},
+                    }
+                    res = requests.post(url, json=payload, timeout=14)
+                    if res.status_code == 200:
+                        text_data = res.json()["candidates"][0]["content"]["parts"][0]["text"]
+                        parsed = json.loads(text_data)
+                        return Response(parsed, status=status.HTTP_200_OK)
+                except Exception as vision_err:
+                    logger.warning(f"Gemini Vision call notice: {vision_err}")
+
+        # 2. Resilient clinical food vision fallback
+        result = generate_fallback_food_vision(food_name, age, weight_kg, conditions)
         return Response(result, status=status.HTTP_200_OK)

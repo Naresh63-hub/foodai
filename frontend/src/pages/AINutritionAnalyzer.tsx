@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import SafeAreaView from '../components/SafeAreaView'
-import { analyzeFoodNutrition, GeminiNutritionResult } from '../api/food'
+import { analyzeFoodNutrition, GeminiNutritionResult, saveDailyMealLog, saveScanHistory } from '../api/food'
 import { useUserPreferences } from '../hooks/useUserPreferences'
 import { DailyFoodLogItem } from '../types/food'
 import { useWebSpeech } from '../hooks/useWebSpeech'
@@ -68,6 +68,18 @@ export default function AINutritionAnalyzer() {
       })
       setAnalysis(result)
       toast.success(`Analyzed "${result.food_name}"!`)
+
+      // Auto-save to Django Scan History
+      try {
+        saveScanHistory({
+          food_name: result.food_name,
+          scan_type: 'ai_nutrition',
+          calories_kcal: result.calories_kcal,
+          payload: result,
+        }).catch(() => {})
+      } catch {
+        // Continue
+      }
     } catch (err: any) {
       const msg = err.response?.data?.detail || 'Failed to analyze nutritional content.'
       toast.error(msg)
@@ -95,6 +107,26 @@ export default function AINutritionAnalyzer() {
       }
       existing.unshift(newItem)
       localStorage.setItem(todayKey, JSON.stringify(existing))
+
+      // Persist to Django Daily Logs
+      try {
+        saveDailyMealLog({
+          product_name: newItem.product_name,
+          portion_g: newItem.portion_g,
+          calories_kcal: analysis.calories_kcal,
+          carbohydrates_g: analysis.macros.carbohydrates_g,
+          proteins_g: analysis.macros.proteins_g,
+          fat_g: newItem.fat_g,
+          sugars_g: newItem.sugars_g,
+          salt_g: newItem.salt_g,
+          additives_count: newItem.additives_count,
+          processing_level: newItem.processing_level,
+          date_key: todayKey.replace('foodai_daily_log_', ''),
+        }).catch(() => {})
+      } catch {
+        // Continue
+      }
+
       setAddedToTracker(true)
       toast.success(`Added "${analysis.food_name}" to today's Daily Tracker!`, {
         action: {

@@ -5,7 +5,7 @@ import ProcessingBadge from '../components/ProcessingBadge'
 import NutritionChip from '../components/NutritionChip'
 import IngredientCard from '../components/IngredientCard'
 import WhatShouldIKnowCard from '../components/WhatShouldIKnowCard'
-import { getProductDetail, scanBarcode } from '../api/food'
+import { getProductDetail, scanBarcode, saveDailyMealLog } from '../api/food'
 import {
   ProductAnalysisResult,
   HealthWarning,
@@ -127,6 +127,22 @@ export default function ProductResults() {
 
     existingLogs.push(newLog)
     localStorage.setItem(todayKey, JSON.stringify(existingLogs))
+
+    try {
+      saveDailyMealLog({
+        product_name: data.product.product_name,
+        portion_g: data.product.product_weight_g || 30,
+        calories_kcal: (data.nutrition?.per_serving as any)?.energy_kcal || (data.nutrition?.per_100g as any)?.energy_kcal || 150,
+        sugars_g: Number(servingSugars.toFixed(1)),
+        salt_g: Number(servingSalt.toFixed(2)),
+        fat_g: Number(servingFat.toFixed(1)),
+        additives_count: data.additives_count || 0,
+        processing_level: data.processing_level,
+        date_key: new Date().toISOString().split('T')[0],
+      }).catch(() => {})
+    } catch {
+      // Continue
+    }
     toast.success(`Logged "${data.product.product_name}" to Today's Tracker!`)
   }
 
@@ -245,8 +261,8 @@ export default function ProductResults() {
 
   // Product image resolution
   const productImageUrl =
-    p?.image_url ||
-    (scanId && QUICK_SAMPLE_PRESETS.find((q) => q.barcode === scanId)?.imageUrl) ||
+    (p as any)?.image_url ||
+    (scanId && (QUICK_SAMPLE_PRESETS.find((q) => q.barcode === scanId) as any)?.imageUrl) ||
     (p?.barcode && `https://images.openfoodfacts.org/images/products/${p.barcode}/front_en.400.jpg`) ||
     null
 

@@ -19,6 +19,7 @@ import {
   WeeklyCalorieDay,
   saveFoodScanToFirestore,
 } from '../services/firestoreService'
+import { getWeeklyProgress, saveDailyMealLog } from '../api/food'
 import { toast } from 'sonner'
 
 export default function WeeklyCalorieProgress() {
@@ -32,15 +33,27 @@ export default function WeeklyCalorieProgress() {
   const loadData = async () => {
     setLoading(true)
     try {
+      // 1. First try loading from Django Backend
+      try {
+        const backendDays = await getWeeklyProgress(dailyTarget)
+        if (backendDays && backendDays.length > 0 && backendDays.some((d: any) => d.calories > 0)) {
+          setData(backendDays)
+          setSelectedDay(backendDays[backendDays.length - 1])
+          setLoading(false)
+          return
+        }
+      } catch (backendErr) {
+        console.debug('Backend weekly progress notice:', backendErr)
+      }
+
+      // 2. Fall back to combined Firestore & LocalStorage aggregator
       const result = await getWeeklyCaloricProgress(user?.uid, dailyTarget)
       setData(result)
-      // Default selected day to Today (last item)
       if (result.length > 0) {
         setSelectedDay(result[result.length - 1])
       }
     } catch (err) {
-      console.error('Failed to load weekly progress from Firestore:', err)
-      toast.error('Could not load weekly calorie data')
+      console.warn('Weekly progress aggregator notice:', err)
     } finally {
       setLoading(false)
     }
@@ -86,6 +99,24 @@ export default function WeeklyCalorieProgress() {
       const existing = JSON.parse(localStorage.getItem(localKey) || '[]')
       existing.unshift(newMeal)
       localStorage.setItem(localKey, JSON.stringify(existing))
+
+      // Persist to Django Backend
+      try {
+        await saveDailyMealLog({
+          product_name: mealName,
+          meal_type: 'meal',
+          portion_g: 200,
+          calories_kcal: cal,
+          carbohydrates_g: Math.round((cal * 0.45) / 4),
+          proteins_g: Math.round((cal * 0.3) / 4),
+          fat_g: Math.round((cal * 0.25) / 9),
+          sugars_g: Math.round(cal * 0.05),
+          salt_g: 1.2,
+          date_key: today,
+        })
+      } catch (backendErr) {
+        console.warn('Backend quick meal sync notice:', backendErr)
+      }
 
       if (user?.uid) {
         try {

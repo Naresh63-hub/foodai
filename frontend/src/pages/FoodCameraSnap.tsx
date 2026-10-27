@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import SafeAreaView from '../components/SafeAreaView'
-import { analyzeFoodPhoto, FoodVisionAnalysisResult } from '../api/food'
+import { analyzeFoodPhoto, FoodVisionAnalysisResult, saveDailyMealLog, saveScanHistory } from '../api/food'
 import { useAuth } from '../contexts/AuthContext'
 import { useUserPreferences } from '../hooks/useUserPreferences'
 import { saveFoodScanToFirestore, saveDailyLogToFirestore } from '../services/firestoreService'
@@ -287,6 +287,19 @@ export default function FoodCameraSnap() {
       setAnalysis(result)
       toast.success(`Recognized: ${result.food_name}!`)
 
+      // Auto-save to Django Backend Database
+      try {
+        await saveScanHistory({
+          food_name: result.food_name,
+          scan_type: 'camera_snap',
+          calories_kcal: result.calories_kcal,
+          payload: result,
+        })
+        setSavedToCloud(true)
+      } catch (backendErr) {
+        console.debug('Backend scan history notice:', backendErr)
+      }
+
       // Auto-save to Firestore if user is authenticated (progressive enhancement)
       if (user?.uid) {
         try {
@@ -350,6 +363,25 @@ export default function FoodCameraSnap() {
       const existing: DailyFoodLogItem[] = JSON.parse(localStorage.getItem(todayKey) || '[]')
       existing.unshift(newItem)
       localStorage.setItem(todayKey, JSON.stringify(existing))
+
+      // Persist to Django Backend Database
+      try {
+        await saveDailyMealLog({
+          product_name: newItem.product_name,
+          portion_g: newItem.portion_g,
+          calories_kcal: analysis.calories_kcal,
+          carbohydrates_g: analysis.macros.carbohydrates_g || 0,
+          proteins_g: analysis.macros.proteins_g || 0,
+          fat_g: newItem.fat_g,
+          sugars_g: newItem.sugars_g,
+          salt_g: newItem.salt_g,
+          additives_count: newItem.additives_count,
+          processing_level: newItem.processing_level,
+          date_key: todayKey.replace('foodai_daily_log_', ''),
+        })
+      } catch (backendErr) {
+        console.debug('Backend daily log notice:', backendErr)
+      }
 
       // Persist to Firestore if user logged in (non-blocking)
       if (user?.uid) {
