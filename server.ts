@@ -37,7 +37,7 @@ async function startServer() {
   const corsOptions: cors.CorsOptions = {
     origin: (origin, callback) => {
       // Allow requests with no origin (e.g. mobile apps, curl) or matching allowlist
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.includes(origin) || (origin.startsWith('https://') && origin.endsWith('.vercel.app'))) {
         callback(null, true);
       } else {
         // Disallowed origin: omit CORS header so browser blocks cross-origin access

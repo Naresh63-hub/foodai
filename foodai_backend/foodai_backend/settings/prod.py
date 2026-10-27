@@ -37,7 +37,7 @@ CSRF_COOKIE_SECURE = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 
-# CORS: Allow Vercel frontend and any custom origins
+# CORS: Allow Vercel frontend, preview deployments, and custom origins
 CORS_ALLOW_ALL_ORIGINS = env.bool('CORS_ALLOW_ALL_ORIGINS', default=False)
 CORS_ALLOWED_ORIGINS = env.list(
     'CORS_ALLOWED_ORIGINS',
@@ -46,6 +46,9 @@ CORS_ALLOWED_ORIGINS = env.list(
         'http://localhost:5173',
     ]
 )
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.vercel\.app$",
+]
 
 # Transport security: redirect HTTP->HTTPS and enable HSTS (1 year).
 SECURE_SSL_REDIRECT = env.bool('SECURE_SSL_REDIRECT', default=False)

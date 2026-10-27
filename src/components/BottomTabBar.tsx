@@ -1,4 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom'
+import { triggerHaptic } from '../utils/haptics'
 
 // Streamlined 5-tab bottom navigation with AI Food in center and prominent Profile & Settings
 const tabs = [
@@ -26,22 +27,23 @@ export default function BottomTabBar() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom)] pointer-events-auto">
-      <div className="glass max-w-md mx-auto mb-3 rounded-3xl shadow-soft border border-white/60 backdrop-blur-lg bg-white/92 px-1">
-        <div className="flex items-center justify-around px-1 py-1.5">
+      <div className="glass-elevated max-w-md mx-auto mb-3 rounded-3xl border border-white/70 backdrop-blur-xl bg-white/94 px-1.5 py-0.5 shadow-soft">
+        <div className="flex items-center justify-around px-1 py-1">
           {tabs.map((tab) => {
             if (tab.isCenter) {
               return (
                 <NavLink
                   key={tab.to}
                   to={tab.to}
+                  onClick={() => triggerHaptic('medium')}
                   className={({ isActive }) =>
                     [
-                      'flex flex-1 flex-col items-center justify-center -mt-4 transition-all duration-200 group',
+                      'flex flex-1 flex-col items-center justify-center -mt-4 transition-all duration-200 group active:scale-90 tap-press',
                       isActive ? 'scale-105' : 'hover:scale-102',
                     ].join(' ')
                   }
                 >
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-emerald-500 shadow-md flex items-center justify-center text-white border-2 border-white group-active:scale-95 transition-transform">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-emerald-500 shadow-md shadow-purple-500/25 flex items-center justify-center text-white border-2 border-white group-active:scale-95 transition-transform">
                     <span className="text-xl">✨</span>
                   </div>
                   <span className="text-[10px] font-extrabold text-purple-900 mt-0.5 tracking-tight">
@@ -57,16 +59,17 @@ export default function BottomTabBar() {
                 to={tab.to}
                 end={tab.to === '/'}
                 title={tab.title || tab.label}
+                onClick={() => triggerHaptic('selection')}
                 className={({ isActive }) =>
                   [
-                    'flex flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-1.5 py-1.5 transition-all duration-200',
+                    'flex flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-1.5 py-1.5 transition-all duration-200 tap-press',
                     isActive
-                      ? 'bg-emerald-100/80 text-emerald-800 font-extrabold scale-[1.02]'
-                      : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100/50 font-medium',
+                      ? 'bg-emerald-100/90 text-emerald-800 font-extrabold shadow-xs border border-emerald-300/40 scale-[1.02]'
+                      : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100/60 font-medium active:scale-95',
                   ].join(' ')
                 }
               >
-                <div className="relative inline-flex items-center justify-center">
+                <div className="relative inline-flex items-center justify-center transition-transform duration-200">
                   <span className="text-lg leading-none">{tab.emoji}</span>
                   {tab.badgeEmoji && (
                     <span className="absolute -bottom-1 -right-1 text-[9px] leading-none select-none">

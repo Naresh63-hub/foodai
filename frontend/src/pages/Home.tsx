@@ -8,8 +8,17 @@ import VoiceMealLoggerModal from '../components/VoiceMealLoggerModal'
 import { SkeletonRecentScans } from '../components/Skeleton'
 import { useAuth } from '../contexts/AuthContext'
 import InstallAppModal from '../components/InstallAppModal'
+import { triggerHaptic } from '../utils/haptics'
 
 const demoProducts = demoProductsData as Record<string, any>
+
+function getGreeting() {
+  const hour = new Date().getHours()
+  if (hour >= 5 && hour < 12) return { text: 'Good morning', icon: '☀️' }
+  if (hour >= 12 && hour < 17) return { text: 'Good afternoon', icon: '🌤️' }
+  if (hour >= 17 && hour < 22) return { text: 'Good evening', icon: '🌆' }
+  return { text: 'Good night', icon: '🌙' }
+}
 
 export default function Home() {
   const navigate = useNavigate()
@@ -18,6 +27,8 @@ export default function Home() {
   const [loadingScans, setLoadingScans] = useState(true)
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false)
   const [showInstallModal, setShowInstallModal] = useState(false)
+
+  const greeting = getGreeting()
 
   useEffect(() => {
     if (!user) {
@@ -39,6 +50,7 @@ export default function Home() {
   }, [user])
 
   const handleQuickPreset = (barcode: string) => {
+    triggerHaptic('light')
     const demoData = demoProducts[barcode]
     if (demoData) {
       navigate(`/results/${barcode}`, { state: { result: demoData } })
@@ -66,8 +78,11 @@ export default function Home() {
             <div className="flex items-center gap-1.5">
               <button
                 type="button"
-                onClick={() => setShowInstallModal(true)}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[11px] font-bold border border-emerald-200 shadow-xs transition-all active:scale-95"
+                onClick={() => {
+                  triggerHaptic('light')
+                  setShowInstallModal(true)
+                }}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[11px] font-bold border border-emerald-200 shadow-xs transition-all active:scale-95 tap-press"
                 title="Install FoodAI or Download Android APK"
               >
                 <span>📱</span>
@@ -77,7 +92,8 @@ export default function Home() {
               {user ? (
                 <Link
                   to="/profile"
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white hover:bg-gray-50 border border-gray-200 text-[11px] font-bold text-gray-800 shadow-xs hover:border-emerald-300 transition-all active:scale-95 group"
+                  onClick={() => triggerHaptic('selection')}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white hover:bg-gray-50 border border-gray-200 text-[11px] font-bold text-gray-800 shadow-xs hover:border-emerald-300 transition-all active:scale-95 group tap-press"
                   title="Profile & Settings"
                   aria-label="Profile and Settings"
                 >
@@ -91,7 +107,8 @@ export default function Home() {
                 <>
                   <Link
                     to="/profile"
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white hover:bg-gray-50 border border-gray-200 text-[11px] font-bold text-gray-700 shadow-xs hover:border-emerald-300 transition-all active:scale-95"
+                    onClick={() => triggerHaptic('selection')}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white hover:bg-gray-50 border border-gray-200 text-[11px] font-bold text-gray-700 shadow-xs hover:border-emerald-300 transition-all active:scale-95 tap-press"
                     title="Profile & Settings"
                     aria-label="Profile and Settings"
                   >
@@ -101,7 +118,8 @@ export default function Home() {
                   </Link>
                   <Link
                     to="/login"
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-600 hover:bg-emerald-700 text-[11px] font-extrabold text-white shadow-xs transition-all active:scale-95"
+                    onClick={() => triggerHaptic('light')}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-600 hover:bg-emerald-700 text-[11px] font-extrabold text-white shadow-xs transition-all active:scale-95 tap-press"
                   >
                     <span>🔑</span>
                     <span>Sign In</span>
@@ -110,18 +128,41 @@ export default function Home() {
               )}
             </div>
           </div>
+
+          {/* Time-of-day greeting badge */}
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-[11px] font-bold text-emerald-800 mb-1.5 animate-fade-in-up">
+            <span>{greeting.icon}</span>
+            <span>{greeting.text}{user?.displayName ? `, ${user.displayName.split(' ')[0]}` : ''}!</span>
+          </div>
+
           <h1 className="text-3xl font-black tracking-tight text-gray-900 leading-tight">
             Know What You're Eating
           </h1>
           <p className="mt-1.5 text-sm text-gray-600 leading-relaxed">
             Scan any barcode or food label to discover ingredients, exact weight percentages, and true processing level.
           </p>
+
+          {/* Quick Search Shortcut Bar */}
+          <Link
+            to="/explore"
+            onClick={() => triggerHaptic('selection')}
+            className="mt-3.5 flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-white border border-gray-200/90 shadow-xs hover:border-emerald-300 hover:shadow-sm transition-all group tap-press"
+          >
+            <div className="flex items-center gap-2 text-gray-400 text-xs min-w-0">
+              <span className="text-sm shrink-0">🔍</span>
+              <span className="group-hover:text-gray-600 transition-colors truncate">Search 10k+ foods, brands, ingredients...</span>
+            </div>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60 shrink-0 ml-2">
+              Explore
+            </span>
+          </Link>
         </div>
 
         {/* Primary Action Button */}
         <Link
           to="/scan"
-          className="flex items-center justify-between w-full rounded-3xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 active:scale-[0.98] text-white p-5 shadow-soft transition-all duration-200"
+          onClick={() => triggerHaptic('medium')}
+          className="flex items-center justify-between w-full rounded-3xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 active:scale-[0.98] text-white p-5 shadow-soft transition-all duration-200 tap-press hover:shadow-lg"
         >
           <div className="flex items-center gap-3.5 min-w-0">
             <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl shrink-0">
@@ -138,7 +179,8 @@ export default function Home() {
         {/* Gemini Vision Food Camera Card */}
         <Link
           to="/camera-snap"
-          className="mt-3 flex items-center justify-between w-full rounded-3xl bg-gradient-to-r from-teal-600 via-emerald-600 to-cyan-700 hover:from-teal-700 hover:to-cyan-800 active:scale-[0.98] text-white p-5 shadow-soft transition-all duration-200"
+          onClick={() => triggerHaptic('medium')}
+          className="mt-3 flex items-center justify-between w-full rounded-3xl bg-gradient-to-r from-teal-600 via-emerald-600 to-cyan-700 hover:from-teal-700 hover:to-cyan-800 active:scale-[0.98] text-white p-5 shadow-soft transition-all duration-200 tap-press hover:shadow-lg"
         >
           <div className="flex items-center gap-3.5 min-w-0">
             <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl shrink-0">
@@ -158,7 +200,8 @@ export default function Home() {
         {/* Gemini AI Nutrition Action Card */}
         <Link
           to="/ai-nutrition"
-          className="mt-3 flex items-center justify-between w-full rounded-3xl bg-gradient-to-r from-purple-700 via-indigo-700 to-emerald-700 hover:from-purple-800 hover:to-emerald-800 active:scale-[0.98] text-white p-5 shadow-soft transition-all duration-200"
+          onClick={() => triggerHaptic('medium')}
+          className="mt-3 flex items-center justify-between w-full rounded-3xl bg-gradient-to-r from-purple-700 via-indigo-700 to-emerald-700 hover:from-purple-800 hover:to-emerald-800 active:scale-[0.98] text-white p-5 shadow-soft transition-all duration-200 tap-press hover:shadow-lg"
         >
           <div className="flex items-center gap-3.5 min-w-0">
             <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl shrink-0">
@@ -177,8 +220,11 @@ export default function Home() {
 
         {/* Web Speech API Voice Meal Log Card */}
         <button
-          onClick={() => setIsVoiceModalOpen(true)}
-          className="mt-3 flex items-center justify-between w-full rounded-3xl bg-gradient-to-r from-rose-600 via-pink-600 to-purple-700 hover:from-rose-700 hover:to-purple-800 active:scale-[0.98] text-white p-5 shadow-soft transition-all duration-200 text-left"
+          onClick={() => {
+            triggerHaptic('light')
+            setIsVoiceModalOpen(true)
+          }}
+          className="mt-3 flex items-center justify-between w-full rounded-3xl bg-gradient-to-r from-rose-600 via-pink-600 to-purple-700 hover:from-rose-700 hover:to-purple-800 active:scale-[0.98] text-white p-5 shadow-soft transition-all duration-200 text-left tap-press hover:shadow-lg"
         >
           <div className="flex items-center gap-3.5 min-w-0">
             <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl shrink-0">
@@ -209,10 +255,10 @@ export default function Home() {
               <button
                 key={p.barcode}
                 onClick={() => handleQuickPreset(p.barcode)}
-                className="flex flex-col text-left p-3.5 rounded-2xl bg-white shadow-card border border-gray-100 hover:border-emerald-300 hover:shadow-soft transition-all active:scale-95 overflow-hidden"
+                className="flex flex-col text-left p-3.5 rounded-2xl bg-white shadow-card border border-gray-100 hover:border-emerald-300 hover:shadow-soft transition-all active:scale-95 overflow-hidden tap-press group"
               >
                 <div className="flex items-center justify-between w-full gap-1">
-                  <span className="text-2xl shrink-0">{p.icon}</span>
+                  <span className="text-2xl shrink-0 group-hover:scale-110 transition-transform">{p.icon}</span>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 truncate max-w-[90px]">
                     {p.tag}
                   </span>
@@ -232,7 +278,8 @@ export default function Home() {
         <div className="mt-8 grid grid-cols-3 gap-2 sm:gap-2.5">
           <Link
             to="/explore"
-            className="rounded-2xl bg-gradient-to-br from-purple-50 to-white border border-purple-100 p-2.5 sm:p-3.5 shadow-sm hover:border-purple-300 transition-all text-center flex flex-col items-center overflow-hidden min-w-0"
+            onClick={() => triggerHaptic('selection')}
+            className="rounded-2xl bg-gradient-to-br from-purple-50 to-white border border-purple-100 p-2.5 sm:p-3.5 shadow-sm hover:border-purple-300 transition-all text-center flex flex-col items-center overflow-hidden min-w-0 tap-press hover:shadow-md"
           >
             <span className="text-2xl shrink-0">🔍</span>
             <p className="mt-1 font-bold text-xs text-gray-900 truncate w-full">Explore</p>
@@ -241,7 +288,8 @@ export default function Home() {
 
           <Link
             to="/compare"
-            className="rounded-2xl bg-gradient-to-br from-blue-50 to-white border border-blue-100 p-2.5 sm:p-3.5 shadow-sm hover:border-blue-300 transition-all text-center flex flex-col items-center overflow-hidden min-w-0"
+            onClick={() => triggerHaptic('selection')}
+            className="rounded-2xl bg-gradient-to-br from-blue-50 to-white border border-blue-100 p-2.5 sm:p-3.5 shadow-sm hover:border-blue-300 transition-all text-center flex flex-col items-center overflow-hidden min-w-0 tap-press hover:shadow-md"
           >
             <span className="text-2xl shrink-0">⚖️</span>
             <p className="mt-1 font-bold text-xs text-gray-900 truncate w-full">Compare</p>
@@ -250,7 +298,8 @@ export default function Home() {
 
           <Link
             to="/profile"
-            className="rounded-2xl bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 p-2.5 sm:p-3.5 shadow-sm hover:border-emerald-300 transition-all text-center flex flex-col items-center overflow-hidden min-w-0"
+            onClick={() => triggerHaptic('selection')}
+            className="rounded-2xl bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 p-2.5 sm:p-3.5 shadow-sm hover:border-emerald-300 transition-all text-center flex flex-col items-center overflow-hidden min-w-0 tap-press hover:shadow-md"
           >
             <span className="text-2xl shrink-0">⚙️</span>
             <p className="mt-1 font-bold text-xs text-gray-900 truncate w-full">Settings</p>
@@ -280,7 +329,11 @@ export default function Home() {
             <h2 className="text-sm font-extrabold uppercase tracking-wider text-gray-700">
               Recent Scans
             </h2>
-            <Link to="/history" className="text-xs font-bold text-emerald-600 hover:text-emerald-700">
+            <Link
+              to="/history"
+              onClick={() => triggerHaptic('selection')}
+              className="text-xs font-bold text-emerald-600 hover:text-emerald-700"
+            >
               View all →
             </Link>
           </div>
@@ -293,7 +346,7 @@ export default function Home() {
                 <div
                   key={s.id}
                   onClick={() => handleQuickPreset(s.barcode || String(s.product_id))}
-                  className="flex items-center justify-between p-3.5 rounded-2xl bg-white shadow-card border border-gray-100 cursor-pointer hover:border-gray-200 overflow-hidden"
+                  className="flex items-center justify-between p-3.5 rounded-2xl bg-white shadow-card border border-gray-100 cursor-pointer hover:border-gray-200 overflow-hidden tap-press"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <span className="text-2xl shrink-0">📦</span>

@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class FirebaseAuthenticationBackend(BaseBackend):
     """
     Custom authentication backend using Firebase tokens with multi-tier verification:
-    1. Firebase Admin SDK verify_id_token
+    1. Firebase Admin SDK verify_id_token (with clock skew tolerance for distributed environments)
     2. Google OAuth public-key verify_firebase_token (works without service account file)
     """
 
@@ -35,12 +35,18 @@ class FirebaseAuthenticationBackend(BaseBackend):
 
         decoded_token = None
 
-        # 1. Try Firebase Admin SDK verification (or mock in unit tests)
+        # 1. Try Firebase Admin SDK verification (with 15s clock skew tolerance)
         try:
-            decoded_token = firebase_auth.verify_id_token(token)
+            decoded_token = firebase_auth.verify_id_token(token, clock_skew_seconds=15)
         except (ExpiredIdTokenError, RevokedIdTokenError) as token_err:
             logger.warning(f"Firebase token expired/revoked: {token_err}")
             return None
+        except TypeError:
+            # Fallback for test mocks that don't accept clock_skew_seconds keyword argument
+            try:
+                decoded_token = firebase_auth.verify_id_token(token)
+            except Exception as admin_err:
+                logger.debug(f"Firebase Admin verify notice: {admin_err}")
         except Exception as admin_err:
             logger.debug(f"Firebase Admin verify notice: {admin_err}")
 
@@ -58,7 +64,25 @@ class FirebaseAuthenticationBackend(BaseBackend):
                     token,
                     google_requests.Request(),
                     audience=project_id,
+                    clock_skew_in_seconds=15,
                 )
+            except TypeError:
+                try:
+                    from google.oauth2 import id_token
+                    from google.auth.transport import requests as google_requests
+                    project_id = (
+                        os.environ.get('FIREBASE_PROJECT_ID')
+                        or os.environ.get('VITE_FIREBASE_PROJECT_ID')
+                        or 'food-ai-433b7'
+                    )
+                    decoded_token = id_token.verify_firebase_token(
+                        token,
+                        google_requests.Request(),
+                        audience=project_id,
+                    )
+                except Exception as g_err:
+                    logger.warning(f"Google public key token verification notice: {g_err}")
+                    return None
             except Exception as g_err:
                 logger.warning(f"Google public key token verification notice: {g_err}")
                 return None
@@ -78,19 +102,26 @@ class FirebaseAuthenticationBackend(BaseBackend):
             else ''
         )
 
-        # Get or create Django user
+        # Get or create Django user safely with concurrency protection
         try:
             user = User.objects.get(username=uid)
             if email and user.email != email:
                 user.email = email
                 user.save(update_fields=['email'])
         except User.DoesNotExist:
-            user = User.objects.create_user(
-                username=uid,
-                email=email,
-                first_name=first_name,
-            )
-            logger.info(f"Created new Django user for Firebase UID: {uid}")
+            try:
+                user = User.objects.create_user(
+                    username=uid,
+                    email=email,
+                    first_name=first_name,
+                )
+                logger.info(f"Created new Django user for Firebase UID: {uid}")
+            except Exception:
+                # Concurrent request might have created user simultaneously
+                user = User.objects.filter(username=uid).first()
+                if not user:
+                    logger.error(f"Failed to create or retrieve Django user for {uid}")
+                    return None
 
         return user
 

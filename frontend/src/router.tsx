@@ -27,8 +27,14 @@ const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 
 function PageSpinner() {
   return (
-    <div className="flex min-h-[60vh] items-center justify-center">
-      <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-emerald-600"></div>
+    <div className="flex min-h-[70vh] flex-col items-center justify-center gap-3">
+      <div className="relative flex items-center justify-center">
+        <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-2xl animate-pulse">
+          🥗
+        </div>
+        <div className="absolute inset-0 rounded-2xl border-2 border-emerald-500 border-t-transparent animate-spin"></div>
+      </div>
+      <p className="text-xs font-semibold text-gray-500 animate-pulse">Loading FoodAI...</p>
     </div>
   )
 }
@@ -108,7 +114,7 @@ function AppLayout() {
   return (
     <div className="relative min-h-screen w-full max-w-full overflow-x-hidden box-border">
       <DevDemoBanner />
-      <main className="w-full max-w-full box-border">
+      <main className="w-full max-w-full box-border animate-fade-in-up">
         <Outlet />
       </main>
       <BottomTabBar />

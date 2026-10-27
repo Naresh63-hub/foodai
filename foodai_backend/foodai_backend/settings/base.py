@@ -70,7 +70,9 @@ WSGI_APPLICATION = 'foodai_backend.wsgi.application'
 
 DATABASES = {
     'default': env.db_url('DATABASE_URL'),
-}
+}
+DATABASES['default']['CONN_MAX_AGE'] = env.int('CONN_MAX_AGE', default=60)
+DATABASES['default']['CONN_HEALTH_CHECKS'] = True
 
 AUTH_PASSWORD_VALIDATORS = [
     {
