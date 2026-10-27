@@ -98,7 +98,7 @@ export default function Scan() {
               setMatchedProduct({
                 product_name: item.product_name,
                 brands: item.brands,
-                barcode: item.barcode,
+                barcode: item.barcode || '',
                 serving_size: item.serving_size,
                 icon: '📦',
               })
@@ -144,7 +144,7 @@ export default function Scan() {
               setMatchedBatchProduct({
                 product_name: item.product_name,
                 brands: item.brands,
-                barcode: item.barcode,
+                barcode: item.barcode || '',
                 icon: '🛒',
               })
             } else {

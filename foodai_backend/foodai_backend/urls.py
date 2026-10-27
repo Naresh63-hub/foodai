@@ -14,6 +14,10 @@ from foodai_backend.food_analysis.views import (
     SampleProductsView,
     TextScanView,
 )
+from foodai_backend.food_analysis.views_ai import (
+    AINutritionAnalyzeView,
+    FoodVisionAnalyzeView,
+)
 from foodai_backend.scans.views import ScanDetailView, ScanListView
 from foodai_backend.scans.views_ocr import OCRScanView
 from foodai_backend.users.views import ProfileView
@@ -45,6 +49,12 @@ urlpatterns = [
     path('api/scan/barcode/', BarcodeScanView.as_view(), name='scan_barcode'),
     path('api/scan/text/', TextScanView.as_view(), name='scan_text'),
     path('api/scan/ocr/', OCRScanView.as_view(), name='scan_ocr'),
+
+    # AI Nutrition & Computer Vision (Gemini / Clinical Synthesizer)
+    path('api/ai/nutrition-analyze/', AINutritionAnalyzeView.as_view(), name='ai_nutrition_analyze'),
+    path('api/nutrition-analyze/', AINutritionAnalyzeView.as_view(), name='nutrition_analyze'),
+    path('api/ai/food-vision-analyze/', FoodVisionAnalyzeView.as_view(), name='ai_food_vision_analyze'),
+    path('api/food-vision-analyze/', FoodVisionAnalyzeView.as_view(), name='food_vision_analyze'),
 
     # Products & Additives
     path('api/products/search/', ProductCatalogSearchView.as_view(), name='product_search'),

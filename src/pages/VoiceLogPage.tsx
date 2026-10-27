@@ -149,42 +149,46 @@ export default function VoiceLogPage() {
       localStorage.setItem(localKey, JSON.stringify(existing))
       setRecentVoiceLogs(existing.slice(0, 5))
 
-      // Sync to Firestore
+      // Sync to Firestore (non-blocking progressive enhancement)
       if (user?.uid) {
-        await saveDailyLogToFirestore({
-          id: newLogItem.id,
-          userId: user.uid,
-          productName: newLogItem.product_name,
-          portionG: newLogItem.portion_g,
-          sugarsG: newLogItem.sugars_g,
-          saltG: newLogItem.salt_g,
-          fatG: newLogItem.fat_g,
-          additivesCount: 0,
-          processingLevel: finalProcessing,
-          dateKey: today,
-          createdAt: newLogItem.timestamp,
-        })
+        try {
+          await saveDailyLogToFirestore({
+            id: newLogItem.id,
+            userId: user.uid,
+            productName: newLogItem.product_name,
+            portionG: newLogItem.portion_g,
+            sugarsG: newLogItem.sugars_g,
+            saltG: newLogItem.salt_g,
+            fatG: newLogItem.fat_g,
+            additivesCount: 0,
+            processingLevel: finalProcessing,
+            dateKey: today,
+            createdAt: newLogItem.timestamp,
+          })
 
-        await saveFoodScanToFirestore({
-          id: `scan_${Date.now()}`,
-          userId: user.uid,
-          foodName: foodName,
-          caloriesKcal: finalCalories,
-          servingDescription: finalServingDesc,
-          servingWeightG: 200,
-          macros: {
-            carbohydrates_g: finalCarbs,
-            proteins_g: finalProtein,
-            fat_g: finalFat,
-            sugars_g: finalSugar,
-            sodium_mg: finalSodium,
-          },
-          healthScore: finalHealthScore,
-          processingLevel: finalProcessing,
-          glycemicImpact: 'Moderate',
-          ingredients: [],
-          createdAt: new Date().toISOString(),
-        })
+          await saveFoodScanToFirestore({
+            id: `scan_${Date.now()}`,
+            userId: user.uid,
+            foodName: foodName,
+            caloriesKcal: finalCalories,
+            servingDescription: finalServingDesc,
+            servingWeightG: 200,
+            macros: {
+              carbohydrates_g: finalCarbs,
+              proteins_g: finalProtein,
+              fat_g: finalFat,
+              sugars_g: finalSugar,
+              sodium_mg: finalSodium,
+            },
+            healthScore: finalHealthScore,
+            processingLevel: finalProcessing,
+            glycemicImpact: 'Moderate',
+            ingredients: [],
+            createdAt: new Date().toISOString(),
+          })
+        } catch (cloudErr) {
+          console.warn('Firestore cloud sync notice (saved locally):', cloudErr)
+        }
       }
 
       speak(`Logged ${foodName} for ${selectedMealType}, ${finalCalories} calories.`)

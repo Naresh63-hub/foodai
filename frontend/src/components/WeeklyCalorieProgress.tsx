@@ -88,29 +88,33 @@ export default function WeeklyCalorieProgress() {
       localStorage.setItem(localKey, JSON.stringify(existing))
 
       if (user?.uid) {
-        await saveFoodScanToFirestore({
-          id: `scan_${Date.now()}`,
-          userId: user.uid,
-          foodName: mealName,
-          caloriesKcal: cal,
-          servingDescription: '1 serving (~200g)',
-          servingWeightG: 200,
-          macros: {
-            carbohydrates_g: Math.round((cal * 0.45) / 4),
-            proteins_g: Math.round((cal * 0.3) / 4),
-            fat_g: Math.round((cal * 0.25) / 9),
-            fiber_g: 4,
-            sugars_g: 6,
-            sodium_mg: 450,
-          },
-          healthScore: 88,
-          processingLevel: 'Minimally Processed',
-          glycemicImpact: 'Moderate',
-          ingredients: [{ name: mealName, amount_estimate: '200g', category: 'Whole Foods', visual_cue: 'Fresh plate' }],
-          createdAt: new Date().toISOString(),
-        })
+        try {
+          await saveFoodScanToFirestore({
+            id: `scan_${Date.now()}`,
+            userId: user.uid,
+            foodName: mealName,
+            caloriesKcal: cal,
+            servingDescription: '1 serving (~200g)',
+            servingWeightG: 200,
+            macros: {
+              carbohydrates_g: Math.round((cal * 0.45) / 4),
+              proteins_g: Math.round((cal * 0.3) / 4),
+              fat_g: Math.round((cal * 0.25) / 9),
+              fiber_g: 4,
+              sugars_g: 6,
+              sodium_mg: 450,
+            },
+            healthScore: 88,
+            processingLevel: 'Minimally Processed',
+            glycemicImpact: 'Moderate',
+            ingredients: [{ name: mealName, amount_estimate: '200g', category: 'Whole Foods', visual_cue: 'Fresh plate' }],
+            createdAt: new Date().toISOString(),
+          })
+        } catch (cloudErr) {
+          console.warn('Firestore cloud sync notice (saved locally):', cloudErr)
+        }
       }
-      toast.success(`Logged ${mealName} (${cal} kcal) to Firestore!`)
+      toast.success(`Logged ${mealName} (${cal} kcal)!`)
       loadData()
     } catch {
       toast.error('Failed to log meal')

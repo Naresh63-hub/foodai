@@ -7,7 +7,6 @@ import { useAuth } from '../contexts/AuthContext'
 import { useUserPreferences } from '../hooks/useUserPreferences'
 import { saveFoodScanToFirestore, saveDailyLogToFirestore } from '../services/firestoreService'
 import { DailyFoodLogItem } from '../types/food'
-import { SkeletonNutritionOverview } from '../components/Skeleton'
 
 // Sample preset meal photos for quick 1-tap testing
 const SAMPLE_MEAL_PRESETS = [
@@ -43,6 +42,9 @@ export default function FoodCameraSnap() {
   const [analysis, setAnalysis] = useState<FoodVisionAnalysisResult | null>(null)
   const [savedToCloud, setSavedToCloud] = useState(false)
   const [loggedToTracker, setLoggedToTracker] = useState(false)
+  const [torchOn, setTorchOn] = useState(false)
+  const [torchSupported, setTorchSupported] = useState(true)
+  const [selectedPreset, setSelectedPreset] = useState<typeof SAMPLE_MEAL_PRESETS[0] | null>(null)
 
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -56,11 +58,21 @@ export default function FoodCameraSnap() {
         streamRef.current.getTracks().forEach((t) => t.stop())
       }
       setCameraActive(true)
+      setTorchOn(false)
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: mode, width: { ideal: 1280 }, height: { ideal: 720 } },
         audio: false,
       })
       streamRef.current = stream
+      const track = stream.getVideoTracks()[0]
+      if (track) {
+        const capabilities = (track.getCapabilities && track.getCapabilities()) as any
+        if (capabilities && 'torch' in capabilities) {
+          setTorchSupported(Boolean(capabilities.torch))
+        } else {
+          setTorchSupported(mode === 'environment')
+        }
+      }
       if (videoRef.current) {
         videoRef.current.srcObject = stream
         videoRef.current.play()
@@ -72,12 +84,45 @@ export default function FoodCameraSnap() {
     }
   }
 
+  // Toggle Torch / Flashlight
+  const toggleTorch = async () => {
+    if (!streamRef.current) {
+      toast.info('Camera is not active')
+      return
+    }
+    const track = streamRef.current.getVideoTracks()[0]
+    if (!track) {
+      toast.info('No video track found')
+      return
+    }
+
+    try {
+      const nextState = !torchOn
+      await track.applyConstraints({
+        advanced: [{ torch: nextState } as any],
+      })
+      setTorchOn(nextState)
+      toast.success(nextState ? 'Torch ON 🔦' : 'Torch OFF')
+    } catch (err: any) {
+      console.warn('Torch constraint error:', err)
+      toast.error('Torch / Flashlight is not supported on this camera/device')
+      setTorchSupported(false)
+    }
+  }
+
   // Stop Camera
   const stopCamera = () => {
     if (streamRef.current) {
+      const track = streamRef.current.getVideoTracks()[0]
+      if (track && torchOn) {
+        try {
+          track.applyConstraints({ advanced: [{ torch: false } as any] })
+        } catch {}
+      }
       streamRef.current.getTracks().forEach((t) => t.stop())
       streamRef.current = null
     }
+    setTorchOn(false)
     setCameraActive(false)
   }
 
@@ -99,6 +144,7 @@ export default function FoodCameraSnap() {
     if (!ctx) return
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
     const base64Data = canvas.toDataURL('image/jpeg', 0.85)
+    setSelectedPreset(null)
     setCapturedImage(base64Data)
     stopCamera()
     toast.success('Food photo snapped!')
@@ -108,6 +154,7 @@ export default function FoodCameraSnap() {
   const handleToggleFacingMode = () => {
     const nextMode = facingMode === 'environment' ? 'user' : 'environment'
     setFacingMode(nextMode)
+    setTorchOn(false)
     startCamera(nextMode)
   }
 
@@ -115,6 +162,7 @@ export default function FoodCameraSnap() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    setSelectedPreset(null)
     const reader = new FileReader()
     reader.onload = () => {
       setCapturedImage(reader.result as string)
@@ -123,22 +171,95 @@ export default function FoodCameraSnap() {
     reader.readAsDataURL(file)
   }
 
-  // Pick demo preset image
-  const handleSelectPreset = async (url: string) => {
+  // Generate high quality canvas fallback data URL for preset samples if external image fails
+  const createPresetFallbackDataUrl = (preset: typeof SAMPLE_MEAL_PRESETS[0]) => {
+    const canvas = document.createElement('canvas')
+    canvas.width = 600
+    canvas.height = 600
+    const ctx = canvas.getContext('2d')
+    if (ctx) {
+      const grad = ctx.createLinearGradient(0, 0, 600, 600)
+      grad.addColorStop(0, '#064e3b')
+      grad.addColorStop(1, '#022c22')
+      ctx.fillStyle = grad
+      ctx.fillRect(0, 0, 600, 600)
+
+      ctx.font = '140px sans-serif'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(preset.emoji, 300, 240)
+
+      ctx.fillStyle = '#ffffff'
+      ctx.font = 'bold 30px sans-serif'
+      ctx.fillText(preset.name, 300, 380)
+
+      ctx.fillStyle = '#a7f3d0'
+      ctx.font = '18px sans-serif'
+      ctx.fillText(preset.description, 300, 425)
+      return canvas.toDataURL('image/jpeg', 0.9)
+    }
+    return ''
+  }
+
+  // Pick demo preset image with resilient image loader & fallback
+  const handleSelectPreset = async (presetOrUrl: typeof SAMPLE_MEAL_PRESETS[0] | string) => {
+    const preset = typeof presetOrUrl === 'string'
+      ? SAMPLE_MEAL_PRESETS.find((p) => p.url === presetOrUrl) || {
+          name: 'Balanced Meal',
+          emoji: '🍽️',
+          url: presetOrUrl,
+          description: 'Nutritious balanced meal',
+        }
+      : presetOrUrl
+
+    setSelectedPreset(preset)
+    setLoading(true)
+
+    const applyFallback = () => {
+      const fallbackUrl = createPresetFallbackDataUrl(preset)
+      setCapturedImage(fallbackUrl)
+      stopCamera()
+      setLoading(false)
+      toast.success(`Selected sample: ${preset.name}`)
+    }
+
     try {
-      setLoading(true)
-      const res = await fetch(url)
+      const res = await fetch(preset.url, { mode: 'cors' })
+      if (!res.ok) throw new Error('Fetch status not ok')
       const blob = await res.blob()
       const reader = new FileReader()
       reader.onload = () => {
         setCapturedImage(reader.result as string)
         stopCamera()
         setLoading(false)
+        toast.success(`Selected sample: ${preset.name}`)
       }
+      reader.onerror = applyFallback
       reader.readAsDataURL(blob)
     } catch {
-      setLoading(false)
-      toast.error('Failed to load preset photo')
+      try {
+        const img = new Image()
+        img.crossOrigin = 'anonymous'
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          canvas.width = img.naturalWidth || 600
+          canvas.height = img.naturalHeight || 600
+          const ctx = canvas.getContext('2d')
+          if (ctx) {
+            ctx.drawImage(img, 0, 0)
+            setCapturedImage(canvas.toDataURL('image/jpeg', 0.85))
+          } else {
+            setCapturedImage(createPresetFallbackDataUrl(preset))
+          }
+          stopCamera()
+          setLoading(false)
+          toast.success(`Selected sample: ${preset.name}`)
+        }
+        img.onerror = applyFallback
+        img.src = preset.url
+      } catch {
+        applyFallback()
+      }
     }
   }
 
@@ -156,6 +277,7 @@ export default function FoodCameraSnap() {
     try {
       const result = await analyzeFoodPhoto({
         image_base64: capturedImage,
+        food_name: selectedPreset?.name || undefined,
         mime_type: 'image/jpeg',
         age: userPrefs.age ? parseInt(userPrefs.age, 10) : null,
         weight_kg: userPrefs.weight ? parseFloat(userPrefs.weight) : null,
@@ -165,7 +287,7 @@ export default function FoodCameraSnap() {
       setAnalysis(result)
       toast.success(`Recognized: ${result.food_name}!`)
 
-      // Auto-save to Firestore if user is authenticated
+      // Auto-save to Firestore if user is authenticated (progressive enhancement)
       if (user?.uid) {
         try {
           const scanId = `snap_${Date.now()}`
@@ -199,6 +321,7 @@ export default function FoodCameraSnap() {
   // Retake photo
   const handleRetake = () => {
     setCapturedImage(null)
+    setSelectedPreset(null)
     setAnalysis(null)
     setSavedToCloud(false)
     setLoggedToTracker(false)
@@ -228,21 +351,25 @@ export default function FoodCameraSnap() {
       existing.unshift(newItem)
       localStorage.setItem(todayKey, JSON.stringify(existing))
 
-      // Persist to Firestore if user logged in
+      // Persist to Firestore if user logged in (non-blocking)
       if (user?.uid) {
-        await saveDailyLogToFirestore({
-          id: newItem.id,
-          userId: user.uid,
-          productName: newItem.product_name,
-          portionG: newItem.portion_g,
-          sugarsG: newItem.sugars_g,
-          saltG: newItem.salt_g,
-          fatG: newItem.fat_g,
-          additivesCount: newItem.additives_count,
-          processingLevel: newItem.processing_level,
-          dateKey: todayKey,
-          createdAt: newItem.timestamp,
-        })
+        try {
+          await saveDailyLogToFirestore({
+            id: newItem.id,
+            userId: user.uid,
+            productName: newItem.product_name,
+            portionG: newItem.portion_g,
+            sugarsG: newItem.sugars_g,
+            saltG: newItem.salt_g,
+            fatG: newItem.fat_g,
+            additivesCount: newItem.additives_count,
+            processingLevel: newItem.processing_level,
+            dateKey: todayKey,
+            createdAt: newItem.timestamp,
+          })
+        } catch (cloudErr) {
+          console.warn('Firestore daily log sync notice (saved locally):', cloudErr)
+        }
       }
 
       setLoggedToTracker(true)
@@ -321,14 +448,30 @@ export default function FoodCameraSnap() {
                 />
 
                 {/* Viewfinder Target Overlay */}
-                <div className="absolute inset-0 pointer-events-none p-6 flex flex-col justify-between">
+                <div className="absolute inset-0 pointer-events-none p-4 sm:p-6 flex flex-col justify-between">
                   <div className="flex justify-between items-start">
                     <div className="w-8 h-8 border-t-4 border-l-4 border-emerald-400 rounded-tl-xl" />
                     <div className="px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-[10px] text-white font-bold flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                       <span>Align meal in frame</span>
                     </div>
-                    <div className="w-8 h-8 border-t-4 border-r-4 border-emerald-400 rounded-tr-xl" />
+                    {/* Floating Torch toggle top-right */}
+                    {torchSupported ? (
+                      <button
+                        onClick={toggleTorch}
+                        className={`pointer-events-auto px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 backdrop-blur-md shadow-md border transition-all active:scale-95 ${
+                          torchOn
+                            ? 'bg-amber-400 text-gray-950 border-amber-300 ring-2 ring-amber-300 font-black'
+                            : 'bg-black/60 hover:bg-black/80 text-white border-white/20'
+                        }`}
+                        title={torchOn ? 'Turn torch off' : 'Turn torch on'}
+                      >
+                        <span>{torchOn ? '⚡' : '🔦'}</span>
+                        <span>{torchOn ? 'ON' : 'Torch'}</span>
+                      </button>
+                    ) : (
+                      <div className="w-8 h-8 border-t-4 border-r-4 border-emerald-400 rounded-tr-xl" />
+                    )}
                   </div>
                   <div className="flex justify-between items-end">
                     <div className="w-8 h-8 border-b-4 border-l-4 border-emerald-400 rounded-bl-xl" />
@@ -337,7 +480,7 @@ export default function FoodCameraSnap() {
                 </div>
 
                 {/* Camera Control Toolbar */}
-                <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-6 px-6">
+                <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-3.5 sm:gap-5 px-4">
                   {/* Gallery Button */}
                   <button
                     onClick={() => fileInputRef.current?.click()}
@@ -346,6 +489,21 @@ export default function FoodCameraSnap() {
                   >
                     🖼️
                   </button>
+
+                  {/* Torch / Flashlight Button */}
+                  {torchSupported && (
+                    <button
+                      onClick={toggleTorch}
+                      className={`w-11 h-11 rounded-full backdrop-blur-md text-lg flex items-center justify-center border active:scale-95 transition-all ${
+                        torchOn
+                          ? 'bg-amber-400 text-gray-950 border-amber-300 ring-2 ring-amber-300 shadow-md font-bold'
+                          : 'bg-black/50 text-white border-white/20 hover:bg-black/70'
+                      }`}
+                      title={torchOn ? 'Turn torch off' : 'Turn torch on'}
+                    >
+                      {torchOn ? '⚡' : '🔦'}
+                    </button>
+                  )}
 
                   {/* Shutter Button */}
                   <button
@@ -473,21 +631,18 @@ export default function FoodCameraSnap() {
 
         {/* LOADING STATE */}
         {loading && (
-          <div className="space-y-4 mb-5">
-            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center text-sm shrink-0 animate-spin">
-                ⏳
-              </div>
-              <div>
-                <h3 className="text-xs font-black text-emerald-900">
-                  Gemini Vision Inspecting Meal...
-                </h3>
-                <p className="text-[11px] text-emerald-700">
-                  Recognizing ingredients, estimating portion weights & analyzing calories
-                </p>
-              </div>
+          <div className="p-6 rounded-3xl bg-white shadow-soft border border-gray-100 animate-pulse text-center space-y-3 mb-5">
+            <div className="w-14 h-14 bg-emerald-100 text-emerald-800 rounded-2xl mx-auto flex items-center justify-center text-3xl animate-bounce">
+              🔍
             </div>
-            <SkeletonNutritionOverview />
+            <div>
+              <h3 className="text-sm font-extrabold text-gray-900">
+                Gemini Vision Inspecting Meal...
+              </h3>
+              <p className="text-xs text-gray-500 mt-1">
+                Recognizing individual ingredients, estimating portion grams & calculating calorie density...
+              </p>
+            </div>
           </div>
         )}
 

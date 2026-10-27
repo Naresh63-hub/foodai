@@ -44,6 +44,7 @@ export default function FoodCameraSnap() {
   const [loggedToTracker, setLoggedToTracker] = useState(false)
   const [torchOn, setTorchOn] = useState(false)
   const [torchSupported, setTorchSupported] = useState(true)
+  const [selectedPreset, setSelectedPreset] = useState<typeof SAMPLE_MEAL_PRESETS[0] | null>(null)
 
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -143,6 +144,7 @@ export default function FoodCameraSnap() {
     if (!ctx) return
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
     const base64Data = canvas.toDataURL('image/jpeg', 0.85)
+    setSelectedPreset(null)
     setCapturedImage(base64Data)
     stopCamera()
     toast.success('Food photo snapped!')
@@ -160,6 +162,7 @@ export default function FoodCameraSnap() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    setSelectedPreset(null)
     const reader = new FileReader()
     reader.onload = () => {
       setCapturedImage(reader.result as string)
@@ -168,22 +171,95 @@ export default function FoodCameraSnap() {
     reader.readAsDataURL(file)
   }
 
-  // Pick demo preset image
-  const handleSelectPreset = async (url: string) => {
+  // Generate high quality canvas fallback data URL for preset samples if external image fails
+  const createPresetFallbackDataUrl = (preset: typeof SAMPLE_MEAL_PRESETS[0]) => {
+    const canvas = document.createElement('canvas')
+    canvas.width = 600
+    canvas.height = 600
+    const ctx = canvas.getContext('2d')
+    if (ctx) {
+      const grad = ctx.createLinearGradient(0, 0, 600, 600)
+      grad.addColorStop(0, '#064e3b')
+      grad.addColorStop(1, '#022c22')
+      ctx.fillStyle = grad
+      ctx.fillRect(0, 0, 600, 600)
+
+      ctx.font = '140px sans-serif'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(preset.emoji, 300, 240)
+
+      ctx.fillStyle = '#ffffff'
+      ctx.font = 'bold 30px sans-serif'
+      ctx.fillText(preset.name, 300, 380)
+
+      ctx.fillStyle = '#a7f3d0'
+      ctx.font = '18px sans-serif'
+      ctx.fillText(preset.description, 300, 425)
+      return canvas.toDataURL('image/jpeg', 0.9)
+    }
+    return ''
+  }
+
+  // Pick demo preset image with resilient image loader & fallback
+  const handleSelectPreset = async (presetOrUrl: typeof SAMPLE_MEAL_PRESETS[0] | string) => {
+    const preset = typeof presetOrUrl === 'string'
+      ? SAMPLE_MEAL_PRESETS.find((p) => p.url === presetOrUrl) || {
+          name: 'Balanced Meal',
+          emoji: '🍽️',
+          url: presetOrUrl,
+          description: 'Nutritious balanced meal',
+        }
+      : presetOrUrl
+
+    setSelectedPreset(preset)
+    setLoading(true)
+
+    const applyFallback = () => {
+      const fallbackUrl = createPresetFallbackDataUrl(preset)
+      setCapturedImage(fallbackUrl)
+      stopCamera()
+      setLoading(false)
+      toast.success(`Selected sample: ${preset.name}`)
+    }
+
     try {
-      setLoading(true)
-      const res = await fetch(url)
+      const res = await fetch(preset.url, { mode: 'cors' })
+      if (!res.ok) throw new Error('Fetch status not ok')
       const blob = await res.blob()
       const reader = new FileReader()
       reader.onload = () => {
         setCapturedImage(reader.result as string)
         stopCamera()
         setLoading(false)
+        toast.success(`Selected sample: ${preset.name}`)
       }
+      reader.onerror = applyFallback
       reader.readAsDataURL(blob)
     } catch {
-      setLoading(false)
-      toast.error('Failed to load preset photo')
+      try {
+        const img = new Image()
+        img.crossOrigin = 'anonymous'
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          canvas.width = img.naturalWidth || 600
+          canvas.height = img.naturalHeight || 600
+          const ctx = canvas.getContext('2d')
+          if (ctx) {
+            ctx.drawImage(img, 0, 0)
+            setCapturedImage(canvas.toDataURL('image/jpeg', 0.85))
+          } else {
+            setCapturedImage(createPresetFallbackDataUrl(preset))
+          }
+          stopCamera()
+          setLoading(false)
+          toast.success(`Selected sample: ${preset.name}`)
+        }
+        img.onerror = applyFallback
+        img.src = preset.url
+      } catch {
+        applyFallback()
+      }
     }
   }
 
@@ -201,6 +277,7 @@ export default function FoodCameraSnap() {
     try {
       const result = await analyzeFoodPhoto({
         image_base64: capturedImage,
+        food_name: selectedPreset?.name || undefined,
         mime_type: 'image/jpeg',
         age: userPrefs.age ? parseInt(userPrefs.age, 10) : null,
         weight_kg: userPrefs.weight ? parseFloat(userPrefs.weight) : null,
@@ -210,7 +287,7 @@ export default function FoodCameraSnap() {
       setAnalysis(result)
       toast.success(`Recognized: ${result.food_name}!`)
 
-      // Auto-save to Firestore if user is authenticated
+      // Auto-save to Firestore if user is authenticated (progressive enhancement)
       if (user?.uid) {
         try {
           const scanId = `snap_${Date.now()}`
@@ -244,6 +321,7 @@ export default function FoodCameraSnap() {
   // Retake photo
   const handleRetake = () => {
     setCapturedImage(null)
+    setSelectedPreset(null)
     setAnalysis(null)
     setSavedToCloud(false)
     setLoggedToTracker(false)
@@ -273,21 +351,25 @@ export default function FoodCameraSnap() {
       existing.unshift(newItem)
       localStorage.setItem(todayKey, JSON.stringify(existing))
 
-      // Persist to Firestore if user logged in
+      // Persist to Firestore if user logged in (non-blocking)
       if (user?.uid) {
-        await saveDailyLogToFirestore({
-          id: newItem.id,
-          userId: user.uid,
-          productName: newItem.product_name,
-          portionG: newItem.portion_g,
-          sugarsG: newItem.sugars_g,
-          saltG: newItem.salt_g,
-          fatG: newItem.fat_g,
-          additivesCount: newItem.additives_count,
-          processingLevel: newItem.processing_level,
-          dateKey: todayKey,
-          createdAt: newItem.timestamp,
-        })
+        try {
+          await saveDailyLogToFirestore({
+            id: newItem.id,
+            userId: user.uid,
+            productName: newItem.product_name,
+            portionG: newItem.portion_g,
+            sugarsG: newItem.sugars_g,
+            saltG: newItem.salt_g,
+            fatG: newItem.fat_g,
+            additivesCount: newItem.additives_count,
+            processingLevel: newItem.processing_level,
+            dateKey: todayKey,
+            createdAt: newItem.timestamp,
+          })
+        } catch (cloudErr) {
+          console.warn('Firestore daily log sync notice (saved locally):', cloudErr)
+        }
       }
 
       setLoggedToTracker(true)
