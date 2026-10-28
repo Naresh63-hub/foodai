@@ -30,7 +30,7 @@ test.describe('Authentication Flow', () => {
 
   test('should navigate between login and register pages', async ({ page }) => {
     await page.goto('/login')
-    await page.getByRole('link', { name: 'Create Account' }).click()
+    await page.locator('a[href="/register"]').click()
     await expect(page).toHaveURL('/register')
     await page.getByRole('button', { name: 'Sign in' }).click()
     await expect(page).toHaveURL('/login')

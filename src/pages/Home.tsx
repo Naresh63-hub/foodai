@@ -189,6 +189,27 @@ export default function Home() {
           <span className="text-xl shrink-0 ml-2">➔</span>
         </Link>
 
+        {/* Multi-Item Plate Recognition Card */}
+        <Link
+          to="/plate"
+          onClick={() => triggerHaptic('medium')}
+          className="mt-3 flex items-center justify-between w-full rounded-3xl bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-700 hover:from-emerald-700 hover:to-indigo-800 active:scale-[0.98] text-white p-5 shadow-soft transition-all duration-200 tap-press hover:shadow-lg"
+        >
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl shrink-0">
+              🍽️
+            </div>
+            <div className="text-left min-w-0">
+              <div className="flex items-center gap-1.5">
+                <p className="font-extrabold text-lg leading-tight truncate">Analyze My Plate</p>
+                <span className="text-[10px] uppercase font-bold bg-white/25 px-2 py-0.5 rounded-full shrink-0">Multi-Item</span>
+              </div>
+              <p className="text-xs text-white/85 font-medium truncate">Deconstruct multiple foods, adjust portions & macros</p>
+            </div>
+          </div>
+          <span className="text-xl shrink-0 ml-2">➔</span>
+        </Link>
+
         {/* Gemini AI Nutrition Action Card */}
         <Link
           to="/ai-nutrition"

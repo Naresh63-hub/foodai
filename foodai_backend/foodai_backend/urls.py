@@ -17,6 +17,7 @@ from foodai_backend.food_analysis.views import (
 from foodai_backend.food_analysis.views_ai import (
     AINutritionAnalyzeView,
     FoodVisionAnalyzeView,
+    MultiItemPlateAnalyzeView,
 )
 from foodai_backend.scans.views import (
     DailyMealLogDetailView,
@@ -61,6 +62,8 @@ urlpatterns = [
     path('api/nutrition-analyze/', AINutritionAnalyzeView.as_view(), name='nutrition_analyze'),
     path('api/ai/food-vision-analyze/', FoodVisionAnalyzeView.as_view(), name='ai_food_vision_analyze'),
     path('api/food-vision-analyze/', FoodVisionAnalyzeView.as_view(), name='food_vision_analyze'),
+    path('api/ai/plate-analyze/', MultiItemPlateAnalyzeView.as_view(), name='ai_plate_analyze'),
+    path('api/plate-analyze/', MultiItemPlateAnalyzeView.as_view(), name='plate_analyze'),
 
     # Products & Additives
     path('api/products/search/', ProductCatalogSearchView.as_view(), name='product_search'),

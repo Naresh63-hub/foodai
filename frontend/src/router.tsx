@@ -20,6 +20,7 @@ const GroceryCart = lazy(() => import('./pages/GroceryCart'))
 const CatalogExplorer = lazy(() => import('./pages/CatalogExplorer'))
 const AINutritionAnalyzer = lazy(() => import('./pages/AINutritionAnalyzer'))
 const FoodCameraSnap = lazy(() => import('./pages/FoodCameraSnap'))
+const PlateAnalyzer = lazy(() => import('./pages/PlateAnalyzer'))
 const VoiceLogPage = lazy(() => import('./pages/VoiceLogPage'))
 const Login = lazy(() => import('./pages/Login'))
 const Register = lazy(() => import('./pages/Register'))
@@ -135,6 +136,8 @@ export default function AppRouter() {
           <Route path="/explore" element={<ProtectedRoute><CatalogExplorer /></ProtectedRoute>} />
           <Route path="/ai-nutrition" element={<ProtectedRoute><AINutritionAnalyzer /></ProtectedRoute>} />
           <Route path="/camera-snap" element={<ProtectedRoute><FoodCameraSnap /></ProtectedRoute>} />
+          <Route path="/plate" element={<ProtectedRoute><PlateAnalyzer /></ProtectedRoute>} />
+          <Route path="/analyze-plate" element={<ProtectedRoute><PlateAnalyzer /></ProtectedRoute>} />
           <Route path="/voice-log" element={<ProtectedRoute><VoiceLogPage /></ProtectedRoute>} />
           <Route path="/scan" element={<ProtectedRoute><Scan /></ProtectedRoute>} />
           <Route path="/tracker" element={<ProtectedRoute><DailyTracker /></ProtectedRoute>} />

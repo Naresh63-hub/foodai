@@ -455,6 +455,24 @@ export default function FoodCameraSnap() {
           </p>
         </div>
 
+        {/* Multi-Item Plate Recognition Shortcut Banner */}
+        <Link
+          to="/plate"
+          className="mb-4 flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-700 text-white shadow-soft hover:shadow-md transition-all active:scale-[0.99]"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="text-2xl shrink-0">🍽️</span>
+            <div className="text-left min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="font-extrabold text-xs">Analyze My Plate</span>
+                <span className="text-[9px] font-bold bg-white/25 uppercase px-1.5 py-0.5 rounded-full">Multi-Item</span>
+              </div>
+              <p className="text-[11px] text-white/85 truncate">Have multiple foods on one plate? Deconstruct each separately</p>
+            </div>
+          </div>
+          <span className="text-xs font-bold bg-white/20 px-2.5 py-1 rounded-xl shrink-0">Try Plate ➔</span>
+        </Link>
+
         {/* Hidden File Input */}
         <input
           ref={fileInputRef}

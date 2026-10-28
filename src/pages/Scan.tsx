@@ -914,11 +914,32 @@ export default function Scan() {
   return (
     <SafeAreaView>
       <div className="px-4 sm:px-5 py-6 pb-36 max-w-md mx-auto w-full box-border">
-        <div className="mb-5">
+        <div className="mb-4">
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">Scan Food</h1>
           <p className="text-xs text-gray-500 mt-1">
             Barcode scanner, label camera OCR, or manual ingredient breakdown.
           </p>
+        </div>
+
+        {/* Multi-Item Plate Recognition Shortcut Banner */}
+        <div className="mb-4">
+          <button
+            type="button"
+            onClick={() => navigate('/plate')}
+            className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-soft hover:shadow-md transition-all active:scale-[0.99] text-left"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="text-2xl shrink-0">🍽️</span>
+              <div className="text-left min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-extrabold text-xs">Analyze My Plate</span>
+                  <span className="text-[9px] font-bold bg-white/25 uppercase px-1.5 py-0.5 rounded-full">Multi-Item</span>
+                </div>
+                <p className="text-[11px] text-white/85 truncate">Deconstruct multiple food items on a single plate</p>
+              </div>
+            </div>
+            <span className="text-sm font-bold ml-2">➔</span>
+          </button>
         </div>
 
         {/* AI Food Intelligence Shortcuts */}

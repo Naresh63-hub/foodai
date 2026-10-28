@@ -121,6 +121,8 @@ class DailyMealLogListView(APIView):
 
         if request.user.is_authenticated:
             qs = qs.filter(user=request.user)
+        else:
+            qs = qs.filter(user__isnull=True)
 
         if date_param:
             qs = qs.filter(date_key=date_param)
@@ -208,6 +210,8 @@ class DailyMealLogDetailView(APIView):
         qs = DailyMealLog.objects.filter(pk=pk)
         if request.user.is_authenticated:
             qs = qs.filter(user=request.user)
+        else:
+            qs = qs.filter(user__isnull=True)
         log = qs.first()
         if not log:
             return Response({"detail": "Meal log not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -237,6 +241,8 @@ class WeeklyProgressView(APIView):
             logs_qs = DailyMealLog.objects.filter(date_key=date_str)
             if request.user.is_authenticated:
                 logs_qs = logs_qs.filter(user=request.user)
+            else:
+                logs_qs = logs_qs.filter(user__isnull=True)
 
             logs = list(logs_qs)
             total_cal = sum(l.calories_kcal for l in logs)
