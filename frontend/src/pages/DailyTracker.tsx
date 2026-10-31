@@ -6,6 +6,7 @@ import { DailyFoodLogItem } from '../types/food'
 import { getDailyLogs, deleteDailyMealLog } from '../api/food'
 import WeeklyCalorieProgress from '../components/WeeklyCalorieProgress'
 import VoiceMealLoggerModal from '../components/VoiceMealLoggerModal'
+import { flushOfflineMealLogs, countPendingOfflineLogs } from '../services/offlineSyncService'
 
 const WHO_LIMITS = {
   sugars_g: 25.0, // WHO recommended max free sugar for adults
@@ -18,6 +19,35 @@ export default function DailyTracker() {
   const todayKey = `foodai_daily_log_${new Date().toISOString().split('T')[0]}`
   const [logs, setLogs] = useState<DailyFoodLogItem[]>([])
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false)
+  const [pendingSync, setPendingSync] = useState(0)
+  const [isSyncing, setIsSyncing] = useState(false)
+
+  const checkSyncStatus = () => {
+    setPendingSync(countPendingOfflineLogs())
+  }
+
+  const handleManualSync = async () => {
+    setIsSyncing(true)
+    const res = await flushOfflineMealLogs()
+    setIsSyncing(false)
+    checkSyncStatus()
+    if (res.synced > 0) {
+      toast.success(`Synced ${res.synced} offline meal${res.synced > 1 ? 's' : ''} to cloud! ☁️`)
+    } else if (res.failed > 0) {
+      toast.info('Cloud backend is connecting; meals remain safe on device.')
+    } else {
+      toast.info('All daily meal logs are already synced!')
+    }
+  }
+
+  useEffect(() => {
+    checkSyncStatus()
+    const onOnline = () => {
+      flushOfflineMealLogs().then(() => checkSyncStatus())
+    }
+    window.addEventListener('online', onOnline)
+    return () => window.removeEventListener('online', onOnline)
+  }, [])
 
   useEffect(() => {
     // 1. Initial local load
@@ -107,6 +137,29 @@ export default function DailyTracker() {
             >
               Reset
             </button>
+          )}
+        </div>
+
+        {/* Sync Status Badge */}
+        <div className="flex items-center justify-between mb-3 px-1 text-xs">
+          {pendingSync > 0 ? (
+            <button
+              type="button"
+              onClick={handleManualSync}
+              disabled={isSyncing}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-900 border border-amber-200 text-[11px] font-bold hover:bg-amber-100 transition shadow-xs"
+            >
+              <span>⚡</span>
+              <span>{pendingSync} meal{pendingSync > 1 ? 's' : ''} saved locally</span>
+              <span className="text-amber-700 underline font-semibold ml-1">
+                {isSyncing ? 'Syncing...' : 'Tap to Sync ☁️'}
+              </span>
+            </button>
+          ) : (
+            <div className="inline-flex items-center gap-1.5 text-gray-400 text-[11px] font-medium">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+              <span>☁️ Cloud & Local Diary Synced</span>
+            </div>
           )}
         </div>
 

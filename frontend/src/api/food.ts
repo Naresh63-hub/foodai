@@ -812,6 +812,82 @@ export function synthesizeClientMultiPlate(payload: {
 }): PlateAnalysisResult {
   const hint = (payload.food_hint || '').toLowerCase()
 
+  if (hint.includes('dosa') || hint.includes('sambar') || hint.includes('chutney')) {
+    const dosaItems: PlateFoodItem[] = [
+      {
+        id: 'cl-dosa-1',
+        food_name: 'Crispy Masala Dosa',
+        description: 'Golden fermented rice crepe with spiced potato filling',
+        portion_g: 170,
+        portion_unit: 'piece',
+        serving_quantity: 1,
+        calories_kcal: 295,
+        proteins_g: 5.4,
+        carbohydrates_g: 42,
+        fat_g: 12,
+        sugars_g: 1.2,
+        fiber_g: 3.5,
+        sodium_mg: 380,
+        confidence_score: 0.95,
+        uncertainty_note: 'Ghee / oil brushed during roasting estimated at 1.5 tsp',
+        base_per_100g: { calories_kcal: 173.5, proteins_g: 3.2, carbohydrates_g: 24.7, fat_g: 7.1, sugars_g: 0.7, fiber_g: 2.1, sodium_mg: 223.5 },
+      },
+      {
+        id: 'cl-dosa-2',
+        food_name: 'Vegetable Lentil Sambar',
+        description: 'Tangy tamarind and toor dal curry with drumsticks and squash',
+        portion_g: 160,
+        portion_unit: 'bowl',
+        serving_quantity: 0.8,
+        calories_kcal: 115,
+        proteins_g: 4.8,
+        carbohydrates_g: 18,
+        fat_g: 3.0,
+        sugars_g: 3.2,
+        fiber_g: 3.8,
+        sodium_mg: 420,
+        confidence_score: 0.94,
+        uncertainty_note: 'Tamarind base provides mild acidity',
+        base_per_100g: { calories_kcal: 71.9, proteins_g: 3.0, carbohydrates_g: 11.3, fat_g: 1.9, sugars_g: 2.0, fiber_g: 2.4, sodium_mg: 262.5 },
+      },
+      {
+        id: 'cl-dosa-3',
+        food_name: 'Fresh Coconut Chutney',
+        description: 'Tempered grated coconut with green chilies and mustard seeds',
+        portion_g: 45,
+        portion_unit: 'tbsp',
+        serving_quantity: 2,
+        calories_kcal: 110,
+        proteins_g: 1.4,
+        carbohydrates_g: 3.8,
+        fat_g: 10.2,
+        sugars_g: 1.5,
+        fiber_g: 2.2,
+        sodium_mg: 160,
+        confidence_score: 0.93,
+        uncertainty_note: 'Fresh cold-pressed coconut base',
+        base_per_100g: { calories_kcal: 244.4, proteins_g: 3.1, carbohydrates_g: 8.4, fat_g: 22.7, sugars_g: 3.3, fiber_g: 4.9, sodium_mg: 355.6 },
+      },
+    ]
+    return {
+      meal_name: 'South Indian Dosa & Sambar Platter',
+      overall_confidence: 0.94,
+      image_quality_assessment: 'Crisp plate view with golden dosa and katoris.',
+      uncertainty_notes: ['Oil used on griddle estimated from surface sheen.'],
+      total_portion_g: 375,
+      total_calories_kcal: 520,
+      total_proteins_g: 11.6,
+      total_carbohydrates_g: 63.8,
+      total_fat_g: 25.2,
+      total_sugars_g: 5.9,
+      total_fiber_g: 9.5,
+      total_sodium_mg: 960,
+      macro_ratios: { carbs_pct: 49, protein_pct: 9, fat_pct: 42 },
+      items: dosaItems,
+      data_source: 'client_synthesizer',
+    }
+  }
+
   if (hint.includes('salmon') || hint.includes('quinoa') || hint.includes('fish')) {
     const rawItems: PlateFoodItem[] = [
       {

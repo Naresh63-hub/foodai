@@ -29,6 +29,13 @@ const SAMPLE_PLATE_PRESETS = [
     imageUrl: 'https://images.unsplash.com/photo-1610057099443-fde8c4d50f91?w=600&auto=format&fit=crop&q=80',
   },
   {
+    name: 'South Indian Dosa & Sambar',
+    hint: 'Crispy Dosa with Potato Masala Sambar Coconut Chutney',
+    emoji: '🥞',
+    description: 'Golden fermented rice crepe, spiced potato masala, vegetable sambar & coconut chutney',
+    imageUrl: 'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=600&auto=format&fit=crop&q=80',
+  },
+  {
     name: 'Mediterranean Salmon Platter',
     hint: 'Grilled Salmon Quinoa Steamed Greens Avocado',
     emoji: '🥗',
@@ -36,10 +43,10 @@ const SAMPLE_PLATE_PRESETS = [
     imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80',
   },
   {
-    name: 'Herb Chicken & Rice Bowl',
+    name: 'High Protein Fitness Bowl',
     hint: 'Herb Roasted Chicken Breast Basmati Rice Grilled Veggies',
-    emoji: '🍛',
-    description: 'Roasted chicken breast, basmati rice, grilled zucchini & yogurt dip',
+    emoji: '🍗',
+    description: 'Lean roasted chicken breast, whole quinoa grains, steamed broccoli & light olive glaze',
     imageUrl: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&auto=format&fit=crop&q=80',
   },
 ]
@@ -855,6 +862,38 @@ export default function PlateAnalyzer() {
                 <h4 className="text-xs font-black text-emerald-950 uppercase tracking-wider mb-2">
                   Add Missing Food Item
                 </h4>
+                
+                {/* Popular Quick-Add Suggestions */}
+                <div className="mb-3">
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                    Quick Suggestions:
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      { name: 'Roti / Chapati', qty: 1, unit: 'piece', cat: 'grain' as const },
+                      { name: 'Steamed Rice', qty: 1, unit: 'bowl', cat: 'grain' as const },
+                      { name: 'Plain Curd / Dahi', qty: 1, unit: 'cup', cat: 'dairy' as const },
+                      { name: 'Green Salad', qty: 1, unit: 'bowl', cat: 'vegetable' as const },
+                      { name: 'Boiled Egg', qty: 1, unit: 'piece', cat: 'protein' as const },
+                      { name: 'Dal Tadka', qty: 1, unit: 'bowl', cat: 'curry' as const },
+                    ].map((sug) => (
+                      <button
+                        key={sug.name}
+                        type="button"
+                        onClick={() => {
+                          setNewItemName(sug.name)
+                          setNewItemQty(sug.qty)
+                          setNewItemUnit(sug.unit)
+                          setNewItemCategory(sug.cat)
+                        }}
+                        className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white border border-emerald-200 text-emerald-800 hover:bg-emerald-100 transition shadow-xs"
+                      >
+                        + {sug.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="space-y-3">
                   <div>
                     <label className="text-[11px] font-bold text-gray-700 block mb-1">
@@ -990,6 +1029,45 @@ export default function PlateAnalyzer() {
                 )}
               </button>
             )}
+          </div>
+        )}
+
+        {/* Sticky Mobile Floating Meal Summary */}
+        {analysisResult && !loading && plateItems.length > 0 && !savedSuccess && (
+          <div className="fixed bottom-16 sm:bottom-4 left-0 right-0 z-30 max-w-2xl mx-auto px-4 pointer-events-none">
+            <div className="p-3.5 bg-gray-900/95 backdrop-blur-md text-white rounded-2xl shadow-2xl border border-gray-800 flex items-center justify-between gap-3 pointer-events-auto">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-base font-black text-emerald-400">
+                    🔥 {mealSummary.calories_kcal} kcal
+                  </span>
+                  <span className="text-[10px] text-gray-400 font-semibold truncate">
+                    ({plateItems.length} items)
+                  </span>
+                </div>
+                <p className="text-[10px] text-gray-300 font-medium truncate mt-0.5">
+                  P: {mealSummary.proteins_g}g · C: {mealSummary.carbohydrates_g}g · F: {mealSummary.fat_g}g
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleSaveMeal}
+                disabled={savingMeal}
+                className="shrink-0 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-500/20 active:scale-95 transition flex items-center gap-1.5"
+              >
+                {savingMeal ? (
+                  <>
+                    <div className="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>💾</span>
+                    <span>Save Meal</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         )}
       </div>
