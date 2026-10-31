@@ -16,6 +16,7 @@ from foodai_backend.food_analysis.views import (
 )
 from foodai_backend.food_analysis.views_ai import (
     AINutritionAnalyzeView,
+    FoodAIChatView,
     FoodVisionAnalyzeView,
     MultiItemPlateAnalyzeView,
 )
@@ -73,6 +74,10 @@ urlpatterns = [
     path('api/ai/plate-analyze', MultiItemPlateAnalyzeView.as_view()),
     path('api/plate-analyze/', MultiItemPlateAnalyzeView.as_view(), name='plate_analyze'),
     path('api/plate-analyze', MultiItemPlateAnalyzeView.as_view()),
+    path('api/ai/chat/', FoodAIChatView.as_view(), name='ai_chat'),
+    path('api/ai/chat', FoodAIChatView.as_view()),
+    path('api/chat/', FoodAIChatView.as_view(), name='chat'),
+    path('api/chat', FoodAIChatView.as_view()),
 
     # Products & Additives
     path('api/products/search/', ProductCatalogSearchView.as_view(), name='product_search'),

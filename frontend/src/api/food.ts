@@ -1125,3 +1125,89 @@ export async function analyzePlatePhoto(payload: {
     return synthesizeClientMultiPlate(payload)
   }
 }
+
+
+
+export interface ChatMessageResponse {
+  reply: string
+  suggestions?: string[]
+}
+
+export function synthesizeChatbotResponse(payload: {
+  message: string
+  health_conditions?: string[] | null
+}): ChatMessageResponse {
+  const q = (payload.message || '').toLowerCase().trim()
+
+  if (q.includes('plate') || q.includes('multi') || q.includes('snap') || q.includes('camera') || q.includes('photo')) {
+    return {
+      reply: '🍱 **How to use Plate Recognition & Portion Tracking:**\n\n1. Go to **[Analyze My Plate](/analyze-plate)**.\n2. Snap a photo of your plate or pick any sample plate (e.g. *Traditional Thali* or *Dosa & Sambar*).\n3. FoodAI detects each item independently with estimated weights and macros.\n4. Adjust portions, units (grams, bowls, pieces), delete or add items.\n5. Click **\'Save Meal\'** on the sticky bar to log it to your daily diary!',
+      suggestions: ['How do I track daily intake?', 'What are WHO limits?', 'Healthy snacks under 150 kcal'],
+    }
+  }
+
+  if (q.includes('barcode') || q.includes('scan') || q.includes('label') || q.includes('additive') || q.includes('nova')) {
+    return {
+      reply: '🔍 **Barcode & Package Scanning:**\n\n• Open **[Scan Food](/scan)** to scan food packages or ingredient lists.\n• FoodAI checks the **NOVA processing level** (Minimally Processed, Processed, Ultra-Processed).\n• Risky additives and allergens are highlighted so you can choose cleaner foods!',
+      suggestions: ['How to analyze my plate?', 'What are WHO limits?', 'High protein snacks'],
+    }
+  }
+
+  if (q.includes('tracker') || q.includes('diary') || q.includes('limit') || q.includes('who') || q.includes('sodium') || q.includes('sugar')) {
+    return {
+      reply: '📊 **Daily Tracker & Health Ceilings:**\n\n• Open your **[Daily Tracker](/tracker)** to review your daily calories and weekly progress.\n• We monitor the 3 official WHO ceilings:\n  - **Free Sugars**: Max 25g/day\n  - **Sodium**: Max 2000mg sodium (5g salt)/day\n  - **Saturated Fat**: Max 20g/day\n• Your meals are saved locally and auto-sync when online!',
+      suggestions: ['How to reduce sodium?', 'Low glycemic index foods', 'Best post-workout meals'],
+    }
+  }
+
+  if (q.includes('protein') || q.includes('muscle') || q.includes('gym') || q.includes('workout')) {
+    return {
+      reply: '💪 **Top High-Protein Sources & Guidance:**\n\n• **Vegetarian**:\n  - Paneer: ~18g per 100g\n  - Moong Dal / Lentils: ~9-12g per cooked bowl\n  - Greek Yogurt: ~10g per cup\n  - Tofu / Tempeh: ~15-19g per 100g\n• **Non-Vegetarian**:\n  - Chicken Breast: ~31g per 100g\n  - Eggs: ~6g per large egg\n  - Salmon / Fish: ~25-28g per 100g\n\n💡 *Active target: 1.6 - 2.2g of protein per kg of body weight.*',
+      suggestions: ['Healthy dinner under 500 kcal', 'How to analyze a plate?', 'Low glycemic index foods'],
+    }
+  }
+
+  if (q.includes('diabet') || q.includes('glucose') || q.includes('sugar') || q.includes('glycemic') || q.includes('gi')) {
+    return {
+      reply: '🩸 **Blood Sugar & Low-GI Guidance:**\n\n• **Favorable Foods**: Whole dals (chana, moong, rajma), steel-cut oats, quinoa, green veggies, seeds.\n• **Meal Strategy**: Always pair carbohydrates with protein and fiber (e.g. rice with dal and salad) to slow digestion and prevent sudden glucose spikes.',
+      suggestions: ['What are WHO daily limits?', 'High protein snack ideas', 'How to analyze my plate?'],
+    }
+  }
+
+  if (q.includes('snack') || q.includes('munch')) {
+    return {
+      reply: '🍎 **Healthy Snacks Under 150 kcal:**\n\n1. **Roasted Makhana (Foxnuts)**: ~100 kcal (crisp, mineral-rich).\n2. **Sprouted Moong Salad**: ~120 kcal (packed with fiber & enzymes).\n3. **Apple Slices with 1 tsp Peanut Butter**: ~140 kcal.\n4. **Boiled Egg with pepper**: ~75 kcal (high satiety).\n5. **Carrot & Cucumber with Hummus**: ~110 kcal.',
+      suggestions: ['Best post-workout meals', 'How do I log a meal?', 'Healthy dinner under 500 kcal'],
+    }
+  }
+
+  if (q.includes('dinner') || q.includes('lunch') || q.includes('recipe') || q.includes('500 kcal')) {
+    return {
+      reply: '🥗 **Balanced Dinner Plate (~400-450 kcal):**\n\n• **Option A (Indian Vegetarian)**:\n  - 2 Multigrain Rotis (160 kcal)\n  - 1 bowl Moong Dal Tadka (150 kcal)\n  - 1 bowl Sauteed Greens/Beans (60 kcal)\n  - Half cup fresh Dahi / Curd (60 kcal)\n  *Total: ~430 kcal | 18g Protein | 8g Fiber*\n\n• **Option B (High Protein Platter)**:\n  - 130g Grilled Herb Chicken or Paneer (210 kcal)\n  - 100g Steamed Quinoa / Brown Rice (120 kcal)\n  - Roasted Broccoli & Lemon Greens (80 kcal)\n  *Total: ~410 kcal | 32g Protein | 6g Fiber*',
+      suggestions: ['How to analyze a plate?', 'High protein snack ideas', 'What are WHO daily limits?'],
+    }
+  }
+
+  return {
+    reply: `🥗 **FoodAI Nutrition Assistant:**\n\nRegarding **"${payload.message}"**:\nEating a balanced diet focused on intact whole foods, ample dietary fiber (>25g/day), and moderate sodium (<2000mg/day) supports optimal metabolic health.\n\nYou can also snap a photo in **[Analyze My Plate](/analyze-plate)** to break down any meal into calories, carbs, protein, and micronutrients!`,
+    suggestions: ['How to analyze a plate?', 'High protein snack ideas', 'What are WHO daily limits?'],
+  }
+}
+
+export async function sendChatMessage(payload: {
+  message: string
+  health_conditions?: string[] | null
+  age?: number | null
+  weight_kg?: number | null
+}): Promise<ChatMessageResponse> {
+  try {
+    const res = await aiClient.post<ChatMessageResponse>('/chat', payload)
+    if (res.data && res.data.reply) {
+      return res.data
+    }
+    return synthesizeChatbotResponse(payload)
+  } catch (err) {
+    console.debug('Backend chat fallback to clinical synthesizer:', err)
+    return synthesizeChatbotResponse(payload)
+  }
+}

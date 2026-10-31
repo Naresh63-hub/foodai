@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState, useEffect } from 'react'
 import { Routes, Route, Navigate, Outlet, useParams } from 'react-router-dom'
 import BottomTabBar from './components/BottomTabBar'
+import FoodAIChatbot from './components/FoodAIChatbot'
 import SafeAreaView from './components/SafeAreaView'
 import { useAuth } from './contexts/AuthContext'
 
@@ -143,6 +144,7 @@ function AppLayout() {
       <main className="w-full max-w-full box-border animate-fade-in-up">
         <Outlet />
       </main>
+      <FoodAIChatbot />
       <BottomTabBar />
     </div>
   )

@@ -1190,3 +1190,183 @@ class MultiItemPlateAnalyzeView(APIView):
         # 2. Resilient clinical plate vision fallback synthesizer
         fallback_result = generate_fallback_multi_plate(food_hint, age, weight_kg, conditions)
         return Response(fallback_result, status=status.HTTP_200_OK)
+
+
+def generate_fallback_chat_reply(message: str, conditions=None) -> dict:
+    """
+    Intelligent clinical & app guidance synthesizer for the FoodAI chatbot.
+    Provides instant, evidence-based answers regarding nutrition, foods, and app features.
+    """
+    q = (message or "").lower().strip()
+
+    # 1. FoodAI Feature Guidance
+    if any(k in q for k in ["plate", "multi item", "multi-item", "photo", "camera", "snap"]):
+        reply = (
+            "🍱 **How to use Plate Recognition & Portion Tracking:**\n\n"
+            "1. Navigate to **[Analyze My Plate](/analyze-plate)** in the navigation.\n"
+            "2. Take a photo of your meal or tap any of the demo plates (e.g. *Traditional Thali* or *Dosa & Sambar*).\n"
+            "3. FoodAI will identify each food item separately with estimated portion weights and macros.\n"
+            "4. You can edit portion quantities, change units (cups, bowls, grams), delete or add missing foods.\n"
+            "5. Tap **'Save Meal'** on the sticky action bar to log it instantly to your diary!"
+        )
+        suggestions = ["How to scan barcodes?", "What are WHO daily limits?", "Healthy snacks under 150 kcal"]
+
+    elif any(k in q for k in ["barcode", "scan", "additive", "e-number", "ultra-processed", "nova"]):
+        reply = (
+            "🔍 **Barcode & Package Scanning Guide:**\n\n"
+            "• Go to **[Scan Food](/scan)** to scan product barcodes or ingredient lists.\n"
+            "• FoodAI evaluates the **NOVA Processing Level** (Minimally Processed, Processed, or Ultra-Processed).\n"
+            "• Harmful or risky food additives are highlighted with risk badges so you can make informed choices."
+        )
+        suggestions = ["How do I track daily intake?", "How to analyze a plate?", "High protein snack ideas"]
+
+    elif any(k in q for k in ["tracker", "diary", "history", "log", "limit", "who"]):
+        reply = (
+            "📊 **Daily Tracker & WHO Guidelines:**\n\n"
+            "• Access your **[Daily Tracker](/tracker)** to review today's caloric intake and 7-day progress.\n"
+            "• We monitor the 3 core WHO ceilings:\n"
+            "  - **Free Sugars**: Max 25g/day\n"
+            "  - **Sodium/Salt**: Max 2000mg sodium (5g salt)/day\n"
+            "  - **Saturated Fat**: Max 20g/day\n"
+            "• If you log offline, meals are safely stored on your device and auto-sync when reconnected!"
+        )
+        suggestions = ["How to analyze my plate?", "Healthy snacks under 150 kcal", "Low glycemic index foods"]
+
+    elif any(k in q for k in ["voice", "speak", "mic", "talk"]):
+        reply = (
+            "🎙️ **Voice Meal Logger:**\n\n"
+            "• Tap the microphone button in **[Daily Tracker](/tracker)** or **[Voice Log](/voice-log)**.\n"
+            "• Say what you ate, e.g., *'I had 2 boiled eggs and 1 slice of whole wheat toast with black coffee.'*\n"
+            "• FoodAI transcribes and decomposes your speech into calibrated portion sizes and macros automatically."
+        )
+        suggestions = ["How to analyze my plate?", "High protein food ideas", "What are WHO daily limits?"]
+
+    # 2. Nutrition Topics
+    elif any(k in q for k in ["high protein", "protein", "muscle", "hypertrophy", "gym"]):
+        reply = (
+            "💪 **High Protein Food Strategies:**\n\n"
+            "• **Poultry & Fish**: Chicken breast (31g protein/100g), Salmon (20g/100g, rich in Omega-3s).\n"
+            "• **Vegetarian & Plant-Based**: Low-fat paneer (18g/100g), Tofu (17g/100g), Soya chunks (52g dry/100g), Greek yogurt (10g/100g).\n"
+            "• **Legumes**: Boiled chickpeas (9g/100g), Lentils / Dal (9g/100g).\n\n"
+            "💡 *Clinical Tip*: Aim for 1.2 to 2.0g protein per kg body weight if you are physically active or resistance training."
+        )
+        suggestions = ["Healthy snacks under 150 kcal", "Low glycemic index foods", "Balanced dinner under 450 kcal"]
+
+    elif any(k in q for k in ["snack", "under 150", "low calorie", "craving", "light"]):
+        reply = (
+            "🍎 **Healthy Snacks Under 150 kcal:**\n\n"
+            "1. **Roasted Makhana (Foxnuts)**: 1 bowl (~30g) = ~105 kcal, low sodium, rich in antioxidants.\n"
+            "2. **Apple Slices with 1 tsp Peanut Butter**: ~120 kcal, fiber + monounsaturated fats.\n"
+            "3. **Sprouted Moong Chaat**: 1 cup with lemon juice & cucumber = ~110 kcal, 7g protein, high fiber.\n"
+            "4. **Plain Low-Fat Greek Yogurt (125g)** with a dash of cinnamon = ~95 kcal, 11g protein."
+        )
+        suggestions = ["High protein food ideas", "Balanced dinner under 450 kcal", "Low glycemic index foods"]
+
+    elif any(k in q for k in ["sugar", "diabetes", "diabetic", "glycemic", "glucose", "insulin"]):
+        reply = (
+            "🩸 **Glycemic Management & Diabetes Principles:**\n\n"
+            "• **Prioritize Low GI (<55)**: Steel-cut oats, lentils, non-starchy vegetables, berries, and whole pulses.\n"
+            "• **Pair Carbohydrates**: Always consume complex carbs alongside lean protein or healthy fats (e.g. nuts, olive oil) to blunt insulin spikes.\n"
+            "• **Watch Free Sugars**: The WHO recommends strictly capping free sugars under **25g (6 teaspoons) per day**.\n"
+            "• Avoid sugary beverages and sweetened fruit juices that lack whole intact fiber."
+        )
+        suggestions = ["What are WHO daily limits?", "Healthy snacks under 150 kcal", "How to analyze my plate?"]
+
+    elif any(k in q for k in ["sodium", "salt", "bp", "blood pressure", "hypertension"]):
+        reply = (
+            "🧂 **Sodium & Blood Pressure Management:**\n\n"
+            "• **WHO Guideline**: Do not exceed **2,000 mg sodium (~5g or 1 tsp salt)** per day.\n"
+            "• Hidden sodium is predominantly found in ultra-processed sauces, instant noodles, chips, and canned soups.\n"
+            "• **DASH Diet Boost**: Increase potassium-rich whole foods (spinach, bananas, sweet potatoes, coconut water) to counter sodium effects."
+        )
+        suggestions = ["What are WHO daily limits?", "How to scan barcodes?", "Healthy snacks under 150 kcal"]
+
+    elif any(k in q for k in ["dinner", "450", "500", "meal plan", "weight loss", "calorie deficit"]):
+        reply = (
+            "🥗 **Balanced Meal Under 450 kcal:**\n\n"
+            "• **Option 1 (Indian)**: 1 Multigrain Roti (80 kcal) + 1 bowl Moong Dal (150 kcal) + 100g Paneer/Tofu Bhurji (150 kcal) + Cucumber Salad (30 kcal) = **~410 kcal**.\n"
+            "• **Option 2 (Mediterranean)**: 120g Grilled Chicken or Salmon (180 kcal) + 1 cup Quinoa/Brown Rice (150 kcal) + Steamed Broccoli with olive oil drizzle (80 kcal) = **~410 kcal**."
+        )
+        suggestions = ["High protein food ideas", "How to analyze my plate?", "Healthy snacks under 150 kcal"]
+
+    else:
+        reply = (
+            f"🥗 **Food & Nutrition Guidance regarding '{message}':**\n\n"
+            "A balanced diet emphasizes whole, minimally processed ingredients, adequate dietary fiber (>25g/day), "
+            "and calibrated sodium intake (<2000mg/day).\n\n"
+            "You can photograph any meal in **[Analyze My Plate](/analyze-plate)** to receive an instant breakdown of its calories, carbs, protein, fat, and micronutrients!"
+        )
+        suggestions = ["How to analyze a plate?", "High protein snack ideas", "What are WHO daily limits?"]
+
+    return {
+        "reply": reply,
+        "suggestions": suggestions,
+    }
+
+
+class FoodAIChatView(APIView):
+    """
+    FoodAI Conversational Nutrition Assistant Endpoint.
+    Answers inquiries regarding foods, macros, meal planning, and FoodAI application features.
+    """
+    permission_classes = [AllowAny]
+    parser_classes = [JSONParser, FormParser, MultiPartParser]
+
+    def post(self, request, *args, **kwargs):
+        message = (
+            request.data.get("message")
+            or request.data.get("query")
+            or request.data.get("text")
+            or ""
+        ).strip()
+
+        if not message:
+            return Response(
+                {"reply": "Hi there! I am your FoodAI Assistant. Ask me anything about food, calories, nutrition, or how to use FoodAI features!", "suggestions": ["How to analyze my plate?", "Healthy snacks under 150 kcal", "What are WHO limits?"]},
+                status=status.HTTP_200_OK,
+            )
+
+        conditions = request.data.get("health_conditions") or []
+        if isinstance(conditions, str) and conditions:
+            conditions = [c.strip() for c in conditions.split(",") if c.strip()]
+
+        api_key = os.environ.get("GEMINI_API_KEY")
+        if api_key and api_key.strip():
+            try:
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+                system_instruction = (
+                    "You are FoodAI Assistant, an empathetic, clinical nutrition expert and application guide for the FoodAI web app. "
+                    "Answer user queries about foods, calories, macronutrients, glycemic index, food additives, and healthy diet planning concisely. "
+                    "You also guide users on how to use FoodAI features: "
+                    "1. 'Analyze My Plate' (/analyze-plate): takes a photo of a meal plate and separates foods into editable portions with combined nutrition. "
+                    "2. 'Food Camera Snap' (/camera-snap): single-dish computer vision analyzer. "
+                    "3. 'Barcode Scanner' (/scan): package barcode scanner for NOVA processing level and additives. "
+                    "4. 'Daily Tracker' (/tracker): tracks daily calories, macros, and WHO ceilings (25g sugar, 2000mg sodium, 20g sat fat). "
+                    "5. 'Voice Log' (/voice-log): 1-tap voice meal logger. "
+                    "Formatting rules: Use markdown, bold headers, bullet points, and emojis. Keep answers concise (< 200 words). Include 2-3 short follow-up suggestions as a JSON field 'suggestions' if possible."
+                )
+
+                prompt = (
+                    f"User question: '{message}'. User Health Conditions: {conditions}.\n"
+                    "Provide a warm, structured response with clear nutritional facts."
+                )
+
+                payload = {
+                    "contents": [{"parts": [{"text": prompt}]}],
+                    "systemInstruction": {"parts": [{"text": system_instruction}]},
+                    "generationConfig": {"temperature": 0.3, "maxOutputTokens": 600},
+                }
+
+                res = requests.post(url, json=payload, timeout=12)
+                if res.status_code == 200:
+                    text_data = res.json()["candidates"][0]["content"]["parts"][0]["text"]
+                    return Response({
+                        "reply": text_data,
+                        "suggestions": ["How to analyze a plate?", "High protein snack ideas", "What are WHO limits?"],
+                    }, status=status.HTTP_200_OK)
+            except Exception as e:
+                logger.warning(f"Gemini Chat call notice: {e}")
+
+        # Fallback synthesizer
+        fallback = generate_fallback_chat_reply(message, conditions)
+        return Response(fallback, status=status.HTTP_200_OK)
