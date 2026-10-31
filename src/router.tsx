@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useState, useEffect } from 'react'
 import { Routes, Route, Navigate, Outlet, useParams } from 'react-router-dom'
 import BottomTabBar from './components/BottomTabBar'
 import SafeAreaView from './components/SafeAreaView'
@@ -65,16 +65,41 @@ function DevDemoBanner() {
 }
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth()
+  const { user, loading, signInDemo } = useAuth()
+  const [showEscapeHatch, setShowEscapeHatch] = useState(false)
+
+  useEffect(() => {
+    if (loading) {
+      const timer = setTimeout(() => setShowEscapeHatch(true), 1200)
+      return () => clearTimeout(timer)
+    }
+  }, [loading])
 
   if (loading) {
     return (
       <SafeAreaView>
-        <div className="flex h-screen items-center justify-center">
-          <div className="text-center">
-            <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-indigo-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading...</p>
+        <div className="flex min-h-[70vh] flex-col items-center justify-center p-6 text-center">
+          <div className="relative flex items-center justify-center mb-4">
+            <div className="h-14 w-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-3xl animate-pulse">
+              🥗
+            </div>
+            <div className="absolute inset-0 rounded-2xl border-2 border-emerald-500 border-t-transparent animate-spin"></div>
           </div>
+          <p className="text-sm font-semibold text-gray-700 animate-pulse">Connecting to FoodAI...</p>
+          {showEscapeHatch && (
+            <div className="mt-5 p-4 bg-amber-50 border border-amber-200/80 rounded-2xl max-w-xs w-full shadow-sm">
+              <p className="text-xs text-amber-900 font-medium leading-relaxed">
+                Network connection is slower than usual.
+              </p>
+              <button
+                type="button"
+                onClick={() => signInDemo()}
+                className="mt-3 w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold transition shadow-md shadow-emerald-600/20"
+              >
+                ⚡ Continue in Fast Demo Mode
+              </button>
+            </div>
+          )}
         </div>
       </SafeAreaView>
     )

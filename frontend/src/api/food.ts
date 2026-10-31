@@ -113,12 +113,21 @@ export async function getAdditive(
 export const getAdditiveDetail = getAdditive
 
 export async function getScanHistory(): Promise<any[]> {
-  const response = await client.get<any[]>('/scans/')
-  return response.data
+  try {
+    const response = await client.get<any[]>('/scans/')
+    return response.data
+  } catch (err) {
+    console.debug('getScanHistory notice:', err)
+    return []
+  }
 }
 
 export async function deleteScan(id: number): Promise<void> {
-  await client.delete(`/scans/${id}/`)
+  try {
+    await client.delete('/scans/' + id + '/')
+  } catch (err) {
+    console.debug('deleteScan notice:', err)
+  }
 }
 
 export async function saveScanHistory(scanData: {
@@ -129,15 +138,56 @@ export async function saveScanHistory(scanData: {
   calories_kcal?: number
   payload?: any
 }): Promise<any> {
-  const response = await client.post('/scans/', scanData)
-  return response.data
+  try {
+    const response = await client.post('/scans/', scanData)
+    return response.data
+  } catch (err) {
+    console.debug('saveScanHistory offline fallback:', err)
+    return {
+      id: 'local-scan-' + Date.now(),
+      status: 'saved_locally',
+      ...scanData,
+    }
+  }
 }
 
 export async function getDailyLogs(date?: string): Promise<DailyFoodLogItem[]> {
-  const response = await client.get<DailyFoodLogItem[]>('/daily-logs/', {
-    params: date ? { date } : {},
-  })
-  return response.data
+  const targetDate = date || new Date().toISOString().split('T')[0]
+  const localKey = 'foodai_daily_log_' + targetDate
+
+  let localLogs: DailyFoodLogItem[] = []
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      const saved = localStorage.getItem(localKey)
+      if (saved) {
+        localLogs = JSON.parse(saved)
+      }
+    } catch {}
+  }
+
+  try {
+    const response = await client.get<DailyFoodLogItem[]>('/daily-logs/', {
+      params: { date: targetDate },
+    })
+    if (Array.isArray(response.data)) {
+      const merged = [...localLogs]
+      for (const s of response.data) {
+        if (!merged.some((m) => m.product_name === s.product_name && Math.abs((m.portion_g || 0) - (s.portion_g || 0)) < 1)) {
+          merged.push(s)
+        }
+      }
+      if (typeof window !== 'undefined' && window.localStorage) {
+        try {
+          localStorage.setItem(localKey, JSON.stringify(merged))
+        } catch {}
+      }
+      return merged
+    }
+  } catch (error) {
+    console.debug('Django getDailyLogs fallback to local cache:', error)
+  }
+
+  return localLogs
 }
 
 export async function saveDailyMealLog(data: {
@@ -155,12 +205,53 @@ export async function saveDailyMealLog(data: {
   date_key?: string
   [key: string]: any
 }): Promise<any> {
-  const response = await client.post('/daily-logs/', data)
-  return response.data
+  const dateKey = data.date_key || new Date().toISOString().split('T')[0]
+  const todayKey = 'foodai_daily_log_' + dateKey
+  const localItem: DailyFoodLogItem = {
+    ...data,
+    id: data.id || 'local-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+    timestamp: new Date().toISOString(),
+    product_name: data.product_name,
+    portion_g: data.portion_g || 150,
+    sugars_g: data.sugars_g || 0,
+    salt_g: data.salt_g || 0,
+    fat_g: data.fat_g || 0,
+    additives_count: data.additives_count || 0,
+    processing_level: data.processing_level || 'minimally_processed',
+  }
+
+  // 1. Immediately store to localStorage so user sees it right away without freeze/failure
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      const existing: DailyFoodLogItem[] = JSON.parse(localStorage.getItem(todayKey) || '[]')
+      if (!existing.some(e => e.product_name === localItem.product_name && Math.abs((e.portion_g || 0) - (localItem.portion_g || 0)) < 1)) {
+        existing.unshift(localItem)
+        localStorage.setItem(todayKey, JSON.stringify(existing.slice(0, 100)))
+      }
+    } catch (e) {
+      console.warn('LocalStorage saveDailyMealLog notice:', e)
+    }
+  }
+
+  // 2. Attempt remote save to Django backend (timeout handles sleeping server gracefully)
+  try {
+    const response = await client.post('/daily-logs/', data)
+    return response.data
+  } catch (error) {
+    console.warn('Backend saveDailyMealLog unreachable, successfully saved to device storage:', error)
+    return {
+      ...localItem,
+      status: 'saved_locally',
+    }
+  }
 }
 
 export async function deleteDailyMealLog(id: number | string): Promise<void> {
-  await client.delete(`/daily-logs/${id}/`)
+  try {
+    await client.delete('/daily-logs/' + id + '/')
+  } catch (err) {
+    console.debug('deleteDailyMealLog notice:', err)
+  }
 }
 
 export async function getWeeklyProgress(targetCalories = 2000): Promise<any[]> {

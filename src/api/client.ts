@@ -15,7 +15,7 @@ const aiApiBase = import.meta.env.VITE_AI_API_URL
 
 const client = axios.create({
   baseURL: apiBase,
-  timeout: 30000,
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -23,7 +23,7 @@ const client = axios.create({
 
 export const aiClient = axios.create({
   baseURL: aiApiBase,
-  timeout: 45000,
+  timeout: 12000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -49,11 +49,18 @@ function attachInterceptors(instance: typeof client) {
   instance.interceptors.response.use(
     (response) => response,
     (error: AxiosError) => {
+      const url = error.config?.url || ''
+      const isFallbackHandled = url.includes('analyze') || url.includes('daily-logs') || url.includes('scans')
+
       if (error.response?.status === 401) {
-        console.warn('API request returned 401 Unauthorized:', error.config?.url)
+        console.warn('API request returned 401 Unauthorized:', url)
         // Do not force hard page reload with window.location.href!
         // Hard redirects destroy SPA flow and cause infinite reload loops.
         // Protected pages are handled by <ProtectedRoute> in React Router.
+      } else if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+        console.warn('Backend request timed out; engaging offline fallback:', url)
+      } else if (isFallbackHandled) {
+        console.debug('Backend notice on fallback-capable route:', url, error.message)
       } else if (error.response?.data) {
         const data = error.response.data as { detail?: string; message?: string }
         const message = data.detail || data.message || 'Something went wrong'

@@ -215,24 +215,39 @@ export default function FoodCameraSnap() {
     setSelectedPreset(preset)
     setLoading(true)
 
+    let done = false
     const applyFallback = () => {
+      if (done) return
+      done = true
+      clearTimeout(safetyTimer)
       const fallbackUrl = createPresetFallbackDataUrl(preset)
       setCapturedImage(fallbackUrl)
       stopCamera()
       setLoading(false)
-      toast.success(`Selected sample: ${preset.name}`)
+      toast.success('Selected sample: ' + preset.name)
     }
 
+    // Failsafe timer: Ensure UI never gets stuck loading on external preset images
+    const safetyTimer = setTimeout(() => {
+      applyFallback()
+    }, 1500)
+
     try {
-      const res = await fetch(preset.url, { mode: 'cors' })
+      const controller = new AbortController()
+      const fetchTimer = setTimeout(() => controller.abort(), 1400)
+      const res = await fetch(preset.url, { mode: 'cors', signal: controller.signal })
+      clearTimeout(fetchTimer)
       if (!res.ok) throw new Error('Fetch status not ok')
       const blob = await res.blob()
       const reader = new FileReader()
       reader.onload = () => {
+        if (done) return
+        done = true
+        clearTimeout(safetyTimer)
         setCapturedImage(reader.result as string)
         stopCamera()
         setLoading(false)
-        toast.success(`Selected sample: ${preset.name}`)
+        toast.success('Selected sample: ' + preset.name)
       }
       reader.onerror = applyFallback
       reader.readAsDataURL(blob)
@@ -241,6 +256,9 @@ export default function FoodCameraSnap() {
         const img = new Image()
         img.crossOrigin = 'anonymous'
         img.onload = () => {
+          if (done) return
+          done = true
+          clearTimeout(safetyTimer)
           const canvas = document.createElement('canvas')
           canvas.width = img.naturalWidth || 600
           canvas.height = img.naturalHeight || 600
@@ -253,7 +271,7 @@ export default function FoodCameraSnap() {
           }
           stopCamera()
           setLoading(false)
-          toast.success(`Selected sample: ${preset.name}`)
+          toast.success('Selected sample: ' + preset.name)
         }
         img.onerror = applyFallback
         img.src = preset.url

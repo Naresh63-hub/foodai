@@ -235,6 +235,7 @@ export default function PlateAnalyzer() {
       console.error('Plate analysis error:', err)
       toast.error('Unable to analyze meal plate. Please try another photo.')
     } finally {
+      clearInterval(stepInterval)
       setLoading(false)
     }
   }
@@ -349,37 +350,34 @@ export default function PlateAnalyzer() {
         console.warn('Backend scan history notice:', scanErr)
       }
 
-      // 3. Firestore sync if real authenticated Firebase user
+      // 3. Firestore sync if real authenticated Firebase user (non-blocking cloud enhancement)
       if (user && user.uid && user.uid !== 'local-dev-user') {
-        try {
-          await saveDailyLogToFirestore({
-            id: `plate-${Date.now()}`,
-            userId: user.uid,
-            productName: mealName,
-            portionG: mealSummary.total_portion_g,
-            sugarsG: mealSummary.sugars_g.value,
-            saltG: Math.round((mealSummary.sodium_mg.value / 1000) * 100) / 100,
-            fatG: mealSummary.fat_g,
-            additivesCount: 0,
-            processingLevel: 'minimally_processed',
-            dateKey: todayStr,
-            createdAt: new Date().toISOString(),
-          })
-          await saveFoodScanToFirestore({
-            id: `scan-${Date.now()}`,
-            userId: user.uid,
-            barcode: `plate-${Date.now()}`,
-            productName: mealName,
-            brands: 'Plated Meal',
-            calories: mealSummary.calories_kcal,
-            processingLevel: 'minimally_processed',
-            score: 85,
-            rawPayload: mealPayload,
-            createdAt: new Date().toISOString(),
-          } as any)
-        } catch (fErr) {
-          console.warn('Firestore optional sync notice:', fErr)
-        }
+        saveDailyLogToFirestore({
+          id: `plate-${Date.now()}`,
+          userId: user.uid,
+          productName: mealName,
+          portionG: mealSummary.total_portion_g,
+          sugarsG: mealSummary.sugars_g.value,
+          saltG: Math.round((mealSummary.sodium_mg.value / 1000) * 100) / 100,
+          fatG: mealSummary.fat_g,
+          additivesCount: 0,
+          processingLevel: 'minimally_processed',
+          dateKey: todayStr,
+          createdAt: new Date().toISOString(),
+        }).catch((fErr) => console.warn('Firestore optional sync notice:', fErr))
+
+        saveFoodScanToFirestore({
+          id: `scan-${Date.now()}`,
+          userId: user.uid,
+          barcode: `plate-${Date.now()}`,
+          productName: mealName,
+          brands: 'Plated Meal',
+          calories: mealSummary.calories_kcal,
+          processingLevel: 'minimally_processed',
+          score: 85,
+          rawPayload: mealPayload,
+          createdAt: new Date().toISOString(),
+        } as any).catch((fErr) => console.warn('Firestore optional sync notice:', fErr))
       }
 
       // 4. Local storage backup
