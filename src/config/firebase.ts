@@ -5,12 +5,12 @@ import { getAnalytics, isSupported, Analytics } from 'firebase/analytics'
 
 // Your web app's Firebase configuration provided by the user
 export const firebaseConfig = {
-  apiKey: "AIzaSyA4s3CDR_DmZjYobBghtFHwqVR--oDCYfI",
-  authDomain: "food-ai-433b7.firebaseapp.com",
-  projectId: "food-ai-433b7",
-  storageBucket: "food-ai-433b7.firebasestorage.app",
-  messagingSenderId: "59556325769",
-  appId: "1:59556325769:web:90a209b9bf7b0aa9b9d958",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyA4s3CDR_DmZjYobBghtFHwqVR--oDCYfI",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "food-ai-433b7.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "food-ai-433b7",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "food-ai-433b7.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "59556325769",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:59556325769:web:90a209b9bf7b0aa9b9d958",
   firestoreDatabaseId: "(default)",
 }
 

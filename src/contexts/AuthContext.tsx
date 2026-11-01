@@ -13,6 +13,7 @@ import {
 import { auth, googleProvider } from '../config/firebase'
 import { AUTH_BYPASS } from '../config/authMode'
 import { syncUserProfile } from '../services/firestoreService'
+import { performGoogleSignIn } from '../services/googleAuthService'
 import { toast } from 'sonner'
 
 interface AuthContextType {
@@ -63,9 +64,84 @@ function isUnauthorizedDomainError(error: any): boolean {
   )
 }
 
+function isUserCancellation(error: any): boolean {
+  if (!error) return false
+  const code = typeof error.code === 'string' ? error.code : ''
+  const msg = typeof error.message === 'string' ? error.message : ''
+  return (
+    code === 'auth/popup-closed-by-user' ||
+    msg.includes('popup-closed-by-user') ||
+    code === 'SIGN_IN_CANCELED' ||
+    code === '16' ||
+    msg.toLowerCase().includes('canceled') ||
+    msg.toLowerCase().includes('cancelled')
+  )
+}
+
 function getFriendlyAuthErrorMessage(error: any): string {
   if (!error) return 'Authentication failed'
   const code = typeof error.code === 'string' ? error.code : ''
+  const msg = typeof error.message === 'string' ? error.message : ''
+
+  // 1. User Cancellation
+  if (isUserCancellation(error)) {
+    return 'Sign-in was cancelled'
+  }
+
+  // 2. Network connection errors
+  if (
+    code === 'auth/network-request-failed' ||
+    msg.toLowerCase().includes('network') ||
+    msg.toLowerCase().includes('offline') ||
+    msg.toLowerCase().includes('failed to fetch')
+  ) {
+    return 'Network connection issue. Please check your internet connection and try again.'
+  }
+
+  // 3. Unauthorized domain
+  if (code === 'auth/unauthorized-domain' || msg.includes('auth/unauthorized-domain')) {
+    const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost'
+    return `Domain (${hostname}) is not authorized in Firebase Console. Add it in Authentication > Settings > Authorized domains.`
+  }
+
+  // 4. Operation not allowed
+  if (code === 'auth/operation-not-allowed' || msg.includes('operation-not-allowed')) {
+    return 'Google sign-in is not enabled in Firebase Console. Enable it in Authentication > Sign-in method.'
+  }
+
+  // 5. Android Credential Manager / Google Play Services configuration issues (Code 10 / 12500 / DEVELOPER_ERROR)
+  if (
+    code === '10' ||
+    code === '12500' ||
+    code === 'DEVELOPER_ERROR' ||
+    code === 'PROVIDER_CONFIGURATION_ERROR' ||
+    msg.includes('DEVELOPER_ERROR') ||
+    msg.includes('PROVIDER_CONFIGURATION_ERROR') ||
+    msg.includes('GetCredentialProviderConfigurationException')
+  ) {
+    return 'Google Sign-In configuration required: Please verify that package "com.foodai.app" and SHA-1 certificate fingerprint are registered in Firebase Console (Project Settings > Your Apps).'
+  }
+
+  // 6. No Google account on Android device
+  if (
+    code === 'NO_CREDENTIAL_AVAILABLE' ||
+    msg.includes('NoCredentialException') ||
+    msg.includes('NO_CREDENTIAL_AVAILABLE')
+  ) {
+    return 'No Google account found on this device. Please add a Google account in Android Settings.'
+  }
+
+  // 7. Popup blocked by browser
+  if (code === 'auth/popup-blocked' || msg.includes('popup-blocked')) {
+    return 'Google sign-in popup was blocked by browser. Please allow popups.'
+  }
+
+  // 8. Missing VITE_GOOGLE_CLIENT_ID configuration
+  if (msg.includes('VITE_GOOGLE_CLIENT_ID')) {
+    return 'Google Sign-In configuration required: VITE_GOOGLE_CLIENT_ID is not configured. Please set your OAuth 2.0 Web Client ID from Firebase Console.'
+  }
+
+  // 9. Standard Firebase Auth codes
   switch (code) {
     case 'auth/invalid-credential':
     case 'auth/wrong-password':
@@ -78,14 +154,15 @@ function getFriendlyAuthErrorMessage(error: any): string {
       return 'Password should be at least 6 characters.'
     case 'auth/invalid-email':
       return 'Please enter a valid email address.'
-    case 'auth/popup-blocked':
-      return 'Google sign-in popup was blocked by browser. Please allow popups.'
-    case 'auth/popup-closed-by-user':
-      return 'Google sign-in window was closed.'
     case 'auth/too-many-requests':
       return 'Too many attempts. Please wait a few moments and try again.'
-    default:
-      return error.message || 'Authentication error. Please try again.'
+    default: {
+      // Strip any sensitive credentials or tokens from the displayed message
+      const sanitized = msg
+        .replace(/AIza[0-9A-Za-z-_]{35}/g, '[REDACTED_API_KEY]')
+        .replace(/ya29\.[0-9A-Za-z-_]+/g, '[REDACTED_TOKEN]')
+      return sanitized || 'Authentication error. Please try again.'
+    }
   }
 }
 
@@ -183,7 +260,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return
     }
     try {
-      const result = await signInWithPopup(auth, googleProvider)
+      const result = await performGoogleSignIn(auth, googleProvider)
       if (result.user) {
         try {
           await syncUserProfile({
@@ -198,6 +275,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       toast.success(`Welcome back, ${result.user.displayName || 'Food Explorer'}!`)
     } catch (error: any) {
+      if (isUserCancellation(error)) {
+        toast.info('Google sign-in was cancelled')
+        return
+      }
+
       if (isUnauthorizedDomainError(error)) {
         const hostname = typeof window !== 'undefined' ? window.location.hostname : 'preview'
         console.warn(
@@ -211,8 +293,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      console.warn('Google sign in notice:', error?.message || error)
       const friendlyMsg = getFriendlyAuthErrorMessage(error)
+      console.warn('Google sign-in error:', friendlyMsg)
       toast.error(friendlyMsg)
       throw error
     }
