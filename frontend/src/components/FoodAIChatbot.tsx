@@ -164,7 +164,7 @@ export default function FoodAIChatbot() {
   return (
     <>
       {/* Floating Chat Trigger Button - Fixed at bottom left */}
-      <div className="fixed bottom-20 left-4 z-40 sm:bottom-6 sm:left-6">
+      <div className="fixed bottom-20 left-4 z-50 sm:bottom-6 sm:left-6 pointer-events-auto">
         <button
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
@@ -182,7 +182,13 @@ export default function FoodAIChatbot() {
 
       {/* Chat Window Dialog - Floating Bottom Left */}
       {isOpen && (
-        <div className="fixed bottom-20 left-4 sm:bottom-6 sm:left-6 z-50 w-[calc(100vw-2rem)] sm:w-[380px] max-w-[400px] h-[520px] max-h-[80vh] flex flex-col rounded-3xl bg-white shadow-2xl border border-gray-200 overflow-hidden animate-fade-in-up">
+        <>
+          {/* Mobile backdrop to dismiss chat when tapping outside */}
+          <div
+            className="fixed inset-0 z-50 bg-black/25 backdrop-blur-2xs sm:hidden pointer-events-auto"
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="fixed bottom-20 left-4 sm:bottom-6 sm:left-6 z-50 w-[calc(100vw-2rem)] sm:w-[380px] max-w-[400px] h-[520px] max-h-[80vh] flex flex-col rounded-3xl bg-white shadow-2xl border border-gray-200 overflow-hidden animate-fade-in-up pointer-events-auto">
           {/* Header */}
           <div className="p-3.5 px-4 bg-gradient-to-r from-emerald-700 via-teal-800 to-gray-900 text-white flex items-center justify-between shadow-sm shrink-0">
             <div className="flex items-center gap-2.5 min-w-0">
@@ -316,6 +322,7 @@ export default function FoodAIChatbot() {
             </button>
           </form>
         </div>
+        </>
       )}
     </>
   )

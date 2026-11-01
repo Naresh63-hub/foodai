@@ -141,7 +141,7 @@ function AppLayout() {
   return (
     <div className="relative min-h-screen w-full max-w-full overflow-x-hidden box-border">
       <DevDemoBanner />
-      <main className="w-full max-w-full box-border animate-fade-in-up">
+      <main className="w-full max-w-full box-border pb-24 sm:pb-28 animate-fade-in-up">
         <Outlet />
       </main>
       <FoodAIChatbot />

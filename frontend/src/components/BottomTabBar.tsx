@@ -26,8 +26,8 @@ export default function BottomTabBar() {
   if (isAuthRoute) return null
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom)] pointer-events-auto">
-      <div className="glass-elevated max-w-md mx-auto mb-3 rounded-3xl border border-white/70 backdrop-blur-xl bg-white/94 px-1.5 py-0.5 shadow-soft">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 pb-[env(safe-area-inset-bottom)] pointer-events-none select-none">
+      <div className="glass-elevated max-w-md mx-auto mb-3 rounded-3xl border border-white/70 backdrop-blur-xl bg-white/94 px-1.5 py-0.5 shadow-soft pointer-events-auto">
         <div className="flex items-center justify-around px-1 py-1">
           {tabs.map((tab) => {
             if (tab.isCenter) {

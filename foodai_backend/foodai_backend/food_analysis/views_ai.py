@@ -10,6 +10,93 @@ from rest_framework import status
 
 logger = logging.getLogger(__name__)
 
+GEMINI_MODEL_URL = (
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+)
+
+# Provenance labels. A response whose data_source is not in AI_SOURCES was NOT
+# produced by the model and must never be presented as verified AI analysis.
+GEMINI_TEXT_SOURCE = "gemini_ai_analysis"
+GEMINI_VISION_SOURCE = "gemini_multimodal_vision"
+BASELINE_SOURCE = "clinical_baseline"
+PLATE_BASELINE_SOURCE = "clinical_plate_synthesizer"
+VISION_BASELINE_SOURCE = "clinical_vision_synthesizer"
+CHAT_BASELINE_SOURCE = "clinical_chat_synthesizer"
+AI_SOURCES = {GEMINI_TEXT_SOURCE, GEMINI_VISION_SOURCE}
+
+ESTIMATE_NOTICE = (
+    "Estimate only. These values come from FoodAI's built-in clinical baseline, "
+    "not from an AI analysis of your food or photo."
+)
+
+
+def gemini_credentials_present() -> bool:
+    """True when GEMINI_API_KEY is configured in the process environment."""
+    return bool((os.environ.get("GEMINI_API_KEY") or "").strip())
+
+
+def call_gemini(payload: dict, timeout: int) -> tuple[str | None, str | None]:
+    """
+    Call Gemini and return (text, error_reason).
+
+    Security notes:
+    - The key is sent in the x-goog-api-key header, never as a URL query
+      parameter, so request objects and exception messages cannot carry the
+      credential into Render logs.
+    - Only fixed reason codes and HTTP status codes are logged or returned.
+      Provider response bodies are never surfaced to the client.
+    """
+    api_key = (os.environ.get("GEMINI_API_KEY") or "").strip()
+    if not api_key:
+        return None, "missing_credentials"
+
+    try:
+        res = requests.post(
+            GEMINI_MODEL_URL,
+            json=payload,
+            timeout=timeout,
+            headers={"x-goog-api-key": api_key},
+        )
+    except requests.exceptions.Timeout:
+        logger.warning("Gemini request timed out after %ss", timeout)
+        return None, "provider_timeout"
+    except requests.exceptions.RequestException:
+        # Deliberately logs no exception text: requests embeds the full request
+        # URL (and anything else) in these messages.
+        logger.warning("Gemini request failed: provider unreachable")
+        return None, "provider_unreachable"
+
+    if res.status_code != 200:
+        reason = {
+            400: "invalid_credentials",
+            401: "invalid_credentials",
+            403: "credentials_rejected",
+            429: "quota_exceeded",
+        }.get(res.status_code, "provider_error")
+        logger.warning("Gemini request rejected with HTTP %s (%s)", res.status_code, reason)
+        return None, reason
+
+    try:
+        candidates = res.json().get("candidates") or []
+        parts = candidates[0].get("content", {}).get("parts") or []
+        text = (parts[0].get("text") or "").strip()
+    except (AttributeError, KeyError, IndexError, TypeError, ValueError):
+        return None, "unparseable_response"
+
+    if not text:
+        return None, "empty_response"
+    return text, None
+
+
+def attach_provenance(result: dict, source: str, reason: str | None = None) -> dict:
+    """Label how a response was produced so estimates are never mistaken for AI output."""
+    result["data_source"] = source
+    result["is_estimate"] = source not in AI_SOURCES
+    if result["is_estimate"]:
+        result["estimate_notice"] = ESTIMATE_NOTICE
+        result["estimate_reason"] = reason or "unknown"
+    return result
+
 
 def generate_fallback_nutrition(food_query: str, age=None, weight_kg=None, health_conditions=None) -> dict:
     """Accurate, clinical baseline nutritional synthesizer for any food or meal query."""
@@ -348,31 +435,40 @@ class AINutritionAnalyzeView(APIView):
             conditions = []
 
         # Try Gemini API if key is available
-        api_key = os.environ.get("GEMINI_API_KEY")
-        if api_key and api_key.strip():
-            try:
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
-                prompt = (
-                    f"Analyze this food query: '{food_query}'. "
-                    f"User Age: {age}, Weight: {weight_kg}kg, Conditions: {conditions}. "
-                    "Return realistic nutritional data as JSON matching food_name, serving_description, "
-                    "serving_weight_g, calories_kcal, macros (carbohydrates_g, proteins_g, fat_g, saturated_fat_g, fiber_g, sugars_g, sodium_mg), "
-                    "macro_ratios (carbs_pct, protein_pct, fat_pct), health_score, processing_level, glycemic_impact, etc."
-                )
-                payload = {
-                    "contents": [{"parts": [{"text": prompt}]}],
-                    "generationConfig": {"responseMimeType": "application/json", "temperature": 0.2},
-                }
-                res = requests.post(url, json=payload, timeout=12)
-                if res.status_code == 200:
-                    text_data = res.json()["candidates"][0]["content"]["parts"][0]["text"]
+        gemini_reason = "missing_credentials"
+        if gemini_credentials_present():
+            gemini_reason = "no_analysis_returned"
+            prompt = (
+                f"Analyze this food query: '{food_query}'. "
+                f"User Age: {age}, Weight: {weight_kg}kg, Conditions: {conditions}. "
+                "Return realistic nutritional data as JSON matching food_name, serving_description, "
+                "serving_weight_g, calories_kcal, macros (carbohydrates_g, proteins_g, fat_g, saturated_fat_g, fiber_g, sugars_g, sodium_mg), "
+                "macro_ratios (carbs_pct, protein_pct, fat_pct), health_score, processing_level, glycemic_impact, etc."
+            )
+            payload = {
+                "contents": [{"parts": [{"text": prompt}]}],
+                "generationConfig": {"responseMimeType": "application/json", "temperature": 0.2},
+            }
+            text_data, gemini_reason = call_gemini(payload, timeout=12)
+            parsed = None
+            if text_data:
+                try:
                     parsed = json.loads(text_data)
-                    return Response(parsed, status=status.HTTP_200_OK)
-            except Exception as e:
-                logger.warning(f"Gemini API call failed, falling back to baseline synthesizer: {e}")
+                except json.JSONDecodeError:
+                    parsed = None
+                    gemini_reason = "model_output_not_json"
+            if isinstance(parsed, dict):
+                return Response(attach_provenance(dict(parsed), GEMINI_TEXT_SOURCE), status=status.HTTP_200_OK)
+            if gemini_reason is None:
+                gemini_reason = "model_output_not_json"
 
-        # Deterministic clinical synthesizer fallback
-        result = generate_fallback_nutrition(food_query, age, weight_kg, conditions)
+        # Deterministic clinical synthesizer fallback, labelled as an estimate.
+        logger.warning("Nutrition analysis served from baseline synthesizer: %s", gemini_reason)
+        result = attach_provenance(
+            generate_fallback_nutrition(food_query, age, weight_kg, conditions),
+            BASELINE_SOURCE,
+            gemini_reason,
+        )
         return Response(result, status=status.HTTP_200_OK)
 
 
@@ -406,8 +502,8 @@ class FoodVisionAnalyzeView(APIView):
             conditions = []
 
         # 1. Try Gemini Vision API if key and image are present
-        api_key = os.environ.get("GEMINI_API_KEY")
-        if api_key and api_key.strip():
+        gemini_reason = "missing_credentials"
+        if gemini_credentials_present():
             raw_b64 = None
             if image_base64 and "," in image_base64:
                 header, raw_b64 = image_base64.split(",", 1)
@@ -423,8 +519,8 @@ class FoodVisionAnalyzeView(APIView):
                 image_file.seek(0)
 
             if raw_b64:
+                gemini_reason = "no_analysis_returned"
                 try:
-                    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
                     prompt = (
                         "Analyze this food picture in detail. "
                         f"Recognized title hint: '{food_name}'. User Age: {age}, Weight: {weight_kg}kg, Conditions: {conditions}. "
@@ -452,16 +548,32 @@ class FoodVisionAnalyzeView(APIView):
                         ],
                         "generationConfig": {"responseMimeType": "application/json", "temperature": 0.2},
                     }
-                    res = requests.post(url, json=payload, timeout=14)
-                    if res.status_code == 200:
-                        text_data = res.json()["candidates"][0]["content"]["parts"][0]["text"]
-                        parsed = json.loads(text_data)
-                        return Response(parsed, status=status.HTTP_200_OK)
-                except Exception as vision_err:
-                    logger.warning(f"Gemini Vision call notice: {vision_err}")
+                    text_data, gemini_reason = call_gemini(payload, timeout=14)
+                    parsed = None
+                    if text_data:
+                        try:
+                            parsed = json.loads(text_data)
+                        except json.JSONDecodeError:
+                            parsed = None
+                            gemini_reason = "model_output_not_json"
+                    if isinstance(parsed, dict):
+                        return Response(attach_provenance(dict(parsed), GEMINI_VISION_SOURCE), status=status.HTTP_200_OK)
+                    if gemini_reason is None:
+                        gemini_reason = "model_output_not_json"
+                except Exception:
+                    # Exception text is never logged: it can carry request details.
+                    gemini_reason = "provider_error"
+                    logger.warning("Gemini Vision request failed")
+            else:
+                gemini_reason = "no_image_provided"
 
-        # 2. Resilient clinical food vision fallback
-        result = generate_fallback_food_vision(food_name, age, weight_kg, conditions)
+        # 2. Resilient clinical food vision fallback, labelled as an estimate.
+        logger.warning("Food vision served from baseline synthesizer: %s", gemini_reason)
+        result = attach_provenance(
+            generate_fallback_food_vision(food_name, age, weight_kg, conditions),
+            VISION_BASELINE_SOURCE,
+            gemini_reason,
+        )
         return Response(result, status=status.HTTP_200_OK)
 
 
@@ -1017,8 +1129,8 @@ class MultiItemPlateAnalyzeView(APIView):
             )
 
         # 1. Attempt Gemini 2.5 Flash Multimodal Vision
-        api_key = os.environ.get("GEMINI_API_KEY")
-        if api_key and api_key.strip():
+        gemini_reason = "missing_credentials"
+        if gemini_credentials_present():
             raw_b64 = None
             if image_base64 and "," in image_base64:
                 header, raw_b64 = image_base64.split(",", 1)
@@ -1034,8 +1146,8 @@ class MultiItemPlateAnalyzeView(APIView):
                 image_file.seek(0)
 
             if raw_b64:
+                gemini_reason = "no_analysis_returned"
                 try:
-                    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
                     prompt = (
                         "You are an expert clinical nutrition computer vision model. Analyze this meal plate image in detail. "
                         "Identify every distinct food item visible on the plate independently (e.g. if the plate contains rice, dal, "
@@ -1085,10 +1197,15 @@ class MultiItemPlateAnalyzeView(APIView):
                         ],
                         "generationConfig": {"responseMimeType": "application/json", "temperature": 0.2},
                     }
-                    res = requests.post(url, json=payload, timeout=15)
-                    if res.status_code == 200:
-                        text_data = res.json()["candidates"][0]["content"]["parts"][0]["text"]
-                        parsed = json.loads(text_data)
+                    text_data, gemini_reason = call_gemini(payload, timeout=15)
+                    parsed = None
+                    if text_data:
+                        try:
+                            parsed = json.loads(text_data)
+                        except json.JSONDecodeError:
+                            parsed = None
+                            gemini_reason = "model_output_not_json"
+                    if isinstance(parsed, dict):
                         raw_items = parsed.get("items")
                         if isinstance(raw_items, list) and len(raw_items) > 0:
                             # Normalize items and calculate base_per_100g
@@ -1183,12 +1300,21 @@ class MultiItemPlateAnalyzeView(APIView):
                                 "items": normalized_items,
                                 "data_source": "gemini_multimodal_vision",
                             }
-                            return Response(response_payload, status=status.HTTP_200_OK)
-                except Exception as plate_err:
-                    logger.warning(f"Gemini Multi-Item Plate Vision call notice: {plate_err}")
+                            return Response(attach_provenance(response_payload, GEMINI_VISION_SOURCE), status=status.HTTP_200_OK)
+                except Exception:
+                    # Exception text is never logged: it can carry request details.
+                    gemini_reason = "provider_error"
+                    logger.warning("Gemini Multi-Item Plate Vision request failed")
+            else:
+                gemini_reason = "no_image_provided"
 
-        # 2. Resilient clinical plate vision fallback synthesizer
-        fallback_result = generate_fallback_multi_plate(food_hint, age, weight_kg, conditions)
+        # 2. Resilient clinical plate vision fallback synthesizer, labelled as an estimate.
+        logger.warning("Plate analysis served from baseline synthesizer: %s", gemini_reason)
+        fallback_result = attach_provenance(
+            generate_fallback_multi_plate(food_hint, age, weight_kg, conditions),
+            PLATE_BASELINE_SOURCE,
+            gemini_reason,
+        )
         return Response(fallback_result, status=status.HTTP_200_OK)
 
 
@@ -1330,10 +1456,10 @@ class FoodAIChatView(APIView):
         if isinstance(conditions, str) and conditions:
             conditions = [c.strip() for c in conditions.split(",") if c.strip()]
 
-        api_key = os.environ.get("GEMINI_API_KEY")
-        if api_key and api_key.strip():
+        gemini_reason = "missing_credentials"
+        if gemini_credentials_present():
+            gemini_reason = "no_analysis_returned"
             try:
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
                 system_instruction = (
                     "You are FoodAI Assistant, an empathetic, clinical nutrition expert and application guide for the FoodAI web app. "
                     "Answer user queries about foods, calories, macronutrients, glycemic index, food additives, and healthy diet planning concisely. "
@@ -1357,16 +1483,22 @@ class FoodAIChatView(APIView):
                     "generationConfig": {"temperature": 0.3, "maxOutputTokens": 600},
                 }
 
-                res = requests.post(url, json=payload, timeout=12)
-                if res.status_code == 200:
-                    text_data = res.json()["candidates"][0]["content"]["parts"][0]["text"]
-                    return Response({
-                        "reply": text_data,
+                chat_text, gemini_reason = call_gemini(payload, timeout=12)
+                if chat_text:
+                    return Response(attach_provenance({
+                        "reply": chat_text,
                         "suggestions": ["How to analyze a plate?", "High protein snack ideas", "What are WHO limits?"],
-                    }, status=status.HTTP_200_OK)
-            except Exception as e:
-                logger.warning(f"Gemini Chat call notice: {e}")
+                    }, GEMINI_TEXT_SOURCE), status=status.HTTP_200_OK)
+            except Exception:
+                # Exception text is never logged: it can carry request details.
+                gemini_reason = "provider_error"
+                logger.warning("Gemini Chat request failed")
 
-        # Fallback synthesizer
-        fallback = generate_fallback_chat_reply(message, conditions)
+        # Fallback synthesizer, labelled as an estimate rather than AI assistance.
+        logger.warning("Chat reply served from baseline synthesizer: %s", gemini_reason)
+        fallback = attach_provenance(
+            generate_fallback_chat_reply(message, conditions),
+            CHAT_BASELINE_SOURCE,
+            gemini_reason,
+        )
         return Response(fallback, status=status.HTTP_200_OK)

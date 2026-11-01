@@ -316,7 +316,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext)
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider')
+    const fallbackUser = makeMockUser('guest@foodai.local', 'Food Explorer')
+    return {
+      user: fallbackUser,
+      loading: false,
+      isDemoMode: true,
+      signIn: async () => {},
+      signUp: async () => {},
+      signInWithGoogle: async () => {},
+      signInWithGoogleCredential: async () => {},
+      signInDemo: () => {},
+      sendPasswordReset: async () => {},
+      signOut: async () => {},
+    }
   }
   return context
 }

@@ -27,11 +27,11 @@
     color: #111827;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overscroll-behavior-y: contain;
   }
 
-  button, a, input, select, textarea {
+  button, a, input, select, textarea, [role="button"] {
     touch-action: manipulation;
+    cursor: pointer;
   }
 
   /* Sleek modern rounded scrollbar */

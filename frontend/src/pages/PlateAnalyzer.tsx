@@ -1034,7 +1034,7 @@ export default function PlateAnalyzer() {
 
         {/* Sticky Mobile Floating Meal Summary */}
         {analysisResult && !loading && plateItems.length > 0 && !savedSuccess && (
-          <div className="fixed bottom-16 sm:bottom-4 left-0 right-0 z-30 max-w-2xl mx-auto px-4 pointer-events-none">
+          <div className="fixed bottom-20 sm:bottom-6 left-0 right-0 z-40 max-w-2xl mx-auto px-4 pointer-events-none">
             <div className="p-3.5 bg-gray-900/95 backdrop-blur-md text-white rounded-2xl shadow-2xl border border-gray-800 flex items-center justify-between gap-3 pointer-events-auto">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">

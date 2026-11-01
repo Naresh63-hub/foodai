@@ -18,6 +18,12 @@ services:
           property: connectionString
       - key: SECRET_KEY
         generateValue: true
+      # Gemini API key. Declared with sync: false so the value is never stored in
+      # this file and is never overwritten by Blueprint updates. Set it only in the
+      # Render service's Environment page. Without it the backend serves clinical
+      # baseline estimates and labels them as estimates in every AI response.
+      - key: GEMINI_API_KEY
+        sync: false
       - key: DEBUG
         value: "False"
       - key: FIREBASE_ADMIN_SDK_KEY_PATH
