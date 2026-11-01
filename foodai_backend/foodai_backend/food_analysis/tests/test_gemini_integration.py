@@ -97,7 +97,7 @@ class GeminiCredentialTransportTests(TestCase):
     @patch("requests.post")
     def test_rejected_credentials_are_reported_and_provider_body_hidden(self, mock_post):
         mock_post.return_value = mock_gemini_status(
-            400, {"error": {"message": f"API key not valid. Please pass a valid API key."}}
+            400, {"error": {"message": "API key not valid. Please pass a valid API key."}}
         )
         with self.assertLogs(VIEWS_LOGGER, level="WARNING") as captured:
             response = self.client.post("/api/ai/nutrition-analyze/", {"food_query": "masala dosa"}, format="json")
