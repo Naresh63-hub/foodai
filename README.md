@@ -204,47 +204,58 @@ npm run test:e2e
 
 ---
 
-## 🚀 Production Deployment Guide
+## 🚀 Production Deployment Guide (Render.com)
 
-### Option A: Frontend on Vercel (Recommended)
+### Complete Full-Stack Deployment via Render Blueprint (`render.yaml`)
 
-1. Import repository `Naresh63-hub/foodai` on [Vercel](https://vercel.com/new).
-2. Configure project settings:
-   - **Framework Preset**: `Vite`
-   - **Root Directory**: `frontend`
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
-3. Add Environment Variables (from Firebase Console):
-   - `VITE_FIREBASE_API_KEY`
-   - `VITE_FIREBASE_AUTH_DOMAIN`
-   - `VITE_FIREBASE_PROJECT_ID`
-   - `VITE_FIREBASE_STORAGE_BUCKET`
-   - `VITE_FIREBASE_MESSAGING_SENDER_ID`
-   - `VITE_FIREBASE_APP_ID`
-   - `VITE_API_URL` = `https://your-backend-url.onrender.com`
-4. Click **Deploy**.
+The repository includes a ready-to-use `render.yaml` blueprint that provisions:
+1. **Managed PostgreSQL Database (`foodai-db`)**: Persistent database storage with zero-config `DATABASE_URL` injection.
+2. **Backend Web Service (`foodai-backend`)**: Python Django REST API with Gunicorn, auto-running migrations and catalog seeding on build.
+3. **Frontend Static Site (`foodai-frontend`)**: React 18 + Vite SPA served via Render's global CDN with client-side routing support.
+
+#### 1. First-Time Setup on Render
+1. Go to [Render Dashboard](https://dashboard.render.com).
+2. Click **New +** → **Blueprint**.
+3. Connect your GitHub repository (`Naresh63-hub/foodai`).
+4. Render detects `render.yaml` and sets up `foodai-backend`, `foodai-db`, and `foodai-frontend`.
+5. In **Environment Variables** / **Secret Files**:
+   - Upload your `firebase-service-account.json` under Secret Files (or paste contents into `FIREBASE_SERVICE_ACCOUNT_JSON`).
+   - Add your `GEMINI_API_KEY` (for AI nutrition and meal plate analysis).
+   - In `foodai-frontend`, add your Firebase web config (`VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, etc.).
+6. Click **Apply**. Render will automatically build, migrate, and deploy your live app!
 
 ---
 
-### Option B: Backend on Render.com (Blueprint via `render.yaml`)
+### 🔄 How to Go Live Every Time (Continuous Deployment)
 
-The repository ships a `render.yaml` blueprint that provisions a **managed PostgreSQL** instance and injects `DATABASE_URL` automatically. **Do not use SQLite in production** — Render's free-tier disk is ephemeral and scan history / user profiles are wiped on every redeploy.
+Once your Render Blueprint or services are connected:
+1. Make your changes and test locally:
+   ```bash
+   npm run test --prefix frontend
+   python -m pytest foodai_backend/foodai_backend/tests
+   ```
+2. Commit and push your changes to GitHub:
+   ```bash
+   git add .
+   git commit -m "feat: my latest updates"
+   git push origin main
+   ```
+3. **Render takes care of the rest automatically:**
+   - Render detects the push to `main`.
+   - Runs database migrations (`python manage.py migrate`).
+   - Seeds the FMCG food dataset (`python manage.py import_food_dataset`).
+   - Builds the optimized frontend bundle.
+   - Deploys the new version live with zero downtime.
 
-1. Create a **New Blueprint** on [Render](https://render.com) connected to `Naresh63-hub/foodai` (it reads `render.yaml`).
-2. The blueprint configures:
-   - **Root Directory**: `foodai_backend`
-   - **Build Command**: `cd foodai_backend && pip install -r ../requirements.txt && python manage.py migrate && python manage.py import_food_dataset`
-   - **Start Command**: `cd foodai_backend && gunicorn foodai_backend.wsgi:application`
-   - **Database**: free PostgreSQL `foodai-db` (connection string wired into `DATABASE_URL`)
-3. Environment Variables (already in `render.yaml`, adjust to your domain):
-   - `DJANGO_SETTINGS_MODULE` = `foodai_backend.settings.prod`
-   - `SECRET_KEY` = auto-generated
-   - `DEBUG` = `False`
-   - `ALLOWED_HOSTS` = `.onrender.com` (or your custom domain)
-   - `FIREBASE_ADMIN_SDK_KEY_PATH` = `firebase-service-account.json`
-   - `CORS_ALLOW_ALL_ORIGINS` = `false`
-   - `CORS_ALLOWED_ORIGINS` = `https://your-frontend-domain.vercel.app`
-4. Upload your Firebase service account key securely to Render.
+---
+
+### Alternative: Frontend on Vercel + Backend on Render
+
+If you prefer keeping the frontend on Vercel:
+1. Import `Naresh63-hub/foodai` on [Vercel](https://vercel.com/new).
+2. Set Root Directory to `frontend`.
+3. Add `VITE_API_URL` pointing to your Render backend URL (e.g., `https://foodai-backend.onrender.com` or `https://foodai-1-cht5.onrender.com`).
+4. Both Vercel and Render will auto-deploy simultaneously whenever you `git push origin main`.
 
 ---
 

@@ -92,3 +92,14 @@ class TestProductionSettingsSecurity:
         assert prod.CSRF_COOKIE_SECURE is True, (
             "CSRF_COOKIE_SECURE must be True in production."
         )
+
+    def test_prod_settings_cors_allows_render_domains(self):
+        """
+        Verify that production CORS regex includes Render domains.
+        """
+        from foodai_backend.settings import prod
+        import re
+
+        render_origin = "https://foodai-frontend.onrender.com"
+        matches = any(re.match(pattern, render_origin) for pattern in prod.CORS_ALLOWED_ORIGIN_REGEXES)
+        assert matches is True, "Production CORS must allow *.onrender.com frontend origins."

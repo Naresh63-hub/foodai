@@ -48,6 +48,7 @@ CORS_ALLOWED_ORIGINS = env.list(
 )
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://.*\.vercel\.app$",
+    r"^https://.*\.onrender\.com$",
 ]
 
 # Transport security: redirect HTTP->HTTPS and enable HSTS (1 year).
