@@ -77,11 +77,14 @@ def call_gemini(payload: dict, timeout: int) -> tuple[str | None, str | None]:
         return None, reason
 
     try:
-        candidates = res.json().get("candidates") or []
-        parts = candidates[0].get("content", {}).get("parts") or []
-        text = (parts[0].get("text") or "").strip()
-    except (AttributeError, KeyError, IndexError, TypeError, ValueError):
+        body = res.json()
+    except ValueError:
         return None, "unparseable_response"
+
+    # Gemini signals a safety-blocked or truncated answer as no candidates/parts.
+    candidates = (body or {}).get("candidates") or []
+    parts = (candidates[0].get("content") or {}).get("parts") or [] if candidates else []
+    text = (parts[0].get("text") or "").strip() if parts else ""
 
     if not text:
         return None, "empty_response"
