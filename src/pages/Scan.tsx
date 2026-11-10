@@ -192,13 +192,6 @@ export default function Scan() {
     checkCameraPermissions()
   }, [])
 
-  // Auto-activate camera if permission was previously granted
-  useEffect(() => {
-    if (permissionStatus === 'granted' && (tab === 'barcode' || tab === 'batch') && !cameraActive) {
-      startCamera()
-    }
-  }, [permissionStatus, tab])
-
   // Suggest flashlight when light level is low
   useEffect(() => {
     if (lightLevel === 'dark' && cameraActive && !torchOn && torchSupported) {
@@ -433,7 +426,7 @@ export default function Scan() {
   }
 
   // Start Live Webcam Video Stream for Barcode Scanner
-  const startCamera = async () => {
+  async function startCamera() {
     try {
       setCameraActive(true)
       setTorchOn(false)
@@ -507,6 +500,13 @@ export default function Scan() {
       setCameraActive(false)
     }
   }
+
+  // Auto-activate camera if permission was previously granted
+  useEffect(() => {
+    if (permissionStatus === 'granted' && (tab === 'barcode' || tab === 'batch') && !cameraActive) {
+      startCamera()
+    }
+  }, [permissionStatus, tab])
 
   const toggleTorch = async () => {
     if (!streamRef.current) {

@@ -4,6 +4,8 @@ import SafeAreaView from '../components/SafeAreaView'
 import { useAuth } from '../contexts/AuthContext'
 import { useUserPreferences } from '../hooks/useUserPreferences'
 import InstallAppModal from '../components/InstallAppModal'
+import UpdateReleaseModal from '../components/UpdateReleaseModal'
+import { useAppUpdate } from '../hooks/useAppUpdate'
 
 const CONDITION_NAMES: Record<string, { title: string; icon: string }> = {
   diabetes: { title: 'Diabetes / Pre-diabetes', icon: '🩸' },
@@ -23,6 +25,15 @@ export default function Profile() {
   const { user, signOut } = useAuth()
   const { values } = useUserPreferences()
   const [showInstallModal, setShowInstallModal] = useState(false)
+  const {
+    currentVersion,
+    isChecking,
+    hasUpdate,
+    releaseInfo,
+    isModalOpen,
+    closeModal,
+    checkForUpdates,
+  } = useAppUpdate(false)
   const email = user?.email ?? 'Not signed in'
   const { age, weight } = values
   const conditions = values.conditions
@@ -184,6 +195,35 @@ export default function Profile() {
           <div className="rounded-2xl bg-white shadow-card border border-gray-100 divide-y divide-gray-100 overflow-hidden">
             <button
               type="button"
+              onClick={() => checkForUpdates(true)}
+              disabled={isChecking}
+              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors text-left disabled:opacity-60"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🚀</span>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-bold text-gray-900">Check for App Updates</p>
+                    <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      v{currentVersion}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    {isChecking
+                      ? 'Checking GitHub Releases...'
+                      : hasUpdate
+                      ? 'New version available! Tap to install ➔'
+                      : 'App is up to date · Tap to re-check'}
+                  </p>
+                </div>
+              </div>
+              <span className="text-emerald-700 text-xs font-bold px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 rounded-lg border border-emerald-200/80 transition-colors">
+                {isChecking ? '...' : hasUpdate ? 'Update 🚀' : 'Check'}
+              </span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setShowInstallModal(true)}
               className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors text-left"
             >
@@ -233,6 +273,13 @@ export default function Profile() {
       <InstallAppModal
         isOpen={showInstallModal}
         onClose={() => setShowInstallModal(false)}
+      />
+
+      {/* App Update Release Modal */}
+      <UpdateReleaseModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        releaseInfo={releaseInfo}
       />
     </SafeAreaView>
   )

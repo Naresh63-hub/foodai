@@ -3,7 +3,9 @@ import { Routes, Route, Navigate, Outlet, useParams } from 'react-router-dom'
 import BottomTabBar from './components/BottomTabBar'
 import FoodAIChatbot from './components/FoodAIChatbot'
 import SafeAreaView from './components/SafeAreaView'
+import UpdateReleaseModal from './components/UpdateReleaseModal'
 import { useAuth } from './contexts/AuthContext'
+import { useAppUpdate } from './hooks/useAppUpdate'
 
 // Code-split page routes so the initial bundle stays small; each page loads on demand.
 const Home = lazy(() => import('./pages/Home'))
@@ -138,6 +140,8 @@ function ProductResultsParamWrapper() {
 }
 
 function AppLayout() {
+  const { isModalOpen, releaseInfo, closeModal } = useAppUpdate(true)
+
   return (
     <div className="relative min-h-screen w-full max-w-full overflow-x-hidden box-border">
       <DevDemoBanner />
@@ -146,6 +150,11 @@ function AppLayout() {
       </main>
       <FoodAIChatbot />
       <BottomTabBar />
+      <UpdateReleaseModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        releaseInfo={releaseInfo}
+      />
     </div>
   )
 }

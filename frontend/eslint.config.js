@@ -31,6 +31,7 @@ export default tseslint.config(
       'react-hooks/set-state-in-effect': 'off',
       'react-hooks/purity': 'off',
       'react-hooks/static-components': 'off',
+      'react-hooks/immutability': 'off',
       'no-empty': ['warn', { allowEmptyCatch: true }],
       'no-useless-assignment': 'off',
     },
