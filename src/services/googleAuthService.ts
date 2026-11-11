@@ -19,11 +19,19 @@ export function isNativePlatform(): boolean {
   }
 }
 
+export const DEFAULT_GOOGLE_WEB_CLIENT_ID =
+  '59556325769-489r0888tuooujuq25ikpuf5i0ethlgj.apps.googleusercontent.com'
+
 /**
- * Retrieves the configured Google OAuth 2.0 Web Client ID from environment variables.
+ * Retrieves the configured Google OAuth 2.0 Web Client ID from environment variables,
+ * falling back to the official FoodAI Web OAuth Client ID.
  */
 export function getGoogleWebClientId(): string {
-  return (import.meta.env.VITE_GOOGLE_CLIENT_ID || '').trim()
+  const envId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+  if (typeof envId === 'string') {
+    return envId.trim()
+  }
+  return DEFAULT_GOOGLE_WEB_CLIENT_ID
 }
 
 /**
