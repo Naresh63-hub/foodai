@@ -66,7 +66,7 @@ export default function GroceryCart() {
 
   return (
     <SafeAreaView>
-      <div className="px-4 sm:px-5 py-6 pb-36 max-w-md mx-auto w-full box-border">
+      <div className="px-5 py-6 pb-28 max-w-md mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>

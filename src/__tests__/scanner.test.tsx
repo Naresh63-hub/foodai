@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import Scan from '../pages/Scan'
+import { AuthProvider } from '../contexts/AuthContext'
 
 // Mock navigator.mediaDevices
 const mockGetUserMedia = vi.fn()
@@ -52,7 +53,7 @@ vi.mock('../constants', () => ({
   ],
 }))
 
-describe('Scanner Component (src version)', () => {
+describe('Scanner Component', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     localStorageMock.getItem.mockReturnValue(null)
@@ -68,7 +69,11 @@ describe('Scanner Component (src version)', () => {
       [
         {
           path: '/scan',
-          element: <Scan />,
+          element: (
+            <AuthProvider>
+              <Scan />
+            </AuthProvider>
+          ),
         },
       ],
       {
@@ -92,7 +97,11 @@ describe('Scanner Component (src version)', () => {
       [
         {
           path: '/scan',
-          element: <Scan />,
+          element: (
+            <AuthProvider>
+              <Scan />
+            </AuthProvider>
+          ),
         },
       ],
       {
@@ -114,7 +123,11 @@ describe('Scanner Component (src version)', () => {
       [
         {
           path: '/scan',
-          element: <Scan />,
+          element: (
+            <AuthProvider>
+              <Scan />
+            </AuthProvider>
+          ),
         },
       ],
       {
@@ -139,7 +152,11 @@ describe('Scanner Component (src version)', () => {
       [
         {
           path: '/scan',
-          element: <Scan />,
+          element: (
+            <AuthProvider>
+              <Scan />
+            </AuthProvider>
+          ),
         },
       ],
       {
@@ -165,7 +182,11 @@ describe('Scanner Component (src version)', () => {
       [
         {
           path: '/scan',
-          element: <Scan />,
+          element: (
+            <AuthProvider>
+              <Scan />
+            </AuthProvider>
+          ),
         },
       ],
       {
@@ -196,7 +217,11 @@ describe('Scanner Component (src version)', () => {
       [
         {
           path: '/scan',
-          element: <Scan />,
+          element: (
+            <AuthProvider>
+              <Scan />
+            </AuthProvider>
+          ),
         },
       ],
       {
@@ -223,7 +248,11 @@ describe('Scanner Component (src version)', () => {
       [
         {
           path: '/scan',
-          element: <Scan />,
+          element: (
+            <AuthProvider>
+              <Scan />
+            </AuthProvider>
+          ),
         },
       ],
       {

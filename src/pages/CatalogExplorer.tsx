@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import SafeAreaView from '../components/SafeAreaView'
 import { searchProducts, CatalogProductItem } from '../api/food'
-import { SkeletonProductList } from '../components/Skeleton'
 
 const CATEGORIES = [
   { id: '', label: 'All Foods', icon: '🍽️' },
@@ -58,7 +57,7 @@ export default function CatalogExplorer() {
 
   return (
     <SafeAreaView>
-      <div className="px-4 sm:px-5 py-6 pb-36 max-w-md mx-auto w-full box-border">
+      <div className="px-5 py-6 pb-28 max-w-md mx-auto">
         {/* Header */}
         <div className="mb-5">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-bold border border-emerald-200 mb-1.5">
@@ -175,9 +174,7 @@ export default function CatalogExplorer() {
         </div>
 
         {/* Product Cards List */}
-        {loading ? (
-          <SkeletonProductList count={4} />
-        ) : products.length > 0 ? (
+        {products.length > 0 ? (
           <div className="space-y-3">
             {products.map((item) => (
               <div

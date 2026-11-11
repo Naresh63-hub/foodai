@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import { toast } from 'sonner'
 import Register from '../pages/Register'
 import { AuthProvider } from '../contexts/AuthContext'
+import { toast } from 'sonner'
 
 // Mock useAuth
 const mockSignUp = vi.fn()

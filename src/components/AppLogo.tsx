@@ -34,7 +34,6 @@ export default function AppLogo({
           style={{ width: size === 'xl' ? '280px' : size === 'lg' ? '220px' : '180px' }}
           referrerPolicy="no-referrer"
           onError={(e) => {
-            // Fallback to SVG if PNG is loading
             ;(e.target as HTMLImageElement).src = '/logo-full.svg'
           }}
         />

@@ -24,6 +24,8 @@ vi.mock('firebase/auth', () => ({
   signOut: vi.fn(),
   GoogleAuthProvider: vi.fn(),
   signInWithPopup: vi.fn(),
+  signInWithRedirect: vi.fn(),
+  getRedirectResult: vi.fn(() => Promise.resolve(null)),
 }))
 
 // Mock react-router-dom

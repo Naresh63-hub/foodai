@@ -54,7 +54,7 @@ export default function Nutrition() {
 
   return (
     <SafeAreaView>
-      <div className="px-4 sm:px-5 py-6 pb-36 max-w-md mx-auto w-full box-border">
+      <div className="px-5 py-6 pb-28 max-w-md mx-auto">
         <Link to={-1 as any} className="text-xs font-bold text-gray-500 hover:text-gray-900 inline-flex items-center gap-1 mb-4">
           ← Back to Product Results
         </Link>

@@ -818,7 +818,7 @@ export default function Scan() {
                     e.stopPropagation()
                     applyZoom(zoomLevel === 1 ? 2 : 1)
                   }}
-                  className="px-2 py-1 rounded-full text-[10px] font-extrabold bg-black/60 hover:bg-black/80 text-white border border-white/20 backdrop-blur-md transition-all active:scale-95 cursor-pointer"
+                  className="px-2 py-1 rounded-full text-[10px] font-extrabold bg-black/60 hover:bg-black/80 text-white border border-white/20 backdrop-blur-md transition-all active:scale-95"
                   title="Toggle 1x/2x Zoom"
                 >
                   {zoomLevel === 1 ? '1x' : '2x 🔍'}
@@ -833,7 +833,7 @@ export default function Scan() {
                     e.stopPropagation()
                     toggleTorch()
                   }}
-                  className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 backdrop-blur-md shadow-md transition-all active:scale-95 cursor-pointer ${
+                  className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 backdrop-blur-md shadow-md transition-all active:scale-95 ${
                     torchOn
                       ? 'bg-amber-400 text-gray-950 font-black ring-2 ring-amber-300'
                       : 'bg-black/60 hover:bg-black/80 text-white border border-white/20'
@@ -878,7 +878,7 @@ export default function Scan() {
                           setMultipleBarcodes([])
                           handleDetectedBarcode(code)
                         }}
-                        className="w-full p-3 rounded-xl bg-gray-50 hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 transition-all text-left cursor-pointer"
+                        className="w-full p-3 rounded-xl bg-gray-50 hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 transition-all text-left"
                       >
                         <p className="text-xs font-mono font-bold text-gray-900">{code}</p>
                       </button>

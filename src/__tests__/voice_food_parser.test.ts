@@ -8,7 +8,7 @@ describe('Voice Food Command Parser', () => {
 
     expect(result.mealType).toBe('breakfast')
     expect(result.cleanedFoodQuery.toLowerCase()).toContain('2 boiled eggs and black coffee')
-    expect(result.portionEstimate.toLowerCase()).toContain('2 boiled eggs')
+    expect(result.portionEstimate?.toLowerCase()).toContain('2 boiled eggs')
   })
 
   it('extracts stated calories from spoken voice commands', () => {
@@ -26,7 +26,7 @@ describe('Voice Food Command Parser', () => {
 
     expect(result.mealType).toBe('snack')
     expect(result.cleanedFoodQuery.toLowerCase()).toContain('bowl of greek yogurt with berries')
-    expect(result.portionEstimate.toLowerCase()).toContain('bowl')
+    expect(result.portionEstimate?.toLowerCase()).toContain('bowl')
   })
 
   it('handles dinner voice commands cleanly', () => {

@@ -1,5 +1,5 @@
-import firebaseConfig from '../firebase-applet-config.json'
-
-// Real Firebase Auth is active with provisioned credentials.
+// Central definition of the dev-only login bypass flag.
+// Kept in one place so AuthContext, the API client and the preferences hook
+// all agree on whether we're running in "demo mode" (no real Firebase auth).
 export const AUTH_BYPASS =
-  !firebaseConfig?.apiKey || import.meta.env.VITE_AUTH_BYPASS === 'force_demo'
+  import.meta.env.DEV && import.meta.env.VITE_AUTH_BYPASS === 'true'

@@ -66,7 +66,7 @@ describe('Product Scan Name Display', () => {
 
     await waitFor(() => {
       expect(
-        screen.getAllByText('Britannia Glucose / Tiger Biscuits').length
+        screen.getAllByText(/Britannia Glucose \/ Tiger Biscuits/i).length
       ).toBeGreaterThanOrEqual(1)
     })
   })

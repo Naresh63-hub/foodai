@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import SafeAreaView from '../components/SafeAreaView'
 import ProcessingBadge from '../components/ProcessingBadge'
 import { deleteScan, getScanHistory } from '../api/food'
-import { SkeletonHistoryList } from '../components/Skeleton'
 
 type Status = 'loading' | 'ready' | 'error'
 
@@ -48,13 +47,17 @@ export default function History() {
 
   return (
     <SafeAreaView>
-      <div className="px-4 sm:px-5 py-6 pb-36 max-w-md mx-auto w-full box-border">
+      <div className="px-5 py-6 pb-28 max-w-md mx-auto">
         <h1 className="text-2xl font-black text-gray-900 tracking-tight">Scan History</h1>
         <p className="mt-1 text-xs text-gray-500">
           {status === 'ready' ? `${scans.length} products scanned & analyzed` : 'Your past scans'}
         </p>
 
-        {status === 'loading' && <SkeletonHistoryList count={5} />}
+        {status === 'loading' && (
+          <div className="flex justify-center py-16">
+            <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-emerald-600"></div>
+          </div>
+        )}
 
         {status === 'error' && (
           <div className="mt-6 rounded-2xl bg-rose-50 border border-rose-200 p-5 text-center">

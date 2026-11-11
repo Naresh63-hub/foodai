@@ -171,7 +171,7 @@ export default function ProfilePreferences() {
 
   return (
     <SafeAreaView>
-      <form onSubmit={handleSave} className="px-4 sm:px-5 py-6 pb-36 max-w-md mx-auto w-full box-border">
+      <form onSubmit={handleSave} className="px-5 py-6 pb-28 max-w-md mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <Link
             to="/profile"

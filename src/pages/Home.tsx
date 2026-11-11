@@ -2,12 +2,15 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import SafeAreaView from '../components/SafeAreaView'
 import { QUICK_SAMPLE_PRESETS } from '../constants'
+import demoProductsData from '../constants/demoProducts.json'
 import { getScanHistory } from '../api/food'
 import VoiceMealLoggerModal from '../components/VoiceMealLoggerModal'
 import { SkeletonRecentScans } from '../components/Skeleton'
 import { useAuth } from '../contexts/AuthContext'
 import InstallAppModal from '../components/InstallAppModal'
 import { triggerHaptic } from '../utils/haptics'
+
+const demoProducts = demoProductsData as Record<string, any>
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -48,7 +51,12 @@ export default function Home() {
 
   const handleQuickPreset = (barcode: string) => {
     triggerHaptic('light')
-    navigate(`/results/${barcode}`)
+    const demoData = demoProducts[barcode]
+    if (demoData) {
+      navigate(`/results/${barcode}`, { state: { result: demoData } })
+    } else {
+      navigate(`/results/${barcode}`)
+    }
   }
 
   return (

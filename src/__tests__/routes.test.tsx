@@ -15,7 +15,6 @@ import BottomTabBar from '../components/BottomTabBar'
 import NutritionChip from '../components/NutritionChip'
 import IngredientCard from '../components/IngredientCard'
 import ProcessingBadge from '../components/ProcessingBadge'
-import { AuthProvider } from '../contexts/AuthContext'
 
 describe('Route pages & components are valid modules', () => {
   it('all 9 page components export as functions', () => {
@@ -42,11 +41,7 @@ describe('Route pages & components are valid modules', () => {
       [
         {
           path: '*',
-          element: (
-            <AuthProvider>
-              <AppRouter />
-            </AuthProvider>
-          ),
+          element: <AppRouter />,
         },
       ],
       { initialEntries: ['/'] }
@@ -57,16 +52,7 @@ describe('Route pages & components are valid modules', () => {
 
   it('<Routes/> renders without crashing at /scan', () => {
     const router = createMemoryRouter(
-      [
-        {
-          path: '*',
-          element: (
-            <AuthProvider>
-              <AppRouter />
-            </AuthProvider>
-          ),
-        },
-      ],
+      [{ path: '*', element: <AppRouter /> }],
       { initialEntries: ['/scan'] }
     )
     const { container } = render(<RouterProvider router={router} />)
@@ -75,16 +61,7 @@ describe('Route pages & components are valid modules', () => {
 
   it('<Routes/> renders without crashing at /history', () => {
     const router = createMemoryRouter(
-      [
-        {
-          path: '*',
-          element: (
-            <AuthProvider>
-              <AppRouter />
-            </AuthProvider>
-          ),
-        },
-      ],
+      [{ path: '*', element: <AppRouter /> }],
       { initialEntries: ['/history'] }
     )
     const { container } = render(<RouterProvider router={router} />)
@@ -93,16 +70,7 @@ describe('Route pages & components are valid modules', () => {
 
   it('<Routes/> renders without crashing at /profile', () => {
     const router = createMemoryRouter(
-      [
-        {
-          path: '*',
-          element: (
-            <AuthProvider>
-              <AppRouter />
-            </AuthProvider>
-          ),
-        },
-      ],
+      [{ path: '*', element: <AppRouter /> }],
       { initialEntries: ['/profile'] }
     )
     const { container } = render(<RouterProvider router={router} />)

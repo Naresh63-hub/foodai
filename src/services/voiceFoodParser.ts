@@ -10,7 +10,7 @@ export interface ParsedVoiceCommand {
 
 export function parseVoiceFoodCommand(speech: string): ParsedVoiceCommand {
   const raw = speech.trim()
-  let text = raw.toLowerCase()
+  const text = raw.toLowerCase()
 
   // 1. Detect Meal Type from speech
   let mealType: MealType = 'snack'
