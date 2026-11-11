@@ -3,124 +3,48 @@ import { useNavigate, Link } from 'react-router-dom'
 import SafeAreaView from '../components/SafeAreaView'
 import { toast } from 'sonner'
 import { useUserPreferences } from '../hooks/useUserPreferences'
-
-interface ConditionOption {
-  id: string
-  title: string
-  icon: string
-  description: string
-  category: 'metabolic' | 'cardio' | 'allergy' | 'special'
-}
-
-const AVAILABLE_CONDITIONS: ConditionOption[] = [
-  {
-    id: 'diabetes',
-    title: 'Diabetes / Pre-diabetes',
-    icon: '🩸',
-    description: 'Warns on high simple sugars, maltodextrin, high GI syrups & fast carbs.',
-    category: 'metabolic',
-  },
-  {
-    id: 'hypertension',
-    title: 'Hypertension / High BP',
-    icon: '🫀',
-    description: 'Flags high sodium (>1.25g salt/100g), MSG, sodium benzoate & baking soda.',
-    category: 'cardio',
-  },
-  {
-    id: 'heart_disease',
-    title: 'High Cholesterol / Heart Health',
-    icon: '🧈',
-    description: 'Alerts on refined palm oil, hydrogenated fats, trans fats & saturated lipids.',
-    category: 'cardio',
-  },
-  {
-    id: 'child_mode',
-    title: 'Child Mode (<12 yrs)',
-    icon: '👶',
-    description: 'Strict checks for synthetic azo dyes (Tartrazine, Sunset Yellow) & excess sugar.',
-    category: 'special',
-  },
-  {
-    id: 'celiac',
-    title: 'Celiac / Gluten Sensitivity',
-    icon: '🌾',
-    description: 'Strict alerts for wheat, maida, atta, barley, rye, malt & gluten grains.',
-    category: 'allergy',
-  },
-  {
-    id: 'lactose',
-    title: 'Lactose Intolerance',
-    icon: '🥛',
-    description: 'Detects milk solids, whey protein, casein, butterfat & dairy derivatives.',
-    category: 'allergy',
-  },
-  {
-    id: 'nut_allergy',
-    title: 'Nut & Peanut Allergy',
-    icon: '🥜',
-    description: 'Severe allergy warning for peanuts, cashews, almonds & tree nuts.',
-    category: 'allergy',
-  },
-  {
-    id: 'soy_allergy',
-    title: 'Soy Allergy',
-    icon: '🌱',
-    description: 'Flags soy protein, soya lecithin (INS 322) & soybean derivatives.',
-    category: 'allergy',
-  },
-  {
-    id: 'kidney_disease',
-    title: 'Kidney / Renal Health',
-    icon: '🫘',
-    description: 'Warns on inorganic phosphate & potassium additives causing filtration strain.',
-    category: 'metabolic',
-  },
-  {
-    id: 'fatty_liver',
-    title: 'Fatty Liver / NAFLD',
-    icon: '🩺',
-    description: 'Monitors high-fructose corn syrup, liquid sugars & hepatic fat drivers.',
-    category: 'metabolic',
-  },
-  {
-    id: 'pcos',
-    title: 'PCOS / Hormonal Balance',
-    icon: '🌸',
-    description: 'Warns on high glycemic refined sugars & simple starches worsening insulin resistance.',
-    category: 'metabolic',
-  },
-  {
-    id: 'pregnancy',
-    title: 'Pregnancy & Nursing Safe Mode',
-    icon: '🤰',
-    description: 'Flags unpasteurized dairy, synthetic sweeteners (saccharin), and excess stimulants.',
-    category: 'special',
-  },
-  {
-    id: 'low_fodmap',
-    title: 'IBS / Low FODMAP & Gut Care',
-    icon: '🌿',
-    description: 'Detects fermentable polyols (maltitol, sorbitol) and isolated inulin fibers causing bloating.',
-    category: 'special',
-  },
-]
+import {
+  AVAILABLE_CONDITIONS,
+  GENDER_OPTIONS,
+  ACTIVITY_LEVEL_OPTIONS,
+  DIETARY_PREFERENCE_OPTIONS,
+  HEALTH_GOAL_OPTIONS,
+  calculateBMI,
+  getBMICategory,
+  estimateDailyCalories,
+} from '../utils/healthMetrics'
 
 export default function ProfilePreferences() {
   const navigate = useNavigate()
   const { values, hydrating, save } = useUserPreferences()
 
-  const [age, setAge] = useState<string>(values.age)
-  const [weight, setWeight] = useState<string>(values.weight)
-  const [selectedConditions, setSelectedConditions] = useState<string[]>(values.conditions)
+  const [name, setName] = useState<string>(values.name ?? '')
+  const [age, setAge] = useState<string>(values.age ?? '')
+  const [weight, setWeight] = useState<string>(values.weight ?? '')
+  const [height, setHeight] = useState<string>(values.height ?? '')
+  const [gender, setGender] = useState<string>(values.gender ?? '')
+  const [activityLevel, setActivityLevel] = useState<string>(values.activityLevel ?? '')
+  const [dietaryPreference, setDietaryPreference] = useState<string>(values.dietaryPreference ?? '')
+  const [healthGoal, setHealthGoal] = useState<string>(values.healthGoal ?? '')
+  const [dailyCalorieGoal, setDailyCalorieGoal] = useState<string>(values.dailyCalorieGoal ?? '')
+  const [allergiesNotes, setAllergiesNotes] = useState<string>(values.allergiesNotes ?? '')
+  const [selectedConditions, setSelectedConditions] = useState<string[]>(values.conditions ?? [])
   const [saving, setSaving] = useState(false)
 
   // Re-seed the editable draft whenever the committed values change
   // (e.g. once server hydration completes).
   useEffect(() => {
-    setAge(values.age)
-    setWeight(values.weight)
-    setSelectedConditions(values.conditions)
+    setName(values.name ?? '')
+    setAge(values.age ?? '')
+    setWeight(values.weight ?? '')
+    setHeight(values.height ?? '')
+    setGender(values.gender ?? '')
+    setActivityLevel(values.activityLevel ?? '')
+    setDietaryPreference(values.dietaryPreference ?? '')
+    setHealthGoal(values.healthGoal ?? '')
+    setDailyCalorieGoal(values.dailyCalorieGoal ?? '')
+    setAllergiesNotes(values.allergiesNotes ?? '')
+    setSelectedConditions(values.conditions ?? [])
   }, [values])
 
   const toggleCondition = (id: string) => {
@@ -136,9 +60,28 @@ export default function ProfilePreferences() {
   }
 
   const isDirty =
-    age !== values.age ||
-    weight !== values.weight ||
-    !isConditionsEqual(selectedConditions, values.conditions)
+    name !== (values.name ?? '') ||
+    age !== (values.age ?? '') ||
+    weight !== (values.weight ?? '') ||
+    height !== (values.height ?? '') ||
+    gender !== (values.gender ?? '') ||
+    activityLevel !== (values.activityLevel ?? '') ||
+    dietaryPreference !== (values.dietaryPreference ?? '') ||
+    healthGoal !== (values.healthGoal ?? '') ||
+    dailyCalorieGoal !== (values.dailyCalorieGoal ?? '') ||
+    allergiesNotes !== (values.allergiesNotes ?? '') ||
+    !isConditionsEqual(selectedConditions, values.conditions ?? [])
+
+  const bmi = calculateBMI(weight, height)
+  const bmiInfo = bmi !== null ? getBMICategory(bmi) : null
+  const estimatedCalories = estimateDailyCalories({
+    age,
+    weight,
+    height,
+    gender,
+    activityLevel,
+    healthGoal,
+  })
 
   const handleSave = async (e: FormEvent) => {
     e.preventDefault()
@@ -147,7 +90,19 @@ export default function ProfilePreferences() {
       return
     }
     setSaving(true)
-    const result = await save({ age, weight, conditions: selectedConditions })
+    const result = await save({
+      name,
+      age,
+      weight,
+      height,
+      gender,
+      activityLevel,
+      dietaryPreference,
+      healthGoal,
+      dailyCalorieGoal,
+      allergiesNotes,
+      conditions: selectedConditions,
+    })
     setSaving(false)
     if (result === 'server') {
       toast.success('Health profile saved to your account')
@@ -176,12 +131,13 @@ export default function ProfilePreferences() {
           <Link
             to="/profile"
             className="w-10 h-10 rounded-2xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-700 font-bold transition-colors"
+            aria-label="Back to profile"
           >
             ←
           </Link>
           <div>
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Health Profile & Alerts</h1>
-            <p className="text-xs text-gray-500">Personalized warnings before you eat</p>
+            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Health Profile & Settings</h1>
+            <p className="text-xs text-gray-500">Personal details, biometrics & nutrition alerts</p>
           </div>
         </div>
 
@@ -189,10 +145,208 @@ export default function ProfilePreferences() {
           <div className="mb-5 rounded-2xl bg-amber-50 border border-amber-200 px-4 py-3 flex items-center gap-2.5">
             <span className="text-xl">⚠️</span>
             <p className="text-xs font-bold text-amber-800">
-              You have unsaved changes. Tap Save below to activate these warnings.
+              You have unsaved changes. Tap Save below to apply your updates.
             </p>
           </div>
         )}
+
+        {/* PERSONAL DETAILS & BIOMETRICS */}
+        <div className="space-y-4 mb-6">
+          <h2 className="text-sm font-extrabold text-gray-900 uppercase tracking-wider">
+            Personal Details & Body Metrics
+          </h2>
+
+          <div className="rounded-2xl bg-white shadow-card p-4 border border-gray-100 space-y-4">
+            <div>
+              <label htmlFor="full-name" className="block text-xs font-bold text-gray-800 mb-1.5">
+                👤 Full Name
+              </label>
+              <input
+                id="full-name"
+                type="text"
+                maxLength={120}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Aarav Sharma"
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="age" className="block text-xs font-bold text-gray-800 mb-1.5">
+                  🎂 Age (Years)
+                </label>
+                <input
+                  id="age"
+                  type="number"
+                  min={0}
+                  max={120}
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  placeholder="e.g. 28"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="weight" className="block text-xs font-bold text-gray-800 mb-1.5">
+                  ⚖️ Weight (kg)
+                </label>
+                <input
+                  id="weight"
+                  type="number"
+                  min={1}
+                  max={500}
+                  step="0.1"
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                  placeholder="e.g. 68.5"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="height" className="block text-xs font-bold text-gray-800 mb-1.5">
+                  📏 Height (cm)
+                </label>
+                <input
+                  id="height"
+                  type="number"
+                  min={30}
+                  max={300}
+                  step="0.5"
+                  value={height}
+                  onChange={(e) => setHeight(e.target.value)}
+                  placeholder="e.g. 172"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="gender" className="block text-xs font-bold text-gray-800 mb-1.5">
+                  🧬 Biological Sex
+                </label>
+                <select
+                  id="gender"
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white"
+                >
+                  {GENDER_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {(bmi !== null || estimatedCalories !== null) && (
+              <div className="rounded-xl bg-emerald-50/70 border border-emerald-200 p-3 flex flex-wrap items-center justify-between gap-2">
+                {bmi !== null && bmiInfo && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-gray-700">BMI: {bmi}</span>
+                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${bmiInfo.badgeClass}`}>
+                      {bmiInfo.label}
+                    </span>
+                  </div>
+                )}
+                {estimatedCalories !== null && (
+                  <span className="text-xs font-bold text-emerald-800">
+                    🔥 Est. {estimatedCalories} kcal/day
+                  </span>
+                )}
+              </div>
+            )}
+
+            <p className="text-[10px] text-gray-500">
+              Age (&lt;12 yrs enables child dye safety), weight, and height tailor Acceptable Daily Intake (ADI) limits and calorie targets.
+            </p>
+          </div>
+        </div>
+
+        {/* LIFESTYLE, DIET & HEALTH GOALS */}
+        <div className="space-y-4 mb-6">
+          <h2 className="text-sm font-extrabold text-gray-900 uppercase tracking-wider">
+            Diet, Activity & Health Goals
+          </h2>
+
+          <div className="rounded-2xl bg-white shadow-card p-4 border border-gray-100 space-y-4">
+            <div>
+              <label htmlFor="dietary-preference" className="block text-xs font-bold text-gray-800 mb-1.5">
+                🥗 Dietary Preference
+              </label>
+              <select
+                id="dietary-preference"
+                value={dietaryPreference}
+                onChange={(e) => setDietaryPreference(e.target.value)}
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white"
+              >
+                {DIETARY_PREFERENCE_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="health-goal" className="block text-xs font-bold text-gray-800 mb-1.5">
+                🎯 Primary Health Goal
+              </label>
+              <select
+                id="health-goal"
+                value={healthGoal}
+                onChange={(e) => setHealthGoal(e.target.value)}
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white"
+              >
+                {HEALTH_GOAL_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="activity-level" className="block text-xs font-bold text-gray-800 mb-1.5">
+                🏃 Activity Level
+              </label>
+              <select
+                id="activity-level"
+                value={activityLevel}
+                onChange={(e) => setActivityLevel(e.target.value)}
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white"
+              >
+                {ACTIVITY_LEVEL_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="daily-calorie-goal" className="block text-xs font-bold text-gray-800 mb-1.5">
+                🔥 Daily Calorie Target (kcal, Optional)
+              </label>
+              <input
+                id="daily-calorie-goal"
+                type="number"
+                min={500}
+                max={10000}
+                step={10}
+                value={dailyCalorieGoal}
+                onChange={(e) => setDailyCalorieGoal(e.target.value)}
+                placeholder={estimatedCalories ? `Auto-estimated: ${estimatedCalories} kcal` : 'e.g. 2000'}
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white"
+              />
+            </div>
+          </div>
+        </div>
 
         {/* HEALTH CONDITIONS SELECTOR */}
         <div className="mb-6">
@@ -251,49 +405,24 @@ export default function ProfilePreferences() {
           </div>
         </div>
 
-        {/* AGE & BODY WEIGHT */}
-        <div className="space-y-4 mb-6">
+        {/* ALLERGIES & HEALTH NOTES */}
+        <div className="space-y-2 mb-6">
           <h2 className="text-sm font-extrabold text-gray-900 uppercase tracking-wider">
-            Biometrics (Optional)
+            Additional Allergies & Health Notes
           </h2>
-
           <div className="rounded-2xl bg-white shadow-card p-4 border border-gray-100">
-            <label htmlFor="age" className="block text-xs font-bold text-gray-800 mb-1.5">
-              🎂 Age (Years)
+            <label htmlFor="allergies-notes" className="block text-xs font-bold text-gray-800 mb-1.5">
+              📝 Custom Allergies, Intolerances or Notes
             </label>
-            <input
-              id="age"
-              type="number"
-              min={0}
-              max={130}
-              value={age}
-              onChange={(e) => setAge(e.target.value)}
-              placeholder="e.g. 28"
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white"
+            <textarea
+              id="allergies-notes"
+              rows={3}
+              maxLength={1000}
+              value={allergiesNotes}
+              onChange={(e) => setAllergiesNotes(e.target.value)}
+              placeholder="e.g. Avoid artificial sweeteners, sesame seeds, or sulfites..."
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white resize-none"
             />
-            <p className="text-[10px] text-gray-500 mt-1.5">
-              Age under 12 automatically enables strict child safety rules for synthetic food dyes.
-            </p>
-          </div>
-
-          <div className="rounded-2xl bg-white shadow-card p-4 border border-gray-100">
-            <label htmlFor="weight" className="block text-xs font-bold text-gray-800 mb-1.5">
-              ⚖️ Body Weight (kg)
-            </label>
-            <input
-              id="weight"
-              type="number"
-              min={0}
-              max={500}
-              step="0.1"
-              value={weight}
-              onChange={(e) => setWeight(e.target.value)}
-              placeholder="e.g. 68.5"
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white"
-            />
-            <p className="text-[10px] text-gray-500 mt-1.5">
-              Calculates your personal Acceptable Daily Intake (ADI mg/day) limits for food additives.
-            </p>
           </div>
         </div>
 

@@ -11,6 +11,7 @@ class UserProfile(models.Model):
         on_delete=models.CASCADE,
         related_name='profile',
     )
+    full_name = models.CharField(max_length=120, blank=True, default='')
     age = models.IntegerField(
         null=True,
         blank=True,
@@ -21,6 +22,21 @@ class UserProfile(models.Model):
         blank=True,
         validators=[MinValueValidator(1), MaxValueValidator(500)],
     )
+    height_cm = models.FloatField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(30), MaxValueValidator(300)],
+    )
+    gender = models.CharField(max_length=20, blank=True, default='')
+    activity_level = models.CharField(max_length=30, blank=True, default='')
+    dietary_preference = models.CharField(max_length=30, blank=True, default='')
+    health_goal = models.CharField(max_length=40, blank=True, default='')
+    daily_calorie_goal = models.IntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(500), MaxValueValidator(10000)],
+    )
+    allergies_notes = models.TextField(blank=True, default='')
     health_conditions = models.JSONField(default=list, blank=True)
 
     def __str__(self):

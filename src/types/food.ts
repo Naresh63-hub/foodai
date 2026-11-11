@@ -186,8 +186,16 @@ export interface AdditiveReferenceItem {
 }
 
 export interface UserProfileData {
+  full_name?: string
   age: number | null
   body_weight_kg: number | null
+  height_cm?: number | null
+  gender?: string
+  activity_level?: string
+  dietary_preference?: string
+  health_goal?: string
+  daily_calorie_goal?: number | null
+  allergies_notes?: string
   health_conditions?: string[]
 }
 

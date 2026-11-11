@@ -98,8 +98,16 @@ let scanIdCounter = 1;
 const scanHistory: StoredScan[] = [];
 
 let userProfile = {
+  full_name: '' as string,
   age: 28 as number | null,
   body_weight_kg: 68.0 as number | null,
+  height_cm: null as number | null,
+  gender: '' as string,
+  activity_level: '' as string,
+  dietary_preference: '' as string,
+  health_goal: '' as string,
+  daily_calorie_goal: null as number | null,
+  allergies_notes: '' as string,
   health_conditions: ['diabetes'] as string[],
 };
 
@@ -516,9 +524,29 @@ apiRouter.get('/users/profile/', (req: Request, res: Response) => {
 
 // 14. PUT & POST /api/users/profile/
 const updateProfile = (req: Request, res: Response) => {
-  const { age, body_weight_kg, health_conditions } = req.body;
-  if (age !== undefined) userProfile.age = age ? parseInt(String(age), 10) : null;
-  if (body_weight_kg !== undefined) userProfile.body_weight_kg = body_weight_kg ? parseFloat(String(body_weight_kg)) : null;
+  const {
+    full_name,
+    age,
+    body_weight_kg,
+    height_cm,
+    gender,
+    activity_level,
+    dietary_preference,
+    health_goal,
+    daily_calorie_goal,
+    allergies_notes,
+    health_conditions,
+  } = req.body;
+  if (full_name !== undefined) userProfile.full_name = String(full_name || '');
+  if (age !== undefined) userProfile.age = age !== null && age !== '' ? parseInt(String(age), 10) : null;
+  if (body_weight_kg !== undefined) userProfile.body_weight_kg = body_weight_kg !== null && body_weight_kg !== '' ? parseFloat(String(body_weight_kg)) : null;
+  if (height_cm !== undefined) userProfile.height_cm = height_cm !== null && height_cm !== '' ? parseFloat(String(height_cm)) : null;
+  if (gender !== undefined) userProfile.gender = String(gender || '');
+  if (activity_level !== undefined) userProfile.activity_level = String(activity_level || '');
+  if (dietary_preference !== undefined) userProfile.dietary_preference = String(dietary_preference || '');
+  if (health_goal !== undefined) userProfile.health_goal = String(health_goal || '');
+  if (daily_calorie_goal !== undefined) userProfile.daily_calorie_goal = daily_calorie_goal !== null && daily_calorie_goal !== '' ? parseInt(String(daily_calorie_goal), 10) : null;
+  if (allergies_notes !== undefined) userProfile.allergies_notes = String(allergies_notes || '');
   if (health_conditions !== undefined && Array.isArray(health_conditions)) {
     userProfile.health_conditions = health_conditions;
   }

@@ -1,30 +1,32 @@
-import { useState } from 'react'
+import { useState, useEffect, FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import SafeAreaView from '../components/SafeAreaView'
 import { useAuth } from '../contexts/AuthContext'
 import { useUserPreferences } from '../hooks/useUserPreferences'
 import InstallAppModal from '../components/InstallAppModal'
 import UpdateReleaseModal from '../components/UpdateReleaseModal'
 import { useAppUpdate } from '../hooks/useAppUpdate'
-
-const CONDITION_NAMES: Record<string, { title: string; icon: string }> = {
-  diabetes: { title: 'Diabetes / Pre-diabetes', icon: '🩸' },
-  hypertension: { title: 'Hypertension / High BP', icon: '🫀' },
-  heart_disease: { title: 'High Cholesterol / Heart Health', icon: '🧈' },
-  child_mode: { title: 'Child Mode (<12 yrs)', icon: '👶' },
-  celiac: { title: 'Celiac / Gluten Sensitivity', icon: '🌾' },
-  lactose: { title: 'Lactose Intolerance', icon: '🥛' },
-  nut_allergy: { title: 'Nut & Peanut Allergy', icon: '🥜' },
-  soy_allergy: { title: 'Soy Allergy', icon: '🌱' },
-  kidney_disease: { title: 'Kidney / Renal Health', icon: '🫘' },
-  fatty_liver: { title: 'Fatty Liver / NAFLD', icon: '🩺' },
-}
+import {
+  CONDITION_MAP,
+  GENDER_OPTIONS,
+  ACTIVITY_LEVEL_OPTIONS,
+  DIETARY_PREFERENCE_OPTIONS,
+  HEALTH_GOAL_OPTIONS,
+  getOptionLabel,
+  calculateBMI,
+  getBMICategory,
+  estimateDailyCalories,
+} from '../utils/healthMetrics'
 
 export default function Profile() {
   const navigate = useNavigate()
   const { user, signOut } = useAuth()
-  const { values } = useUserPreferences()
+  const { values, save } = useUserPreferences()
   const [showInstallModal, setShowInstallModal] = useState(false)
+  const [editingProfile, setEditingProfile] = useState(false)
+  const [savingQuickEdit, setSavingQuickEdit] = useState(false)
+
   const {
     currentVersion,
     isChecking,
@@ -34,9 +36,101 @@ export default function Profile() {
     closeModal,
     checkForUpdates,
   } = useAppUpdate(false)
+
   const email = user?.email ?? 'Not signed in'
-  const { age, weight } = values
-  const conditions = values.conditions
+  const savedName = values.name ?? ''
+  const age = values.age ?? ''
+  const weight = values.weight ?? ''
+  const height = values.height ?? ''
+  const gender = values.gender ?? ''
+  const activityLevel = values.activityLevel ?? ''
+  const dietaryPreference = values.dietaryPreference ?? ''
+  const healthGoal = values.healthGoal ?? ''
+  const dailyCalorieGoal = values.dailyCalorieGoal ?? ''
+  const allergiesNotes = values.allergiesNotes ?? ''
+  const conditions = values.conditions ?? []
+
+  const displayName =
+    savedName.trim() ||
+    user?.displayName ||
+    (user?.email ? user.email.split('@')[0] : 'Food Explorer')
+
+  const avatarLetter = displayName.charAt(0).toUpperCase() || 'F'
+
+  // Inline quick-edit draft state
+  const [draftName, setDraftName] = useState(savedName)
+  const [draftAge, setDraftAge] = useState(age)
+  const [draftWeight, setDraftWeight] = useState(weight)
+  const [draftHeight, setDraftHeight] = useState(height)
+  const [draftGender, setDraftGender] = useState(gender)
+  const [draftActivity, setDraftActivity] = useState(activityLevel)
+  const [draftDiet, setDraftDiet] = useState(dietaryPreference)
+  const [draftGoal, setDraftGoal] = useState(healthGoal)
+  const [draftCalorieGoal, setDraftCalorieGoal] = useState(dailyCalorieGoal)
+  const [draftAllergiesNotes, setDraftAllergiesNotes] = useState(allergiesNotes)
+
+  useEffect(() => {
+    setDraftName(savedName)
+    setDraftAge(age)
+    setDraftWeight(weight)
+    setDraftHeight(height)
+    setDraftGender(gender)
+    setDraftActivity(activityLevel)
+    setDraftDiet(dietaryPreference)
+    setDraftGoal(healthGoal)
+    setDraftCalorieGoal(dailyCalorieGoal)
+    setDraftAllergiesNotes(allergiesNotes)
+  }, [
+    savedName,
+    age,
+    weight,
+    height,
+    gender,
+    activityLevel,
+    dietaryPreference,
+    healthGoal,
+    dailyCalorieGoal,
+    allergiesNotes,
+  ])
+
+  const bmi = calculateBMI(weight, height)
+  const bmiInfo = bmi !== null ? getBMICategory(bmi) : null
+  const estimatedCalories = estimateDailyCalories({
+    age,
+    weight,
+    height,
+    gender,
+    activityLevel,
+    healthGoal,
+  })
+  const activeCalorieTarget = dailyCalorieGoal || (estimatedCalories ? String(estimatedCalories) : '')
+
+  const handleQuickSave = async (e: FormEvent) => {
+    e.preventDefault()
+    setSavingQuickEdit(true)
+    const result = await save({
+      name: draftName,
+      age: draftAge,
+      weight: draftWeight,
+      height: draftHeight,
+      gender: draftGender,
+      activityLevel: draftActivity,
+      dietaryPreference: draftDiet,
+      healthGoal: draftGoal,
+      dailyCalorieGoal: draftCalorieGoal,
+      allergiesNotes: draftAllergiesNotes,
+      conditions,
+    })
+    setSavingQuickEdit(false)
+    setEditingProfile(false)
+    if (result === 'server') {
+      toast.success('Profile & health details saved')
+    } else if (result === 'local') {
+      toast.success('Profile & health preferences saved')
+    } else {
+      toast.success('Saved offline — will sync when online')
+    }
+  }
 
   const handleLogout = async () => {
     await signOut()
@@ -50,17 +144,15 @@ export default function Profile() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3.5 min-w-0">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white text-2xl font-black shadow-soft relative shrink-0">
-              {email.charAt(0).toUpperCase()}
+              {avatarLetter}
               <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white shadow-xs flex items-center justify-center text-[10px] border border-gray-200">
                 ⚙️
               </span>
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight truncate">
-                  Profile & Settings
-                </h1>
-              </div>
+              <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight truncate">
+                {displayName}
+              </h1>
               <p className="text-xs text-gray-500 font-medium truncate">{email}</p>
             </div>
           </div>
@@ -72,6 +164,271 @@ export default function Profile() {
             <span>⚙️</span>
             <span>Settings</span>
           </Link>
+        </div>
+
+        {/* HEALTH & BODY SNAPSHOT CARD (with inline Edit Profile) */}
+        <div className="rounded-3xl bg-white shadow-card border border-gray-100 p-5 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🩺</span>
+              <h2 className="text-xs font-extrabold uppercase tracking-wider text-gray-700">
+                Personal & Health Snapshot
+              </h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => setEditingProfile((prev) => !prev)}
+              className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition-colors"
+            >
+              {editingProfile ? 'Close' : '✏️ Edit Profile'}
+            </button>
+          </div>
+
+          {!editingProfile ? (
+            <>
+              <div className="grid grid-cols-3 gap-2.5 mb-3">
+                <div className="rounded-2xl bg-gray-50 border border-gray-100 p-2.5 text-center">
+                  <p className="text-[10px] font-bold uppercase text-gray-400">Age</p>
+                  <p className="text-sm font-black text-gray-900 mt-0.5">
+                    {age ? `${age} yrs` : '—'}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-gray-50 border border-gray-100 p-2.5 text-center">
+                  <p className="text-[10px] font-bold uppercase text-gray-400">Weight</p>
+                  <p className="text-sm font-black text-gray-900 mt-0.5">
+                    {weight ? `${weight} kg` : '—'}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-gray-50 border border-gray-100 p-2.5 text-center">
+                  <p className="text-[10px] font-bold uppercase text-gray-400">Height</p>
+                  <p className="text-sm font-black text-gray-900 mt-0.5">
+                    {height ? `${height} cm` : '—'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                {bmi !== null && bmiInfo ? (
+                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-bold border ${bmiInfo.badgeClass}`}>
+                    <span>BMI {bmi}</span>
+                    <span>· {bmiInfo.label}</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-semibold bg-gray-100 text-gray-600">
+                    Add weight & height for BMI
+                  </span>
+                )}
+
+                {activeCalorieTarget && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-bold bg-orange-50 text-orange-800 border border-orange-200">
+                    🔥 {activeCalorieTarget} kcal/day
+                  </span>
+                )}
+
+                {dietaryPreference && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                    🥗 {getOptionLabel(DIETARY_PREFERENCE_OPTIONS, dietaryPreference)}
+                  </span>
+                )}
+
+                {healthGoal && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-bold bg-indigo-50 text-indigo-800 border border-indigo-200">
+                    🎯 {getOptionLabel(HEALTH_GOAL_OPTIONS, healthGoal)}
+                  </span>
+                )}
+              </div>
+
+              {allergiesNotes && (
+                <p className="mt-3 text-[11px] text-gray-600 bg-amber-50/70 border border-amber-200/70 rounded-xl px-3 py-2">
+                  <span className="font-bold text-amber-900">Notes: </span>
+                  {allergiesNotes}
+                </p>
+              )}
+            </>
+          ) : (
+            <form onSubmit={handleQuickSave} className="space-y-3">
+              <div>
+                <label htmlFor="profile-name-input" className="block text-[11px] font-bold text-gray-700 mb-1">
+                  👤 Full Name
+                </label>
+                <input
+                  id="profile-name-input"
+                  type="text"
+                  maxLength={120}
+                  value={draftName}
+                  onChange={(e) => setDraftName(e.target.value)}
+                  placeholder="Enter your name"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label htmlFor="profile-age-input" className="block text-[11px] font-bold text-gray-700 mb-1">
+                    🎂 Age
+                  </label>
+                  <input
+                    id="profile-age-input"
+                    type="number"
+                    min={0}
+                    max={120}
+                    value={draftAge}
+                    onChange={(e) => setDraftAge(e.target.value)}
+                    placeholder="yrs"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-2.5 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="profile-weight-input" className="block text-[11px] font-bold text-gray-700 mb-1">
+                    ⚖️ Weight (kg)
+                  </label>
+                  <input
+                    id="profile-weight-input"
+                    type="number"
+                    min={1}
+                    max={500}
+                    step="0.1"
+                    value={draftWeight}
+                    onChange={(e) => setDraftWeight(e.target.value)}
+                    placeholder="kg"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-2.5 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="profile-height-input" className="block text-[11px] font-bold text-gray-700 mb-1">
+                    📏 Height (cm)
+                  </label>
+                  <input
+                    id="profile-height-input"
+                    type="number"
+                    min={30}
+                    max={300}
+                    step="0.5"
+                    value={draftHeight}
+                    onChange={(e) => setDraftHeight(e.target.value)}
+                    placeholder="cm"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-2.5 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label htmlFor="profile-gender-select" className="block text-[11px] font-bold text-gray-700 mb-1">
+                    🧬 Sex
+                  </label>
+                  <select
+                    id="profile-gender-select"
+                    value={draftGender}
+                    onChange={(e) => setDraftGender(e.target.value)}
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-2.5 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white"
+                  >
+                    {GENDER_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="profile-diet-select" className="block text-[11px] font-bold text-gray-700 mb-1">
+                    🥗 Diet
+                  </label>
+                  <select
+                    id="profile-diet-select"
+                    value={draftDiet}
+                    onChange={(e) => setDraftDiet(e.target.value)}
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-2.5 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white"
+                  >
+                    {DIETARY_PREFERENCE_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label htmlFor="profile-goal-select" className="block text-[11px] font-bold text-gray-700 mb-1">
+                    🎯 Health Goal
+                  </label>
+                  <select
+                    id="profile-goal-select"
+                    value={draftGoal}
+                    onChange={(e) => setDraftGoal(e.target.value)}
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-2.5 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white"
+                  >
+                    {HEALTH_GOAL_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="profile-activity-select" className="block text-[11px] font-bold text-gray-700 mb-1">
+                    🏃 Activity
+                  </label>
+                  <select
+                    id="profile-activity-select"
+                    value={draftActivity}
+                    onChange={(e) => setDraftActivity(e.target.value)}
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-2.5 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white"
+                  >
+                    {ACTIVITY_LEVEL_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label htmlFor="profile-calories-input" className="block text-[11px] font-bold text-gray-700 mb-1">
+                    🔥 Calorie Goal (kcal)
+                  </label>
+                  <input
+                    id="profile-calories-input"
+                    type="number"
+                    min={500}
+                    max={10000}
+                    step={10}
+                    value={draftCalorieGoal}
+                    onChange={(e) => setDraftCalorieGoal(e.target.value)}
+                    placeholder="e.g. 2000"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-2.5 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="profile-notes-input" className="block text-[11px] font-bold text-gray-700 mb-1">
+                    📝 Allergy Notes
+                  </label>
+                  <input
+                    id="profile-notes-input"
+                    type="text"
+                    maxLength={1000}
+                    value={draftAllergiesNotes}
+                    onChange={(e) => setDraftAllergiesNotes(e.target.value)}
+                    placeholder="e.g. Sesame, dyes"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-2.5 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setEditingProfile(false)}
+                  className="flex-1 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 text-xs transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingQuickEdit}
+                  className="flex-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 text-xs transition-colors disabled:opacity-60"
+                >
+                  {savingQuickEdit ? 'Saving…' : 'Save Details'}
+                </button>
+              </div>
+            </form>
+          )}
         </div>
 
         {/* ACTIVE HEALTH CONDITIONS CARD */}
@@ -94,7 +451,7 @@ export default function Profile() {
           {conditions.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {conditions.map((c) => {
-                const info = CONDITION_NAMES[c] || { title: c, icon: '⚠️' }
+                const info = CONDITION_MAP[c] || { title: c, icon: '⚠️' }
                 return (
                   <span
                     key={c}
@@ -139,6 +496,22 @@ export default function Profile() {
               className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-center gap-3">
+                <span className="text-2xl">👤</span>
+                <div>
+                  <p className="text-sm font-bold text-gray-900">Full Name</p>
+                  <p className="text-xs text-gray-500">
+                    {savedName.trim() ? savedName : 'Not set · Tap to add your name'}
+                  </p>
+                </div>
+              </div>
+              <span className="text-gray-400 text-base font-bold">›</span>
+            </Link>
+
+            <Link
+              to="/profile/preferences"
+              className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
                 <span className="text-2xl">🩸</span>
                 <div>
                   <p className="text-sm font-bold text-gray-900">Health Conditions</p>
@@ -175,9 +548,27 @@ export default function Profile() {
               <div className="flex items-center gap-3">
                 <span className="text-2xl">⚖️</span>
                 <div>
-                  <p className="text-sm font-bold text-gray-900">Body Weight</p>
+                  <p className="text-sm font-bold text-gray-900">Body Weight & Height</p>
                   <p className="text-xs text-gray-500">
-                    {weight ? `${weight} kg` : 'Not set · Optional'}
+                    {weight || height
+                      ? `${weight ? `${weight} kg` : '—'} · ${height ? `${height} cm` : '—'}${bmi !== null ? ` (BMI ${bmi})` : ''}`
+                      : 'Not set · Optional'}
+                  </p>
+                </div>
+              </div>
+              <span className="text-gray-400 text-base font-bold">›</span>
+            </Link>
+
+            <Link
+              to="/profile/preferences"
+              className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🥗</span>
+                <div>
+                  <p className="text-sm font-bold text-gray-900">Diet, Activity & Goals</p>
+                  <p className="text-xs text-gray-500">
+                    {getOptionLabel(DIETARY_PREFERENCE_OPTIONS, dietaryPreference)} · {getOptionLabel(HEALTH_GOAL_OPTIONS, healthGoal)}
                   </p>
                 </div>
               </div>
