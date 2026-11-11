@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import client, { aiClient } from '../api/client'
+import { Capacitor } from '@capacitor/core'
+import client, { aiClient, PRODUCTION_API_URL, resolveApiOrigin } from '../api/client'
 import {
   scanBarcode,
   scanText,
@@ -105,5 +106,19 @@ describe('API Routing & Client Separation', () => {
       '/food-vision-analyze',
       expect.objectContaining({ image_base64: 'data:image/jpeg;base64,mock' })
     )
+  })
+
+  it('resolveApiOrigin guards native builds against localhost and defaults to production URL', () => {
+    vi.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true)
+    vi.stubEnv('VITE_API_URL', 'http://localhost:8000')
+    expect(resolveApiOrigin()).toBe(PRODUCTION_API_URL)
+
+    vi.stubEnv('VITE_API_URL', '')
+    expect(resolveApiOrigin()).toBe(PRODUCTION_API_URL)
+
+    vi.stubEnv('VITE_API_URL', 'https://custom-backend.example.com/')
+    expect(resolveApiOrigin()).toBe('https://custom-backend.example.com')
+
+    vi.unstubAllEnvs()
   })
 })

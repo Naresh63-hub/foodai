@@ -2,6 +2,53 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import SafeAreaView from '../components/SafeAreaView'
 import { searchProducts, CatalogProductItem } from '../api/food'
+import demoProductsData from '../constants/demoProducts.json'
+
+function filterDemoCatalog(params: {
+  q?: string
+  brand?: string
+  category?: string
+  palm_oil_free?: boolean
+  low_sugar?: boolean
+  low_salt?: boolean
+}): CatalogProductItem[] {
+  const all = Object.values(demoProductsData as Record<string, any>).map((entry) => ({
+    id: entry.product?.id ?? 0,
+    barcode: entry.product?.barcode ?? null,
+    product_name: entry.product?.product_name ?? '',
+    brands: entry.product?.brands ?? '',
+    serving_size: entry.product?.serving_size ?? '',
+    product_weight_g: entry.product?.product_weight_g ?? null,
+    categories_tags: entry.product?.categories_tags ?? [],
+    sugars_100g: entry.nutrition?.per_100g?.sugars_g ?? 0,
+    salt_100g: entry.nutrition?.per_100g?.salt_g ?? 0,
+    fat_100g: entry.nutrition?.per_100g?.fat_g ?? 0,
+    proteins_100g: entry.nutrition?.per_100g?.proteins_g ?? 0,
+    has_palm_oil: (entry.product?.ingredients_text || '').toLowerCase().includes('palm'),
+  }))
+
+  return all.filter((item) => {
+    if (params.q) {
+      const q = params.q.toLowerCase()
+      const matches =
+        item.product_name.toLowerCase().includes(q) ||
+        item.brands.toLowerCase().includes(q) ||
+        (item.barcode || '').includes(q)
+      if (!matches) return false
+    }
+    if (params.brand && !item.brands.toLowerCase().includes(params.brand.toLowerCase())) {
+      return false
+    }
+    if (params.category) {
+      const cats = (item.categories_tags || []).join(' ').toLowerCase()
+      if (!cats.includes(params.category.toLowerCase())) return false
+    }
+    if (params.palm_oil_free && item.has_palm_oil) return false
+    if (params.low_sugar && item.sugars_100g >= 5) return false
+    if (params.low_salt && item.salt_100g >= 0.3) return false
+    return true
+  })
+}
 
 const CATEGORIES = [
   { id: '', label: 'All Foods', icon: '🍽️' },
@@ -29,19 +76,20 @@ export default function CatalogExplorer() {
 
   const fetchCatalog = () => {
     setLoading(true)
-    searchProducts({
+    const params = {
       q: query.trim() || undefined,
       brand: selectedBrand !== 'All Brands' ? selectedBrand : undefined,
       category: selectedCategory || undefined,
       palm_oil_free: palmOilFree,
       low_sugar: lowSugar,
       low_salt: lowSalt,
-    })
+    }
+    searchProducts(params)
       .then((res) => {
         setProducts(res)
       })
       .catch(() => {
-        setProducts([])
+        setProducts(filterDemoCatalog(params))
       })
       .finally(() => {
         setLoading(false)
