@@ -174,27 +174,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (AUTH_BYPASS) return
 
-    // Failsafe: never allow auth loading state to freeze the application for more than 1500ms
+    // Failsafe: never allow auth loading state to freeze the application for more than 750ms
     const safetyTimer = setTimeout(() => {
       setLoading(false)
-    }, 1500)
+    }, 750)
 
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       clearTimeout(safetyTimer)
       if (currentUser) {
         setUser(currentUser)
         setIsDemoMode(false)
         setLoading(false)
-        try {
-          await syncUserProfile({
-            userId: currentUser.uid,
-            email: currentUser.email || `${currentUser.uid}@foodai.app`,
-            displayName: currentUser.displayName || 'Food Explorer',
-            photoURL: currentUser.photoURL || undefined,
-          })
-        } catch (err) {
+        // Non-blocking background sync so startup UI never waits on Firestore
+        syncUserProfile({
+          userId: currentUser.uid,
+          email: currentUser.email || `${currentUser.uid}@foodai.app`,
+          displayName: currentUser.displayName || 'Food Explorer',
+          photoURL: currentUser.photoURL || undefined,
+        }).catch((err) => {
           console.warn('Profile sync notice:', err)
-        }
+        })
       } else {
         setUser((prev) => (prev?.uid === 'local-dev-user' ? prev : null))
         setLoading(false)

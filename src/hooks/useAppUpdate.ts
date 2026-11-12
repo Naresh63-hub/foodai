@@ -48,10 +48,10 @@ export function useAppUpdate(autoCheck = true) {
   useEffect(() => {
     if (!autoCheck) return
 
-    // Soft delay so initial page render and animations finish smoothly
+    // Defer background release check so initial page render & animations stay instant
     const timer = setTimeout(() => {
       check(false)
-    }, 1200)
+    }, 3500)
 
     return () => clearTimeout(timer)
   }, [autoCheck, check])

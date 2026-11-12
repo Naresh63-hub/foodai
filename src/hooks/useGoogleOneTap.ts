@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Capacitor } from '@capacitor/core'
 import { useAuth } from '../contexts/AuthContext'
 
 declare global {
@@ -51,8 +52,8 @@ export function useGoogleOneTap(options: UseGoogleOneTapOptions = {}) {
   const initializedRef = useRef(false)
 
   useEffect(() => {
-    // Skip if user is already logged in or hook is disabled
-    if (user || disabled || typeof window === 'undefined') {
+    // Skip if user is already logged in, disabled, or running natively on Android/iOS
+    if (user || disabled || typeof window === 'undefined' || Capacitor.isNativePlatform()) {
       return
     }
 

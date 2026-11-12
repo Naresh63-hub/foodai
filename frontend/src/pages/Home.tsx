@@ -20,11 +20,23 @@ function getGreeting() {
   return { text: 'Good night', icon: '🌙' }
 }
 
+const RECENT_SCANS_CACHE_KEY = 'foodai_recent_scans_cache'
+
+function readCachedScans(): any[] {
+  try {
+    const raw = localStorage.getItem(RECENT_SCANS_CACHE_KEY)
+    const parsed = raw ? JSON.parse(raw) : []
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
 export default function Home() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const [recentScans, setRecentScans] = useState<any[]>([])
-  const [loadingScans, setLoadingScans] = useState(true)
+  const [recentScans, setRecentScans] = useState<any[]>(() => readCachedScans().slice(0, 4))
+  const [loadingScans, setLoadingScans] = useState(false)
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false)
   const [showInstallModal, setShowInstallModal] = useState(false)
 
@@ -36,11 +48,18 @@ export default function Home() {
       setLoadingScans(false)
       return
     }
-    setLoadingScans(true)
+    const cached = readCachedScans()
+    if (cached.length > 0) {
+      setRecentScans(cached.slice(0, 4))
+      setLoadingScans(false)
+    }
     getScanHistory()
       .then((res) => {
         if (Array.isArray(res)) {
           setRecentScans(res.slice(0, 4))
+          try {
+            localStorage.setItem(RECENT_SCANS_CACHE_KEY, JSON.stringify(res))
+          } catch {}
         }
       })
       .catch(() => {})

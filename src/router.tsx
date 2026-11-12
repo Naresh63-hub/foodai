@@ -1,26 +1,35 @@
 import { lazy, Suspense, useState, useEffect } from 'react'
 import { Routes, Route, Navigate, Outlet, useParams } from 'react-router-dom'
 import BottomTabBar from './components/BottomTabBar'
-import FoodAIChatbot from './components/FoodAIChatbot'
 import SafeAreaView from './components/SafeAreaView'
 import UpdateReleaseModal from './components/UpdateReleaseModal'
 import { useAuth } from './contexts/AuthContext'
 import { useAppUpdate } from './hooks/useAppUpdate'
+import { warmUpBackend } from './api/client'
+import Home from './pages/Home'
 
-// Code-split page routes so the initial bundle stays small; each page loads on demand.
-const Home = lazy(() => import('./pages/Home'))
-const Scan = lazy(() => import('./pages/Scan'))
+// Lazy-load global chatbot widget so initial landing view stays ultra-fast
+const FoodAIChatbot = lazy(() => import('./components/FoodAIChatbot'))
+
+// Code-split secondary page routes so the initial bundle stays small; preloaded in idle time.
+const loadScan = () => import('./pages/Scan')
+const loadCatalogExplorer = () => import('./pages/CatalogExplorer')
+const loadDailyTracker = () => import('./pages/DailyTracker')
+const loadHistory = () => import('./pages/History')
+const loadProfile = () => import('./pages/Profile')
+
+const Scan = lazy(loadScan)
 const ProductResults = lazy(() => import('./pages/ProductResults'))
 const IngredientDetails = lazy(() => import('./pages/IngredientDetails'))
 const Nutrition = lazy(() => import('./pages/Nutrition'))
 const FoodDNA = lazy(() => import('./pages/FoodDNA'))
 const ProductComparison = lazy(() => import('./pages/ProductComparison'))
-const History = lazy(() => import('./pages/History'))
-const Profile = lazy(() => import('./pages/Profile'))
+const History = lazy(loadHistory)
+const Profile = lazy(loadProfile)
 const ProfilePreferences = lazy(() => import('./pages/ProfilePreferences'))
-const DailyTracker = lazy(() => import('./pages/DailyTracker'))
+const DailyTracker = lazy(loadDailyTracker)
 const GroceryCart = lazy(() => import('./pages/GroceryCart'))
-const CatalogExplorer = lazy(() => import('./pages/CatalogExplorer'))
+const CatalogExplorer = lazy(loadCatalogExplorer)
 const AINutritionAnalyzer = lazy(() => import('./pages/AINutritionAnalyzer'))
 const FoodCameraSnap = lazy(() => import('./pages/FoodCameraSnap'))
 const PlateAnalyzer = lazy(() => import('./pages/PlateAnalyzer'))
@@ -73,7 +82,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (loading) {
-      const timer = setTimeout(() => setShowEscapeHatch(true), 1200)
+      const timer = setTimeout(() => setShowEscapeHatch(true), 700)
       return () => clearTimeout(timer)
     }
   }, [loading])
@@ -142,13 +151,32 @@ function ProductResultsParamWrapper() {
 function AppLayout() {
   const { isModalOpen, releaseInfo, closeModal } = useAppUpdate(true)
 
+  useEffect(() => {
+    warmUpBackend()
+    const preloadTabs = () => {
+      void loadScan()
+      void loadCatalogExplorer()
+      void loadHistory()
+      void loadProfile()
+      void loadDailyTracker()
+    }
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      const id = (window as any).requestIdleCallback(preloadTabs, { timeout: 1500 })
+      return () => (window as any).cancelIdleCallback?.(id)
+    }
+    const timer = setTimeout(preloadTabs, 400)
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
     <div className="relative min-h-screen w-full max-w-full overflow-x-hidden box-border">
       <DevDemoBanner />
       <main className="w-full max-w-full box-border pb-24 sm:pb-28 animate-fade-in-up">
         <Outlet />
       </main>
-      <FoodAIChatbot />
+      <Suspense fallback={null}>
+        <FoodAIChatbot />
+      </Suspense>
       <BottomTabBar />
       <UpdateReleaseModal
         isOpen={isModalOpen}

@@ -6,18 +6,41 @@ import { deleteScan, getScanHistory } from '../api/food'
 
 type Status = 'loading' | 'ready' | 'error'
 
+const SCANS_CACHE_KEY = 'foodai_recent_scans_cache'
+
+function readCachedScans(): any[] {
+  try {
+    const raw = localStorage.getItem(SCANS_CACHE_KEY)
+    const parsed = raw ? JSON.parse(raw) : []
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
 export default function History() {
-  const [scans, setScans] = useState<any[]>([])
-  const [status, setStatus] = useState<Status>('loading')
+  const [scans, setScans] = useState<any[]>(() => readCachedScans())
+  const [status, setStatus] = useState<Status>(() => (readCachedScans().length > 0 ? 'ready' : 'loading'))
 
   const load = useCallback(() => {
-    setStatus('loading')
+    const cached = readCachedScans()
+    if (cached.length > 0) {
+      setScans(cached)
+      setStatus('ready')
+    } else {
+      setStatus('loading')
+    }
     getScanHistory()
       .then((data) => {
-        setScans(Array.isArray(data) ? data : [])
+        const list = Array.isArray(data) ? data : []
+        setScans(list)
         setStatus('ready')
+        try {
+          localStorage.setItem(SCANS_CACHE_KEY, JSON.stringify(list))
+        } catch {}
       })
       .catch((error: any) => {
+        if (cached.length > 0) return
         setScans([])
         // A 401 means "not signed in" (e.g. dev-bypass sends no real token),
         // which is an empty history — not a connection failure.

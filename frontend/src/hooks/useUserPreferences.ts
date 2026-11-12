@@ -81,17 +81,16 @@ export function useUserPreferences() {
   const serverBacked = !!user && !AUTH_BYPASS
 
   const [values, setValues] = useState<Preferences>(() => readLocal())
-  const [hydrating, setHydrating] = useState(serverBacked)
+  // Render cached local values immediately (stale-while-revalidate) instead of blocking UI on network
+  const [hydrating] = useState(false)
 
   useEffect(() => {
     if (!serverBacked) {
       setValues(readLocal())
-      setHydrating(false)
       return
     }
 
     let active = true
-    setHydrating(true)
     getUserProfile()
       .then((p) => {
         if (!active) return
@@ -112,11 +111,7 @@ export function useUserPreferences() {
         writeLocal(next)
       })
       .catch(() => {
-        // Server unreachable: fall back to the local mirror.
-        if (active) setValues(readLocal())
-      })
-      .finally(() => {
-        if (active) setHydrating(false)
+        // Server unreachable: keep local mirror active without blocking
       })
 
     return () => {

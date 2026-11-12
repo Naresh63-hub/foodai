@@ -39,7 +39,7 @@ const aiApiBase = aiOrigin && !(isNativeMobile() && /localhost|127\.0\.0\.1/i.te
 
 const client = axios.create({
   baseURL: apiBase,
-  timeout: 25000,
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -47,11 +47,29 @@ const client = axios.create({
 
 export const aiClient = axios.create({
   baseURL: aiApiBase,
-  timeout: 30000,
+  timeout: 25000,
   headers: {
     'Content-Type': 'application/json',
   },
 })
+
+let warmedUp = false
+export function warmUpBackend(): void {
+  if (warmedUp || typeof window === 'undefined') return
+  warmedUp = true
+  const targetOrigin = origin || (isNativeMobile() ? PRODUCTION_API_URL : '')
+  if (!targetOrigin || /localhost|127\.0\.0\.1/i.test(targetOrigin)) return
+
+  if (isNativeMobile()) {
+    CapacitorHttp.get({
+      url: `${targetOrigin}/`,
+      connectTimeout: 8000,
+      readTimeout: 8000,
+    }).catch(() => {})
+  } else {
+    fetch(`${targetOrigin}/`, { method: 'GET', mode: 'no-cors' }).catch(() => {})
+  }
+}
 
 /**
  * Custom Axios adapter using CapacitorHttp for native Android/iOS JSON requests.

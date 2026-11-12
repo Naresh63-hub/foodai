@@ -72,7 +72,7 @@ vi.mock('sonner', () => ({
   },
 }))
 
-describe('Health Metrics Utilities (src)', () => {
+describe('Health Metrics Utilities', () => {
   it('calculates BMI and clinical category accurately', () => {
     const bmi = calculateBMI(70, 175)
     expect(bmi).toBe(22.9)
@@ -98,7 +98,7 @@ describe('Health Metrics Utilities (src)', () => {
   })
 })
 
-describe('Profile Page (/profile) (src)', () => {
+describe('Profile Page (/profile)', () => {
   beforeEach(() => {
     mockSave.mockReset().mockResolvedValue('server')
     mockValues = {
@@ -166,7 +166,7 @@ describe('Profile Page (/profile) (src)', () => {
   })
 })
 
-describe('ProfilePreferences Page (/profile/preferences) (src)', () => {
+describe('ProfilePreferences Page (/profile/preferences)', () => {
   beforeEach(() => {
     mockSave.mockReset().mockResolvedValue('server')
   })

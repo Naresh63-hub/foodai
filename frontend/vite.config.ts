@@ -10,6 +10,19 @@ export default defineConfig({
     },
     dedupe: ['react', 'react-dom'],
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'firebase-vendor': ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/analytics'],
+          'charts-vendor': ['recharts'],
+          'scanner-vendor': ['@zxing/library'],
+          'ui-vendor': ['lucide-react', 'sonner', 'axios', '@tanstack/react-query'],
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     proxy: {

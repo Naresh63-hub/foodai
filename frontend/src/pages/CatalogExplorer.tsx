@@ -71,11 +71,10 @@ export default function CatalogExplorer() {
   const [palmOilFree, setPalmOilFree] = useState(false)
   const [lowSugar, setLowSugar] = useState(false)
   const [lowSalt, setLowSalt] = useState(false)
-  const [products, setProducts] = useState<CatalogProductItem[]>([])
+  const [products, setProducts] = useState<CatalogProductItem[]>(() => filterDemoCatalog({}))
   const [loading, setLoading] = useState(false)
 
   const fetchCatalog = () => {
-    setLoading(true)
     const params = {
       q: query.trim() || undefined,
       brand: selectedBrand !== 'All Brands' ? selectedBrand : undefined,
@@ -84,9 +83,15 @@ export default function CatalogExplorer() {
       low_sugar: lowSugar,
       low_salt: lowSalt,
     }
+    // Instant local match update while cloud query completes in background
+    setProducts((prev) => (prev.length === 0 ? filterDemoCatalog(params) : prev))
     searchProducts(params)
       .then((res) => {
-        setProducts(res)
+        if (Array.isArray(res) && res.length > 0) {
+          setProducts(res)
+        } else {
+          setProducts(filterDemoCatalog(params))
+        }
       })
       .catch(() => {
         setProducts(filterDemoCatalog(params))
@@ -97,9 +102,13 @@ export default function CatalogExplorer() {
   }
 
   useEffect(() => {
+    if (!query) {
+      fetchCatalog()
+      return
+    }
     const timer = setTimeout(() => {
       fetchCatalog()
-    }, 200)
+    }, 150)
     return () => clearTimeout(timer)
   }, [query, selectedCategory, selectedBrand, palmOilFree, lowSugar, lowSalt])
 
