@@ -5,7 +5,7 @@ services:
     plan: free
     autoDeploy: true
     healthCheckPath: /
-    buildCommand: cd foodai_backend && pip install -r ../requirements.txt && python manage.py migrate && python manage.py import_food_dataset
+    buildCommand: cd foodai_backend && pip install -r ../requirements.txt && python manage.py migrate && python manage.py seed_additives && python manage.py import_food_dataset
     startCommand: cd foodai_backend && gunicorn foodai_backend.wsgi:application
     envVars:
       - key: DJANGO_SETTINGS_MODULE
