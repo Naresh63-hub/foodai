@@ -18,7 +18,7 @@ export default function InstallAppModal({
 
   useEffect(() => {
     // Check if already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
+    if (typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true)
     }
 
@@ -112,26 +112,32 @@ export default function InstallAppModal({
               </ol>
             </div>
 
-            {/* Standalone APK Generator */}
+            {/* Standalone APK Generator & Direct Download */}
             <div className="p-3.5 bg-purple-50 rounded-2xl border border-purple-200 space-y-2">
               <div className="flex items-center gap-2 font-bold text-purple-900 text-xs">
                 <span>📦</span>
-                <span>Option B: Download Standalone .APK File</span>
+                <span>Option B: Direct FoodAI Android APK</span>
               </div>
               <p className="text-[11px] text-purple-800 leading-relaxed">
-                To download a signed standalone <strong>.apk</strong> or <strong>.aab</strong> package for side-loading or Google Play Store:
+                Download the official standalone Android APK directly to your phone. It automatically syncs the latest updates from Vercel in real time!
               </p>
               <a
-                href={pwaBuilderUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/FoodAI.apk"
+                download="FoodAI.apk"
                 className="block text-center w-full bg-purple-600 hover:bg-purple-700 text-white font-extrabold py-2.5 px-4 rounded-xl text-xs shadow-soft transition-all active:scale-[0.98]"
               >
-                Open PWABuilder (Generate APK) ➔
+                Download FoodAI.apk (v1.0.2) ⬇️
               </a>
-              <p className="text-[10px] text-purple-700 text-center">
-                Uses official Google Bubblewrap & TWA (Trusted Web Activity) standards.
-              </p>
+              <div className="pt-1 text-center">
+                <a
+                  href={pwaBuilderUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[11px] text-purple-700 hover:underline"
+                >
+                  Or generate Play Store bundle via PWABuilder ➔
+                </a>
+              </div>
             </div>
           </div>
         )}
