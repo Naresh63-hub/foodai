@@ -111,7 +111,7 @@ export default function ProfilePreferences() {
     } else {
       toast.success('Saved offline — will sync when you sign in')
     }
-    setTimeout(() => navigate('/profile'), 500)
+    navigate('/profile')
   }
 
   if (hydrating) {

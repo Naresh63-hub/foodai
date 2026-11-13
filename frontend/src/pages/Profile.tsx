@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEvent } from 'react'
+import { useState, useEffect, useMemo, FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import SafeAreaView from '../components/SafeAreaView'
@@ -93,16 +93,20 @@ export default function Profile() {
     allergiesNotes,
   ])
 
-  const bmi = calculateBMI(weight, height)
-  const bmiInfo = bmi !== null ? getBMICategory(bmi) : null
-  const estimatedCalories = estimateDailyCalories({
-    age,
-    weight,
-    height,
-    gender,
-    activityLevel,
-    healthGoal,
-  })
+  const bmi = useMemo(() => calculateBMI(weight, height), [weight, height])
+  const bmiInfo = useMemo(() => (bmi !== null ? getBMICategory(bmi) : null), [bmi])
+  const estimatedCalories = useMemo(
+    () =>
+      estimateDailyCalories({
+        age,
+        weight,
+        height,
+        gender,
+        activityLevel,
+        healthGoal,
+      }),
+    [age, weight, height, gender, activityLevel, healthGoal]
+  )
   const activeCalorieTarget = dailyCalorieGoal || (estimatedCalories ? String(estimatedCalories) : '')
 
   const handleQuickSave = async (e: FormEvent) => {

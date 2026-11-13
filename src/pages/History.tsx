@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import SafeAreaView from '../components/SafeAreaView'
 import ProcessingBadge from '../components/ProcessingBadge'
 import { deleteScan, getScanHistory } from '../api/food'
+import { useAuth } from '../contexts/AuthContext'
+import { getUserFoodScans, StoredFoodScan } from '../services/firestoreService'
 
 type Status = 'loading' | 'ready' | 'error'
 
@@ -19,48 +21,88 @@ function readCachedScans(): any[] {
 }
 
 export default function History() {
+  const { user } = useAuth()
   const [scans, setScans] = useState<any[]>(() => readCachedScans())
-  const [status, setStatus] = useState<Status>(() => (readCachedScans().length > 0 ? 'ready' : 'loading'))
+  const [status, setStatus] = useState<Status>('ready')
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
-  const load = useCallback(() => {
+  const load = useCallback(async () => {
     const cached = readCachedScans()
     if (cached.length > 0) {
       setScans(cached)
-      setStatus('ready')
-    } else {
-      setStatus('loading')
     }
-    getScanHistory()
-      .then((data) => {
-        const list = Array.isArray(data) ? data : []
-        setScans(list)
-        setStatus('ready')
-        try {
-          localStorage.setItem(SCANS_CACHE_KEY, JSON.stringify(list))
-        } catch {}
+
+    setIsRefreshing(true)
+    try {
+      const [backendData, firestoreData] = await Promise.allSettled([
+        getScanHistory(),
+        user?.uid ? getUserFoodScans(user.uid) : Promise.resolve([]),
+      ])
+
+      const backendList =
+        backendData.status === 'fulfilled' && Array.isArray(backendData.value)
+          ? backendData.value
+          : []
+
+      const firestoreList: any[] =
+        firestoreData.status === 'fulfilled' && Array.isArray(firestoreData.value)
+          ? firestoreData.value.map((fs: StoredFoodScan) => ({
+              id: fs.id,
+              barcode: fs.id,
+              product_name: fs.foodName,
+              brands: fs.servingDescription || 'FoodAI Snap',
+              scanned_at: fs.createdAt,
+              payload: {
+                product_name: fs.foodName,
+                processing_level: fs.processingLevel || 'unprocessed',
+                calories_kcal: fs.caloriesKcal || 0,
+                health_score: fs.healthScore,
+              },
+            }))
+          : []
+
+      const scanMap = new Map<string, any>()
+      for (const item of cached) {
+        scanMap.set(String(item.id || item.barcode), item)
+      }
+      for (const item of firestoreList) {
+        if (!scanMap.has(String(item.id || item.barcode))) {
+          scanMap.set(String(item.id || item.barcode), item)
+        }
+      }
+      for (const item of backendList) {
+        scanMap.set(String(item.id || item.barcode), item)
+      }
+
+      const combined = Array.from(scanMap.values()).sort((a, b) => {
+        const timeA = new Date(a.scanned_at || a.created_at || 0).getTime()
+        const timeB = new Date(b.scanned_at || b.created_at || 0).getTime()
+        return timeB - timeA
       })
-      .catch((error: any) => {
-        if (cached.length > 0) return
-        setScans([])
-        // A 401 means "not signed in" (e.g. dev-bypass sends no real token),
-        // which is an empty history — not a connection failure.
-        const status = error?.response?.status
-        setStatus(status === 401 || status === 403 ? 'ready' : 'error')
-      })
-  }, [])
+
+      setScans(combined)
+      setStatus('ready')
+      try {
+        localStorage.setItem(SCANS_CACHE_KEY, JSON.stringify(combined))
+      } catch {}
+    } catch {
+      setStatus('ready')
+    } finally {
+      setIsRefreshing(false)
+    }
+  }, [user?.uid])
 
   useEffect(() => {
     load()
   }, [load])
 
-  const handleDelete = async (e: React.MouseEvent, id: number) => {
+  const handleDelete = async (e: React.MouseEvent, id: number | string) => {
     e.preventDefault()
     e.stopPropagation()
-    setScans((prev) => prev.filter((s) => s.id !== id))
+    setScans((prev) => prev.filter((s) => String(s.id) !== String(id) && String(s.barcode) !== String(id)))
     try {
       await deleteScan(id)
     } catch {
-      // Re-fetch on failure so the list reflects the server truth.
       load()
     }
   }
@@ -71,10 +113,19 @@ export default function History() {
   return (
     <SafeAreaView>
       <div className="px-5 py-6 pb-28 max-w-md mx-auto">
-        <h1 className="text-2xl font-black text-gray-900 tracking-tight">Scan History</h1>
-        <p className="mt-1 text-xs text-gray-500">
-          {status === 'ready' ? `${scans.length} products scanned & analyzed` : 'Your past scans'}
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Scan History</h1>
+            <p className="mt-1 text-xs text-gray-500">
+              {scans.length} products scanned & analyzed
+            </p>
+          </div>
+          {isRefreshing && (
+            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full animate-pulse border border-emerald-200">
+              Syncing...
+            </span>
+          )}
+        </div>
 
         {status === 'loading' && (
           <div className="flex justify-center py-16">

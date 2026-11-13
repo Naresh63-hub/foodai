@@ -5,8 +5,9 @@ const config: CapacitorConfig = {
   appName: 'FoodAI',
   webDir: 'dist',
   server: {
-    androidScheme: 'https',
-    cleartext: true
+    url: 'https://foodai-prb1.vercel.app',
+    cleartext: true,
+    androidScheme: 'https'
   },
   plugins: {
     GoogleSignIn: {

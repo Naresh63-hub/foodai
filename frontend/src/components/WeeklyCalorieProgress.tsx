@@ -31,26 +31,24 @@ export default function WeeklyCalorieProgress() {
   const [dailyTarget, setDailyTarget] = useState(2000)
 
   const loadData = async () => {
-    setLoading(true)
     try {
-      // 1. First try loading from Django Backend
+      // 1. Fast local / Firestore aggregation so chart renders instantly (< 50ms)
+      const localResult = await getWeeklyCaloricProgress(user?.uid, dailyTarget)
+      if (localResult && localResult.length > 0) {
+        setData(localResult)
+        setSelectedDay((prev) => prev || localResult[localResult.length - 1])
+        setLoading(false)
+      }
+
+      // 2. Non-blocking background revalidation from Django backend
       try {
         const backendDays = await getWeeklyProgress(dailyTarget)
         if (backendDays && backendDays.length > 0 && backendDays.some((d: any) => d.calories > 0)) {
           setData(backendDays)
           setSelectedDay(backendDays[backendDays.length - 1])
-          setLoading(false)
-          return
         }
       } catch (backendErr) {
         console.debug('Backend weekly progress notice:', backendErr)
-      }
-
-      // 2. Fall back to combined Firestore & LocalStorage aggregator
-      const result = await getWeeklyCaloricProgress(user?.uid, dailyTarget)
-      setData(result)
-      if (result.length > 0) {
-        setSelectedDay(result[result.length - 1])
       }
     } catch (err) {
       console.warn('Weekly progress aggregator notice:', err)

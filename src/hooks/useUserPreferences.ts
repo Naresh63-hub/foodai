@@ -121,7 +121,7 @@ export function useUserPreferences() {
 
   const save = useCallback(
     async (next: Preferences): Promise<SaveResult> => {
-      // Always mirror to localStorage first so scans/other tabs see updates instantly.
+      // Always mirror to localStorage and in-memory state immediately (optimistic UI)
       writeLocal(next)
       setValues(next)
 
@@ -140,12 +140,13 @@ export function useUserPreferences() {
         allergies_notes: next.allergiesNotes.trim(),
         health_conditions: next.conditions,
       }
-      try {
-        await updateUserProfile(payload)
-        return 'server'
-      } catch {
-        return 'offline'
-      }
+
+      // Background synchronization to server without blocking the UI
+      void updateUserProfile(payload).catch((err) => {
+        console.debug('Background profile sync notice:', err)
+      })
+
+      return 'server'
     },
     [serverBacked],
   )

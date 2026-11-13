@@ -112,17 +112,45 @@ export async function getAdditive(
 
 export const getAdditiveDetail = getAdditive
 
+const SCANS_LOCAL_CACHE_KEY = 'foodai_recent_scans_cache'
+
 export async function getScanHistory(): Promise<any[]> {
   try {
     const response = await client.get<any[]>('/scans/')
-    return response.data
+    const list = Array.isArray(response.data) ? response.data : []
+    if (typeof window !== 'undefined' && list.length > 0) {
+      try {
+        localStorage.setItem(SCANS_LOCAL_CACHE_KEY, JSON.stringify(list))
+      } catch {}
+    }
+    return list
   } catch (err) {
     console.debug('getScanHistory notice:', err)
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem(SCANS_LOCAL_CACHE_KEY)
+        return raw ? JSON.parse(raw) : []
+      } catch {}
+    }
     return []
   }
 }
 
-export async function deleteScan(id: number): Promise<void> {
+export async function deleteScan(id: number | string): Promise<void> {
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem(SCANS_LOCAL_CACHE_KEY)
+      if (raw) {
+        const existing = JSON.parse(raw)
+        if (Array.isArray(existing)) {
+          const updated = existing.filter(
+            (s: any) => String(s.id) !== String(id) && String(s.barcode) !== String(id)
+          )
+          localStorage.setItem(SCANS_LOCAL_CACHE_KEY, JSON.stringify(updated))
+        }
+      }
+    } catch {}
+  }
   try {
     await client.delete('/scans/' + id + '/')
   } catch (err) {
@@ -138,16 +166,52 @@ export async function saveScanHistory(scanData: {
   calories_kcal?: number
   payload?: any
 }): Promise<any> {
+  const localId = 'scan-' + Date.now()
+  const localEntry = {
+    id: localId,
+    product_name: scanData.food_name || scanData.payload?.product_name || 'Food Item',
+    brands: scanData.payload?.brands || (scanData.scan_type ? `${scanData.scan_type.toUpperCase()} scan` : 'FoodAI Scan'),
+    barcode: scanData.barcode || localId,
+    scanned_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+    calories_kcal: scanData.calories_kcal || 0,
+    payload: scanData.payload || {
+      product_name: scanData.food_name || 'Food Item',
+      processing_level: scanData.payload?.processing_level || 'processed',
+      calories_kcal: scanData.calories_kcal || 0,
+    },
+    ...scanData,
+  }
+
+  // Instantly mirror to local cache so /history and / Home render it in 0ms!
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem(SCANS_LOCAL_CACHE_KEY)
+      const existing = raw ? JSON.parse(raw) : []
+      const updated = [
+        localEntry,
+        ...(Array.isArray(existing) ? existing.filter((x: any) => x.id !== localId && x.barcode !== localEntry.barcode) : []),
+      ].slice(0, 50)
+      localStorage.setItem(SCANS_LOCAL_CACHE_KEY, JSON.stringify(updated))
+    } catch {}
+  }
+
   try {
     const response = await client.post('/scans/', scanData)
+    if (typeof window !== 'undefined' && response.data?.id) {
+      try {
+        const raw = localStorage.getItem(SCANS_LOCAL_CACHE_KEY)
+        const existing = raw ? JSON.parse(raw) : []
+        if (Array.isArray(existing)) {
+          const updated = existing.map((x: any) => (x.id === localId ? { ...x, ...response.data } : x))
+          localStorage.setItem(SCANS_LOCAL_CACHE_KEY, JSON.stringify(updated))
+        }
+      } catch {}
+    }
     return response.data
   } catch (err) {
     console.debug('saveScanHistory offline fallback:', err)
-    return {
-      id: 'local-scan-' + Date.now(),
-      status: 'saved_locally',
-      ...scanData,
-    }
+    return localEntry
   }
 }
 
