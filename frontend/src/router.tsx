@@ -199,20 +199,22 @@ export default function AppRouter() {
 
         <Route element={<AppLayout />}>
           <Route path="/" element={<Home />} />
-          <Route path="/explore" element={<ProtectedRoute><CatalogExplorer /></ProtectedRoute>} />
-          <Route path="/ai-nutrition" element={<ProtectedRoute><AINutritionAnalyzer /></ProtectedRoute>} />
-          <Route path="/camera-snap" element={<ProtectedRoute><FoodCameraSnap /></ProtectedRoute>} />
-          <Route path="/plate" element={<ProtectedRoute><PlateAnalyzer /></ProtectedRoute>} />
-          <Route path="/analyze-plate" element={<ProtectedRoute><PlateAnalyzer /></ProtectedRoute>} />
-          <Route path="/voice-log" element={<ProtectedRoute><VoiceLogPage /></ProtectedRoute>} />
-          <Route path="/scan" element={<ProtectedRoute><Scan /></ProtectedRoute>} />
+          <Route path="/explore" element={<CatalogExplorer />} />
+          <Route path="/scan" element={<Scan />} />
+          <Route path="/results/:scanId" element={<ProductResultsParamWrapper />} />
+          <Route path="/ingredient/:id" element={<IngredientParamWrapper />} />
+          <Route path="/nutrition/:scanId" element={<NutritionParamWrapper />} />
+          <Route path="/dna/:scanId" element={<DnaParamWrapper />} />
+          <Route path="/compare" element={<ProductComparison />} />
+          <Route path="/cart" element={<GroceryCart />} />
+
+          {/* AI Features & Personal Tracking */}
+          <Route path="/ai-nutrition" element={<AINutritionAnalyzer />} />
+          <Route path="/camera-snap" element={<FoodCameraSnap />} />
+          <Route path="/plate" element={<PlateAnalyzer />} />
+          <Route path="/analyze-plate" element={<PlateAnalyzer />} />
+          <Route path="/voice-log" element={<VoiceLogPage />} />
           <Route path="/tracker" element={<ProtectedRoute><DailyTracker /></ProtectedRoute>} />
-          <Route path="/cart" element={<ProtectedRoute><GroceryCart /></ProtectedRoute>} />
-          <Route path="/compare" element={<ProtectedRoute><ProductComparison /></ProtectedRoute>} />
-          <Route path="/results/:scanId" element={<ProtectedRoute><ProductResultsParamWrapper /></ProtectedRoute>} />
-          <Route path="/ingredient/:id" element={<ProtectedRoute><IngredientParamWrapper /></ProtectedRoute>} />
-          <Route path="/nutrition/:scanId" element={<ProtectedRoute><NutritionParamWrapper /></ProtectedRoute>} />
-          <Route path="/dna/:scanId" element={<ProtectedRoute><DnaParamWrapper /></ProtectedRoute>} />
           <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/profile/preferences" element={<ProtectedRoute><ProfilePreferences /></ProtectedRoute>} />

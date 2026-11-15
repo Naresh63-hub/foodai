@@ -26,7 +26,18 @@ export function resolveApiOrigin(): string {
     }
     return envUrl.replace(/\/+$/, '')
   }
-  return envUrl ? envUrl.replace(/\/+$/, '') : ''
+
+  if (envUrl) {
+    return envUrl.replace(/\/+$/, '')
+  }
+
+  // Local development in browser (e.g. localhost:5173): route through relative /api Vite proxy
+  if (typeof window !== 'undefined' && /localhost|127\.0\.0\.1/.test(window.location.hostname)) {
+    return ''
+  }
+
+  // Deployed production web (e.g. Vercel): route directly to the live Render backend
+  return PRODUCTION_API_URL
 }
 
 const origin = resolveApiOrigin()
