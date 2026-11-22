@@ -225,3 +225,87 @@ export interface GroceryCartItem {
   has_palm_oil: boolean
   healthier_swap?: string
 }
+
+// ============================================================================
+// PERSONAL CARE & COSMETICS
+// ============================================================================
+
+export interface CareHarmfulIngredient {
+  name: string
+  hazard_severity: 'Low' | 'Moderate' | 'High' | string
+  category: string
+  concern: string
+}
+
+export interface CareBeneficialIngredient {
+  name: string
+  benefit: string
+}
+
+export interface CareSkinCompatibility {
+  dry_skin: boolean
+  oily_acne_prone: boolean
+  sensitive_skin: boolean
+  normal_skin: boolean
+}
+
+export interface CareCleanSwap {
+  name: string
+  category: string
+  why_better: string
+}
+
+export interface CareAnalysisResult {
+  product_name: string
+  product_category: string
+  clean_score: number
+  hazard_level: string
+  comedogenic_rating: number
+  harmful_ingredients: CareHarmfulIngredient[]
+  beneficial_ingredients: CareBeneficialIngredient[]
+  skin_compatibility: CareSkinCompatibility
+  clean_swaps: CareCleanSwap[]
+  data_source?: string
+  disclaimer: string
+}
+
+// ============================================================================
+// MEDICINE & FOOD-DRUG INTERACTIONS
+// ============================================================================
+
+export interface FoodDrugInteraction {
+  food_or_beverage: string
+  severity: string
+  interaction: string
+}
+
+export interface MedicineAnalysisResult {
+  medicine_name: string
+  active_salt: string
+  strength: string
+  therapeutic_category: string
+  common_uses: string
+  meal_timing: string
+  food_drug_interactions: FoodDrugInteraction[]
+  alcohol_contraindicated: boolean
+  generic_salt_name: string
+  common_side_effects: string[]
+  key_safety_warning: string
+  data_source?: string
+  disclaimer: string
+}
+
+// ============================================================================
+// SYMPTOM GUIDE & DOCTOR PREPARATION
+// ============================================================================
+
+export interface SymptomGuideResult {
+  triage_level: string
+  overview: string
+  questions_for_doctor: string[]
+  home_comfort_measures: string[]
+  red_flag_warnings: string[]
+  data_source?: string
+  disclaimer: string
+}
+

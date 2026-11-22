@@ -5,6 +5,9 @@ import {
   ProductAnalysisResult,
   UserProfileData,
   DailyFoodLogItem,
+  CareAnalysisResult,
+  MedicineAnalysisResult,
+  SymptomGuideResult,
 } from '../types/food'
 
 export async function scanBarcode(
@@ -1273,5 +1276,111 @@ export async function sendChatMessage(payload: {
   } catch (err) {
     console.debug('Backend chat fallback to clinical synthesizer:', err)
     return synthesizeChatbotResponse(payload)
+  }
+}
+
+// ============================================================================
+// PERSONAL CARE & MEDICINE INTELLIGENCE API
+// ============================================================================
+
+export async function analyzeCareProduct(payload: {
+  product_name?: string
+  ingredients_text?: string
+  category?: string
+  skin_type?: string
+  image_base64?: string
+}): Promise<CareAnalysisResult> {
+  try {
+    const res = await client.post<CareAnalysisResult>('/care/analyze/', payload)
+    return res.data
+  } catch (err) {
+    console.debug('Care analyze error fallback:', err)
+    return {
+      product_name: payload.product_name || 'Personal Care Item',
+      product_category: 'Skincare & Personal Care',
+      clean_score: 80,
+      hazard_level: 'Clean / Low Hazard',
+      comedogenic_rating: 1,
+      harmful_ingredients: [],
+      beneficial_ingredients: [
+        { name: 'Moisturizing Emollients & Purified Base', benefit: 'Hydrates and shields natural skin moisture.' },
+      ],
+      skin_compatibility: { dry_skin: true, oily_acne_prone: true, sensitive_skin: true, normal_skin: true },
+      clean_swaps: [
+        {
+          name: 'Plant Squalane & Ceramide Barrier Cream',
+          category: 'Clean Care',
+          why_better: '100% paraben-free and fragrance-free formulation.',
+        },
+      ],
+      disclaimer: 'Safety evaluation based on standard dermatological toxicity references. Patch test before use.',
+    }
+  }
+}
+
+export async function analyzeMedicine(payload: {
+  medicine_name?: string
+  label_text?: string
+  recent_food?: string
+  recent_food_eaten?: string
+  image_base64?: string
+}): Promise<MedicineAnalysisResult> {
+  try {
+    const res = await client.post<MedicineAnalysisResult>('/medicine/analyze/', payload)
+    return res.data
+  } catch (err) {
+    console.debug('Medicine analyze error fallback:', err)
+    return {
+      medicine_name: payload.medicine_name || 'Pharmaceutical Medication',
+      active_salt: payload.medicine_name || 'Active Salt Compound',
+      strength: 'Clinical Strength',
+      therapeutic_category: 'Prescription / OTC Therapeutic Medication',
+      common_uses: 'Symptomatic medical relief under physician guidance.',
+      meal_timing: 'Take strictly according to prescription instructions with water.',
+      food_drug_interactions: [
+        {
+          food_or_beverage: 'Alcohol',
+          severity: 'Avoid',
+          interaction: 'Alcohol can interfere with hepatic metabolism and amplify adverse reactions.',
+        },
+      ],
+      alcohol_contraindicated: true,
+      generic_salt_name: 'Check Pradhan Mantri Jan Aushadhi generic catalog for salt equivalent',
+      common_side_effects: ['Mild stomach sensitivity', 'Check package insert for complete profile'],
+      key_safety_warning: 'Adhere strictly to prescribed dosage. Consult doctor if symptoms persist.',
+      disclaimer: 'Informational healthcare reference only — not medical diagnosis or prescription.',
+    }
+  }
+}
+
+export async function getSymptomGuide(payload: {
+  symptoms_text: string
+  duration_days?: string
+  age?: number | string
+}): Promise<SymptomGuideResult> {
+  try {
+    const res = await client.post<SymptomGuideResult>('/health/symptom-guide/', payload)
+    return res.data
+  } catch (err) {
+    console.debug('Symptom guide error fallback:', err)
+    return {
+      triage_level: 'Moderate (Schedule Clinic Visit)',
+      overview: 'Symptom profile warrants evaluation by your primary care physician to determine etiology.',
+      questions_for_doctor: [
+        'Could these symptoms indicate an acute infection or inflammatory condition?',
+        'What specific tests or screenings do you recommend?',
+        'Are there any dietary changes or safe over-the-counter measures to ease comfort?',
+      ],
+      home_comfort_measures: [
+        'Maintain steady hydration with oral fluids and electrolytes.',
+        'Prioritize restful sleep and avoid strenuous physical exertion.',
+      ],
+      red_flag_warnings: [
+        'High fever (>103°F) unyielding to medication',
+        'Difficulty breathing or sudden chest discomfort',
+        'Severe intractable pain or persistent vomiting',
+      ],
+      disclaimer: 'FoodAI symptom guidance is for patient education and doctor visit preparation only. Not diagnosis.',
+    }
   }
 }

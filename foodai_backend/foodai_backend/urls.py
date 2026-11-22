@@ -20,6 +20,11 @@ from foodai_backend.food_analysis.views_ai import (
     FoodVisionAnalyzeView,
     MultiItemPlateAnalyzeView,
 )
+from foodai_backend.food_analysis.views_care_medicine import (
+    CareProductAnalyzeView,
+    MedicineAnalyzeView,
+    SymptomGuideView,
+)
 from foodai_backend.scans.views import (
     DailyMealLogDetailView,
     DailyMealLogListView,
@@ -109,4 +114,18 @@ urlpatterns = [
 
     # Users & Profile (Auth handled by Firebase)
     path('api/users/profile/', ProfileView.as_view(), name='user_profile'),
+
+    # Personal Care, Cosmetics & Medicine Intelligence
+    path('api/care/analyze/', CareProductAnalyzeView.as_view(), name='care_analyze'),
+    path('api/care/analyze', CareProductAnalyzeView.as_view()),
+    path('api/ai/care-analyze/', CareProductAnalyzeView.as_view(), name='ai_care_analyze'),
+    path('api/ai/care-analyze', CareProductAnalyzeView.as_view()),
+    path('api/medicine/analyze/', MedicineAnalyzeView.as_view(), name='medicine_analyze'),
+    path('api/medicine/analyze', MedicineAnalyzeView.as_view()),
+    path('api/ai/medicine-analyze/', MedicineAnalyzeView.as_view(), name='ai_medicine_analyze'),
+    path('api/ai/medicine-analyze', MedicineAnalyzeView.as_view()),
+    path('api/health/symptom-guide/', SymptomGuideView.as_view(), name='symptom_guide'),
+    path('api/health/symptom-guide', SymptomGuideView.as_view()),
+    path('api/ai/symptom-guide/', SymptomGuideView.as_view(), name='ai_symptom_guide'),
+    path('api/ai/symptom-guide', SymptomGuideView.as_view()),
 ]

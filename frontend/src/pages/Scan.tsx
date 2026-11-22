@@ -3,17 +3,87 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import type { BrowserMultiFormatReader } from '@zxing/library'
 import SafeAreaView from '../components/SafeAreaView'
-import { scanBarcode, scanOCR, scanText } from '../api/food'
+import { scanBarcode, scanOCR, scanText, analyzeCareProduct, analyzeMedicine } from '../api/food'
+import { CareAnalysisResult, MedicineAnalysisResult } from '../types/food'
+import CareResultsCard from '../components/CareResultsCard'
+import MedicineInteractionCard from '../components/MedicineInteractionCard'
+import SymptomTriageModal from '../components/SymptomTriageModal'
 import { playScanSound } from '../utils/audio'
 import { QUICK_SAMPLE_PRESETS } from '../constants'
 import demoProductsData from '../constants/demoProducts.json'
 
 const demoProducts = demoProductsData as Record<string, any>
 
+const CARE_PRESETS = [
+  {
+    name: 'Dove Beauty Moisture Bar',
+    category: 'soap' as const,
+    ingredients: 'Sodium Lauroyl Isethionate, Stearic Acid, Lauric Acid, Sodium Palmitate, Aqua, Sodium Isethionate, Sodium Stearate, Cocamidopropyl Betaine, Sodium Palm Kernelate, Glycerin, Parfum, Sodium Chloride, Zinc Oxide, Tetrasodium EDTA, CI 77891',
+    icon: '🧼',
+    desc: 'Mild syndet cleanser bar with glycerin',
+  },
+  {
+    name: 'Nivea Soft Light Moisturiser',
+    category: 'cream' as const,
+    ingredients: 'Aqua, Glycerin, Paraffinum Liquidum, Myristyl Alcohol, Butylene Glycol, Alcohol Denat, Stearic Acid, Myristyl Myristate, Cera Microcristallina, Glyceryl Stearate, Simmondsia Chinensis Seed Oil, Tocopheryl Acetate, Dimethicone, Phenoxyethanol, Parfum',
+    icon: '🧴',
+    desc: 'Light daily face & body cream with Jojoba oil',
+  },
+  {
+    name: 'Clarifying Sulfate Shampoo',
+    category: 'shampoo' as const,
+    ingredients: 'Water, Sodium Laureth Sulfate (SLES), Sodium Lauryl Sulfate (SLS), Cocamidopropyl Betaine, Sodium Chloride, Fragrance, DMDM Hydantoin, Methylparaben, Propylparaben, Citric Acid, Tetrasodium EDTA',
+    icon: '🫧',
+    desc: 'High-cleansing shampoo with SLS & parabens',
+  },
+  {
+    name: 'Gentle Hydrating Cleanser',
+    category: 'facewash' as const,
+    ingredients: 'Aqua, Glycerin, Cetearyl Alcohol, Ceramide NP, Ceramide AP, Ceramide EOP, Phytosphingosine, Cholesterol, Hyaluronic Acid, Niacinamide, Xanthan Gum, Phenoxyethanol',
+    icon: '✨',
+    desc: 'Barrier-repairing ceramide cleanser (non-comedogenic)',
+  },
+]
+
+const MEDICINE_PRESETS = [
+  {
+    name: 'Dolo 650',
+    food: 'Tea, Coffee, Alcohol',
+    icon: '💊',
+    desc: 'Paracetamol 650mg • Fever & Pain',
+  },
+  {
+    name: 'Pan 40 (Pantoprazole)',
+    food: 'Heavy breakfast, coffee',
+    icon: '🛡️',
+    desc: 'Pantoprazole 40mg • Acidity & GERD',
+  },
+  {
+    name: 'Cetirizine 10mg',
+    food: 'Alcohol, sedative beverages',
+    icon: '🌿',
+    desc: 'Cetirizine HCl • Allergy & Cold',
+  },
+  {
+    name: 'Amoxicillin 500mg',
+    food: 'Milk, Curd, Dairy products',
+    icon: '🦠',
+    desc: 'Antibiotic • Bacterial Infection',
+  },
+  {
+    name: 'Atorvastatin 20mg',
+    food: 'Grapefruit juice, high-fat feast',
+    icon: '❤️',
+    desc: 'Atorvastatin • Cholesterol Control',
+  },
+]
+
 export default function Scan() {
   const navigate = useNavigate()
   const location = useLocation()
+  const initialCategory = (location.state as any)?.categoryMode || 'food'
   const initialTab = (location.state as any)?.tab
+  const [categoryMode, setCategoryMode] = useState<'food' | 'care' | 'medicine'>(initialCategory)
   const [tab, setTab] = useState<'barcode' | 'batch' | 'ocr' | 'text'>(
     initialTab === 'ocr' || initialTab === 'text' || initialTab === 'batch' ? initialTab : 'barcode'
   )
@@ -24,6 +94,19 @@ export default function Scan() {
   const [productName, setProductName] = useState('')
   const [loading, setLoading] = useState(false)
   const [fileName, setFileName] = useState<string | null>(null)
+
+  // Care & Cosmetics State
+  const [careProductName, setCareProductName] = useState('')
+  const [careIngredients, setCareIngredients] = useState('')
+  const [careCategory, setCareCategory] = useState<'soap' | 'cream' | 'shampoo' | 'lotion' | 'facewash' | 'other'>('cream')
+  const [skinType, setSkinType] = useState<string>('normal')
+  const [careResult, setCareResult] = useState<CareAnalysisResult | null>(null)
+
+  // Medicine & Doctor Prep State
+  const [medicineName, setMedicineName] = useState('')
+  const [recentFoodQuery, setRecentFoodQuery] = useState('')
+  const [medicineResult, setMedicineResult] = useState<MedicineAnalysisResult | null>(null)
+  const [showSymptomModal, setShowSymptomModal] = useState(false)
   const [cameraActive, setCameraActive] = useState(false)
   const [torchOn, setTorchOn] = useState(false)
   const [torchSupported, setTorchSupported] = useState(true)
@@ -724,6 +807,67 @@ export default function Scan() {
     handleBarcodeSubmit(code)
   }
 
+  const handleCareSubmit = async (
+    e?: React.FormEvent,
+    presetData?: { name: string; ingredients: string; category?: any }
+  ) => {
+    if (e) e.preventDefault()
+    const nameToUse = presetData?.name || careProductName.trim()
+    const ingToUse = presetData?.ingredients || careIngredients.trim()
+    const catToUse = presetData?.category || careCategory
+
+    if (!ingToUse) {
+      toast.error('Please enter ingredient list')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const res = await analyzeCareProduct({
+        product_name: nameToUse || 'Cosmetic / Care Product',
+        ingredients_text: ingToUse,
+        category: catToUse,
+        skin_type: skinType,
+      })
+      setCareResult(res)
+      playScanSound()
+      toast.success('Cosmetic & Care analysis complete!')
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Care analysis failed. Try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleMedicineSubmit = async (
+    e?: React.FormEvent,
+    presetData?: { name: string; food?: string }
+  ) => {
+    if (e) e.preventDefault()
+    const nameToUse = presetData?.name || medicineName.trim()
+    const foodToUse = presetData?.food !== undefined ? presetData.food : recentFoodQuery.trim()
+
+    if (!nameToUse) {
+      toast.error('Please enter tablet or syrup name')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const res = await analyzeMedicine({
+        medicine_name: nameToUse,
+        recent_food_eaten: foodToUse,
+      })
+      setMedicineResult(res)
+      playScanSound()
+      toast.success('Medicine guidance & food interactions retrieved!')
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Medicine lookup failed. Try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const renderCameraView = (mode: 'single' | 'batch') => {
     return (
       <div className="relative rounded-3xl bg-gray-950 overflow-hidden text-center text-white p-3 sm:p-4 shadow-card border border-gray-800 min-h-[260px] flex flex-col items-center justify-center">
@@ -968,282 +1112,592 @@ export default function Scan() {
     <SafeAreaView>
       <div className="px-5 py-6 pb-28 max-w-md mx-auto">
         <div className="mb-4">
-          <h1 className="text-2xl font-black text-gray-900 tracking-tight">Scan Food</h1>
+          <h1 className="text-2xl font-black text-gray-900 tracking-tight">
+            {categoryMode === 'food' && 'Scan Food'}
+            {categoryMode === 'care' && 'Care & Cosmetics'}
+            {categoryMode === 'medicine' && 'Medicine & Interactions'}
+          </h1>
           <p className="text-xs text-gray-500 mt-1">
-            Barcode scanner, label camera OCR, or manual ingredient breakdown.
+            {categoryMode === 'food' && 'Barcode scanner, label camera OCR, or manual ingredient breakdown.'}
+            {categoryMode === 'care' && 'Clean score, endocrine disruptors, comedogenic pore ratings & clean swaps.'}
+            {categoryMode === 'medicine' && 'Active chemical salts, meal timing rules, food conflicts & Jan Aushadhi generic alternatives.'}
           </p>
         </div>
 
-        {/* Multi-Item Plate Recognition Shortcut Banner */}
-        <div className="mb-4">
+        {/* Universal Mode Selector: Food | Care & Soaps | Medicine */}
+        <div className="flex rounded-2xl bg-gray-100 p-1 mb-5 shadow-xs">
           <button
             type="button"
-            onClick={() => navigate('/plate')}
-            className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-soft hover:shadow-md transition-all active:scale-[0.99] text-left cursor-pointer"
+            onClick={() => setCategoryMode('food')}
+            className={`flex-1 py-2 text-xs font-black rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              categoryMode === 'food'
+                ? 'bg-white text-emerald-800 shadow-sm'
+                : 'text-gray-500 hover:text-gray-900'
+            }`}
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <span className="text-2xl shrink-0">🍽️</span>
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-black uppercase tracking-wider text-emerald-200">
-                    All-in-One Vision AI
-                  </span>
-                  <span className="bg-white/20 text-[9px] font-extrabold px-1.5 py-0.2 rounded-full uppercase">
-                    New
-                  </span>
-                </div>
-                <p className="text-sm font-bold truncate">Plate & Cooked Meal Scanner</p>
-                <p className="text-[11px] text-emerald-100 truncate">
-                  AI recognizes items on your plate & counts calories
-                </p>
-              </div>
-            </div>
-            <span className="text-lg font-black shrink-0 text-white/80">→</span>
+            <span>🥗</span>
+            <span>Food</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setCategoryMode('care')}
+            className={`flex-1 py-2 text-xs font-black rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              categoryMode === 'care'
+                ? 'bg-white text-teal-800 shadow-sm'
+                : 'text-gray-500 hover:text-gray-900'
+            }`}
+          >
+            <span>🧴</span>
+            <span>Care & Soaps</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setCategoryMode('medicine')}
+            className={`flex-1 py-2 text-xs font-black rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              categoryMode === 'medicine'
+                ? 'bg-white text-indigo-800 shadow-sm'
+                : 'text-gray-500 hover:text-gray-900'
+            }`}
+          >
+            <span>💊</span>
+            <span>Medicine</span>
           </button>
         </div>
 
-        {/* Tab Selector */}
-        <div className="rounded-2xl bg-gray-100 p-1 grid grid-cols-4 gap-1 mb-5">
-          <button
-            onClick={() => handleTabChange('barcode')}
-            className={`py-2 rounded-xl text-[11px] font-bold transition-all text-center cursor-pointer ${
-              tab === 'barcode' ? 'bg-white shadow-card text-gray-900' : 'text-gray-500 hover:text-gray-800'
-            }`}
-          >
-            📊 Barcode
-          </button>
-          <button
-            onClick={() => handleTabChange('batch')}
-            className={`py-2 rounded-xl text-[11px] font-bold transition-all text-center cursor-pointer ${
-              tab === 'batch' ? 'bg-white shadow-card text-emerald-800 font-extrabold' : 'text-gray-500 hover:text-gray-800'
-            }`}
-          >
-            🛒 Cart ({batchCount})
-          </button>
-          <button
-            onClick={() => handleTabChange('ocr')}
-            className={`py-2 rounded-xl text-[11px] font-bold transition-all text-center cursor-pointer ${
-              tab === 'ocr' ? 'bg-white shadow-card text-gray-900' : 'text-gray-500 hover:text-gray-800'
-            }`}
-          >
-            📷 OCR
-          </button>
-          <button
-            onClick={() => handleTabChange('text')}
-            className={`py-2 rounded-xl text-[11px] font-bold transition-all text-center cursor-pointer ${
-              tab === 'text' ? 'bg-white shadow-card text-gray-900' : 'text-gray-500 hover:text-gray-800'
-            }`}
-          >
-            📝 Paste
-          </button>
-        </div>
-
-        {/* TAB 2: CONTINUOUS BATCH SUPERMARKET SCANNER */}
-        {tab === 'batch' && (
-          <div className="space-y-4">
-            <div className="rounded-3xl bg-gradient-to-br from-emerald-700 via-teal-800 to-gray-950 text-white p-5 shadow-soft">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">⚡</span>
-                  <div>
-                    <h2 className="text-sm font-black tracking-tight">Supermarket Basket Mode</h2>
-                    <p className="text-[10px] text-emerald-200 font-medium">Scan consecutive items into Grocery Cart</p>
+        {/* ========================================================================= */}
+        {/* MODE 1: FOOD SCANNER */}
+        {/* ========================================================================= */}
+        {categoryMode === 'food' && (
+          <>
+            {/* Multi-Item Plate Recognition Shortcut Banner */}
+            <div className="mb-4">
+              <button
+                type="button"
+                onClick={() => navigate('/plate')}
+                className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-soft hover:shadow-md transition-all active:scale-[0.99] text-left cursor-pointer"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="text-2xl shrink-0">🍽️</span>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-black uppercase tracking-wider text-emerald-200">
+                        All-in-One Vision AI
+                      </span>
+                      <span className="bg-white/20 text-[9px] font-extrabold px-1.5 py-0.2 rounded-full uppercase">
+                        New
+                      </span>
+                    </div>
+                    <p className="text-sm font-bold truncate">Plate & Cooked Meal Scanner</p>
+                    <p className="text-[11px] text-emerald-100 truncate">
+                      AI recognizes items on your plate & counts calories
+                    </p>
                   </div>
                 </div>
-                <button
-                  onClick={() => navigate('/cart')}
-                  className="rounded-xl bg-white/20 hover:bg-white/30 px-3 py-1 text-xs font-bold text-white transition-all cursor-pointer"
-                >
-                  View Cart ({batchCount}) →
-                </button>
-              </div>
+                <span className="text-lg font-black shrink-0 text-white/80">→</span>
+              </button>
             </div>
 
-            {/* Live Camera Viewfinder in Batch Mode */}
-            {renderCameraView('batch')}
+            {/* Tab Selector */}
+            <div className="rounded-2xl bg-gray-100 p-1 grid grid-cols-4 gap-1 mb-5">
+              <button
+                onClick={() => handleTabChange('barcode')}
+                className={`py-2 rounded-xl text-[11px] font-bold transition-all text-center cursor-pointer ${
+                  tab === 'barcode' ? 'bg-white shadow-card text-gray-900' : 'text-gray-500 hover:text-gray-800'
+                }`}
+              >
+                📊 Barcode
+              </button>
+              <button
+                onClick={() => handleTabChange('batch')}
+                className={`py-2 rounded-xl text-[11px] font-bold transition-all text-center cursor-pointer ${
+                  tab === 'batch' ? 'bg-white shadow-card text-emerald-800 font-extrabold' : 'text-gray-500 hover:text-gray-800'
+                }`}
+              >
+                🛒 Cart ({batchCount})
+              </button>
+              <button
+                onClick={() => handleTabChange('ocr')}
+                className={`py-2 rounded-xl text-[11px] font-bold transition-all text-center cursor-pointer ${
+                  tab === 'ocr' ? 'bg-white shadow-card text-gray-900' : 'text-gray-500 hover:text-gray-800'
+                }`}
+              >
+                📷 OCR
+              </button>
+              <button
+                onClick={() => handleTabChange('text')}
+                className={`py-2 rounded-xl text-[11px] font-bold transition-all text-center cursor-pointer ${
+                  tab === 'text' ? 'bg-white shadow-card text-gray-900' : 'text-gray-500 hover:text-gray-800'
+                }`}
+              >
+                📝 Paste
+              </button>
+            </div>
 
-            {/* Quick Batch Barcode Form */}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                handleBatchScanSubmit()
-              }}
-              className="rounded-2xl bg-white shadow-card p-4 border border-gray-100"
-            >
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-                Scan Barcode to Add to Cart
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={batchCode}
-                  onChange={(e) => setBatchCode(e.target.value)}
-                  placeholder="e.g. 8901063371040"
-                  className="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
+            {/* TAB 2: CONTINUOUS BATCH SUPERMARKET SCANNER */}
+            {tab === 'batch' && (
+              <div className="space-y-4">
+                <div className="rounded-3xl bg-gradient-to-br from-emerald-700 via-teal-800 to-gray-950 text-white p-5 shadow-soft">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">⚡</span>
+                      <div>
+                        <h2 className="text-sm font-black tracking-tight">Supermarket Basket Mode</h2>
+                        <p className="text-[10px] text-emerald-200 font-medium">Scan consecutive items into Grocery Cart</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => navigate('/cart')}
+                      className="rounded-xl bg-white/20 hover:bg-white/30 px-3 py-1 text-xs font-bold text-white transition-all cursor-pointer"
+                    >
+                      View Cart ({batchCount}) →
+                    </button>
+                  </div>
+                </div>
+
+                {/* Live Camera Viewfinder in Batch Mode */}
+                {renderCameraView('batch')}
+
+                {/* Quick Batch Barcode Form */}
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    handleBatchScanSubmit()
+                  }}
+                  className="rounded-2xl bg-white shadow-card p-4 border border-gray-100"
+                >
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                    Scan Barcode to Add to Cart
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={batchCode}
+                      onChange={(e) => setBatchCode(e.target.value)}
+                      placeholder="e.g. 8901063371040"
+                      className="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold px-4 py-2.5 text-xs transition-all disabled:opacity-50 cursor-pointer"
+                    >
+                      {loading ? 'Adding...' : '➕ Add'}
+                    </button>
+                  </div>
+                </form>
+
+                {/* Tap to Quick Add Preset Foods */}
+                <div className="rounded-2xl bg-white p-4 border border-gray-100 shadow-card">
+                  <p className="text-xs font-bold text-gray-700 mb-2">⚡ Tap to Quick Add into Cart:</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {QUICK_SAMPLE_PRESETS.slice(0, 4).map((p) => (
+                      <button
+                        key={p.barcode}
+                        type="button"
+                        onClick={() => handleBatchScanSubmit(p.barcode)}
+                        disabled={loading}
+                        className="p-2.5 text-left rounded-xl bg-gray-50 hover:bg-emerald-50 border border-gray-100 hover:border-emerald-200 transition-all cursor-pointer"
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-lg">{p.icon}</span>
+                          <span className="text-xs font-bold text-gray-900 truncate">{p.name}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 1: BARCODE SCANNER */}
+            {tab === 'barcode' && (
+              <div className="space-y-4">
+                {renderCameraView('single')}
+
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    handleBarcodeSubmit()
+                  }}
+                  className="rounded-2xl bg-white shadow-card p-4 border border-gray-100"
+                >
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                    Enter Barcode Number
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={barcode}
+                      onChange={(e) => setBarcode(e.target.value)}
+                      placeholder="e.g. 8901063371040"
+                      className="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 text-sm transition-all disabled:opacity-50 cursor-pointer"
+                    >
+                      {loading ? '...' : 'Search'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {/* TAB 2: LABEL PHOTO OCR */}
+            {tab === 'ocr' && (
+              <div className="space-y-4">
+                {renderCameraView('single')}
+
+                <div className="rounded-2xl bg-white shadow-card p-5 border border-gray-100">
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                    Or Upload Nutrition / Ingredient Label File
+                  </label>
+                  <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50/70 hover:bg-emerald-50 hover:border-emerald-300 p-8 transition-all">
+                    <span className="text-4xl mb-2">🖼️</span>
+                    <span className="text-sm font-bold text-gray-800">
+                      {fileName ?? 'Tap to select label photo'}
+                    </span>
+                    <span className="text-[11px] text-gray-400 mt-1">
+                      JPG, PNG, WEBP up to 10MB
+                    </span>
+                    <span className="mt-3 px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
+                      Upload & Analyze
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      disabled={loading}
+                    />
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: PASTE TEXT */}
+            {tab === 'text' && (
+              <form onSubmit={handleTextSubmit} className="rounded-2xl bg-white shadow-card p-4 border border-gray-100 space-y-3">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                    Product Name (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={productName}
+                    onChange={(e) => setProductName(e.target.value)}
+                    placeholder="e.g. Britannia Tiger Biscuits"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                    Ingredients List
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={ingredientsText}
+                    onChange={(e) => setIngredientsText(e.target.value)}
+                    placeholder="e.g. Refined wheat flour, sugar, palm oil, invert sugar syrup, milk solids, salt, dough conditioner E223, raising agents E500ii, E503ii, emulsifier E322, colour E150d..."
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-xs leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+
                 <button
                   type="submit"
                   disabled={loading}
-                  className="rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold px-4 py-2.5 text-xs transition-all disabled:opacity-50 cursor-pointer"
+                  className="w-full rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 text-sm transition-all disabled:opacity-50 cursor-pointer"
                 >
-                  {loading ? 'Adding...' : '➕ Add'}
+                  {loading ? 'Analyzing...' : 'Analyze Ingredients'}
                 </button>
-              </div>
-            </form>
+              </form>
+            )}
 
-            {/* Tap to Quick Add Preset Foods */}
-            <div className="rounded-2xl bg-white p-4 border border-gray-100 shadow-card">
-              <p className="text-xs font-bold text-gray-700 mb-2">⚡ Tap to Quick Add into Cart:</p>
+            {/* 1-Tap Quick Demo Preset Barcodes */}
+            <div className="mt-8">
+              <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2.5">
+                ⚡ Popular Indian & Global Foods:
+              </p>
               <div className="grid grid-cols-2 gap-2">
-                {QUICK_SAMPLE_PRESETS.slice(0, 4).map((p) => (
+                {QUICK_SAMPLE_PRESETS.map((p) => (
                   <button
                     key={p.barcode}
-                    type="button"
-                    onClick={() => handleBatchScanSubmit(p.barcode)}
-                    disabled={loading}
-                    className="p-2.5 text-left rounded-xl bg-gray-50 hover:bg-emerald-50 border border-gray-100 hover:border-emerald-200 transition-all cursor-pointer"
+                    onClick={() => selectPreset(p.barcode)}
+                    className="flex items-center gap-2.5 p-2.5 rounded-xl bg-gray-50 hover:bg-white hover:shadow-soft border border-gray-200/80 transition-all text-left cursor-pointer"
                   >
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-lg">{p.icon}</span>
-                      <span className="text-xs font-bold text-gray-900 truncate">{p.name}</span>
+                    <span className="text-2xl">{p.icon}</span>
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-bold text-gray-900 truncate">{p.name}</p>
+                      <p className="text-[9px] text-gray-400 font-mono truncate">{p.barcode}</p>
                     </div>
                   </button>
                 ))}
               </div>
             </div>
-          </div>
+          </>
         )}
 
-        {/* TAB 1: BARCODE SCANNER */}
-        {tab === 'barcode' && (
+        {/* ========================================================================= */}
+        {/* MODE 2: PERSONAL CARE & COSMETICS */}
+        {/* ========================================================================= */}
+        {categoryMode === 'care' && (
           <div className="space-y-4">
-            {/* Viewfinder simulation & Live Camera */}
-            {renderCameraView('single')}
-
-            {/* Barcode Number Search Form */}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                handleBarcodeSubmit()
-              }}
-              className="rounded-2xl bg-white shadow-card p-4 border border-gray-100"
-            >
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-                Enter Barcode Number
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={barcode}
-                  onChange={(e) => setBarcode(e.target.value)}
-                  placeholder="e.g. 8901063371040"
-                  className="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 text-sm transition-all disabled:opacity-50 cursor-pointer"
+            {careResult ? (
+              <CareResultsCard data={careResult} onReset={() => setCareResult(null)} />
+            ) : (
+              <>
+                <form
+                  onSubmit={handleCareSubmit}
+                  className="rounded-3xl bg-white shadow-card p-5 border border-gray-100 space-y-4"
                 >
-                  {loading ? '...' : 'Search'}
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                      Product Name (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={careProductName}
+                      onChange={(e) => setCareProductName(e.target.value)}
+                      placeholder="e.g. Dove Beauty Bar, Nivea Moisturiser..."
+                      className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    />
+                  </div>
 
-        {/* TAB 2: LABEL PHOTO OCR */}
-        {tab === 'ocr' && (
-          <div className="space-y-4">
-            {/* Live Camera Viewfinder in OCR Mode */}
-            {renderCameraView('single')}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                      Product Category
+                    </label>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {[
+                        { id: 'soap', label: '🧼 Soap / Bar' },
+                        { id: 'cream', label: '🧴 Cream' },
+                        { id: 'shampoo', label: '🫧 Shampoo' },
+                        { id: 'facewash', label: '✨ Facewash' },
+                        { id: 'lotion', label: '💧 Lotion' },
+                        { id: 'other', label: '📦 Other' },
+                      ].map((cat) => (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          onClick={() => setCareCategory(cat.id as any)}
+                          className={`py-2 px-2 rounded-xl text-xs font-bold transition-all border text-center cursor-pointer ${
+                            careCategory === cat.id
+                              ? 'bg-teal-600 text-white border-teal-600 shadow-xs'
+                              : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                          }`}
+                        >
+                          {cat.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-            <div className="rounded-2xl bg-white shadow-card p-5 border border-gray-100">
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-                Or Upload Nutrition / Ingredient Label File
-              </label>
-              <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50/70 hover:bg-emerald-50 hover:border-emerald-300 p-8 transition-all">
-                <span className="text-4xl mb-2">🖼️</span>
-                <span className="text-sm font-bold text-gray-800">
-                  {fileName ?? 'Tap to select label photo'}
-                </span>
-                <span className="text-[11px] text-gray-400 mt-1">
-                  JPG, PNG, WEBP up to 10MB
-                </span>
-                <span className="mt-3 px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
-                  Upload & Analyze
-                </span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  disabled={loading}
-                />
-              </label>
-            </div>
-          </div>
-        )}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                      Target Skin Type
+                    </label>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {['normal', 'oily', 'dry', 'sensitive'].map((st) => (
+                        <button
+                          key={st}
+                          type="button"
+                          onClick={() => setSkinType(st)}
+                          className={`py-1.5 rounded-xl text-xs font-bold capitalize transition-all border text-center cursor-pointer ${
+                            skinType === st
+                              ? 'bg-teal-50 text-teal-800 border-teal-300 font-extrabold'
+                              : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'
+                          }`}
+                        >
+                          {st}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-        {/* TAB 3: PASTE TEXT */}
-        {tab === 'text' && (
-          <form onSubmit={handleTextSubmit} className="rounded-2xl bg-white shadow-card p-4 border border-gray-100 space-y-3">
-            <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                Product Name (Optional)
-              </label>
-              <input
-                type="text"
-                value={productName}
-                onChange={(e) => setProductName(e.target.value)}
-                placeholder="e.g. Britannia Tiger Biscuits"
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                      Ingredients (INCI List)
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={careIngredients}
+                      onChange={(e) => setCareIngredients(e.target.value)}
+                      placeholder="e.g. Aqua, Glycerin, Sodium Laureth Sulfate, Cocamidopropyl Betaine, Methylparaben, Dimethicone, Parfum..."
+                      className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-xs leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 font-mono"
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1">
+                      Paste full ingredient list from packaging label.
+                    </p>
+                  </div>
 
-            <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                Ingredients List
-              </label>
-              <textarea
-                rows={4}
-                value={ingredientsText}
-                onChange={(e) => setIngredientsText(e.target.value)}
-                placeholder="e.g. Refined wheat flour, sugar, palm oil, invert sugar syrup, milk solids, salt, dough conditioner E223, raising agents E500ii, E503ii, emulsifier E322, colour E150d..."
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-xs leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
+                  <button
+                    type="submit"
+                    disabled={loading || !careIngredients.trim()}
+                    className="w-full rounded-2xl bg-teal-600 hover:bg-teal-700 active:scale-95 text-white font-black py-3 text-sm transition-all disabled:opacity-50 shadow-soft cursor-pointer"
+                  >
+                    {loading ? 'Evaluating INCI Chemicals...' : 'Analyze Clean Score & Hazards'}
+                  </button>
+                </form>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 text-sm transition-all disabled:opacity-50 cursor-pointer"
-            >
-              {loading ? 'Analyzing...' : 'Analyze Ingredients'}
-            </button>
-          </form>
-        )}
-
-        {/* 1-Tap Quick Demo Preset Barcodes */}
-        <div className="mt-8">
-          <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2.5">
-            ⚡ Popular Indian & Global Foods:
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {QUICK_SAMPLE_PRESETS.map((p) => (
-              <button
-                key={p.barcode}
-                onClick={() => selectPreset(p.barcode)}
-                className="flex items-center gap-2.5 p-2.5 rounded-xl bg-gray-50 hover:bg-white hover:shadow-soft border border-gray-200/80 transition-all text-left cursor-pointer"
-              >
-                <span className="text-2xl">{p.icon}</span>
-                <div className="min-w-0">
-                  <p className="text-[11px] font-bold text-gray-900 truncate">{p.name}</p>
-                  <p className="text-[9px] text-gray-400 font-mono truncate">{p.barcode}</p>
+                {/* 1-Tap Quick Sample Presets for Personal Care */}
+                <div className="mt-6">
+                  <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2.5">
+                    ⚡ Instant Care Demos:
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {CARE_PRESETS.map((p) => (
+                      <button
+                        key={p.name}
+                        type="button"
+                        onClick={() => {
+                          setCareProductName(p.name)
+                          setCareCategory(p.category)
+                          setCareIngredients(p.ingredients)
+                          handleCareSubmit(undefined, p)
+                        }}
+                        disabled={loading}
+                        className="flex flex-col text-left p-3 rounded-2xl bg-white hover:bg-teal-50/50 border border-gray-200/80 hover:border-teal-300 shadow-xs transition-all cursor-pointer"
+                      >
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="text-xl">{p.icon}</span>
+                          <span className="text-xs font-bold text-gray-900 truncate">{p.name}</span>
+                        </div>
+                        <p className="text-[10px] text-gray-500 line-clamp-2">{p.desc}</p>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </button>
-            ))}
+              </>
+            )}
           </div>
-        </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* MODE 3: MEDICINE & FOOD INTERACTIONS */}
+        {/* ========================================================================= */}
+        {categoryMode === 'medicine' && (
+          <div className="space-y-4">
+            {/* Doctor Prep & Clinical Checklist Shortcut Banner */}
+            <button
+              type="button"
+              onClick={() => setShowSymptomModal(true)}
+              className="w-full flex items-center justify-between p-4 rounded-3xl bg-gradient-to-r from-blue-700 via-indigo-700 to-indigo-900 text-white shadow-soft hover:shadow-md transition-all active:scale-[0.99] text-left cursor-pointer"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="text-3xl shrink-0">🩺</span>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-blue-200">
+                      Safe Clinical Prep
+                    </span>
+                    <span className="bg-white/20 text-[9px] font-black px-1.5 py-0.2 rounded-full uppercase">
+                      Zero Diagnosis
+                    </span>
+                  </div>
+                  <p className="text-sm font-black truncate">Doctor Visit Preparation & Triage</p>
+                  <p className="text-[11px] text-blue-100 truncate">
+                    Question checklist, home comfort care & emergency red flags
+                  </p>
+                </div>
+              </div>
+              <span className="text-xl font-black shrink-0 text-white/80">→</span>
+            </button>
+
+            {medicineResult ? (
+              <MedicineInteractionCard data={medicineResult} onReset={() => setMedicineResult(null)} />
+            ) : (
+              <>
+                <form
+                  onSubmit={handleMedicineSubmit}
+                  className="rounded-3xl bg-white shadow-card p-5 border border-gray-100 space-y-4"
+                >
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                      Medicine / Tablet / Syrup Name
+                    </label>
+                    <input
+                      type="text"
+                      value={medicineName}
+                      onChange={(e) => setMedicineName(e.target.value)}
+                      placeholder="e.g. Dolo 650, Pan 40, Amoxicillin, Cetirizine..."
+                      className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                      Recent Food / Drink Eaten (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={recentFoodQuery}
+                      onChange={(e) => setRecentFoodQuery(e.target.value)}
+                      placeholder="e.g. Milk, Curd, Coffee, Grapefruit, Alcohol..."
+                      className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1">
+                      We check if this food blocks drug absorption or risks toxicity.
+                    </p>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading || !medicineName.trim()}
+                    className="w-full rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-black py-3 text-sm transition-all disabled:opacity-50 shadow-soft cursor-pointer"
+                  >
+                    {loading ? 'Checking Pharmacology Rules...' : 'Check Food Conflicts & Meal Timing'}
+                  </button>
+                </form>
+
+                {/* 1-Tap Quick Sample Presets for Medicines */}
+                <div className="mt-6">
+                  <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2.5">
+                    ⚡ Common Medicines & Food Conflicts:
+                  </p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {MEDICINE_PRESETS.map((p) => (
+                      <button
+                        key={p.name}
+                        type="button"
+                        onClick={() => {
+                          setMedicineName(p.name)
+                          setRecentFoodQuery(p.food)
+                          handleMedicineSubmit(undefined, p)
+                        }}
+                        disabled={loading}
+                        className="flex items-center justify-between p-3 rounded-2xl bg-white hover:bg-indigo-50/50 border border-gray-200/80 hover:border-indigo-300 shadow-xs transition-all text-left cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className="text-2xl shrink-0">{p.icon}</span>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-gray-900 truncate">{p.name}</p>
+                            <p className="text-[10px] text-gray-500 truncate">{p.desc}</p>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg shrink-0">
+                          {p.food ? `vs ${p.food}` : 'Inspect'}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Clinical Safety & Regulatory Banner */}
+                <div className="p-3.5 rounded-2xl bg-blue-50/70 border border-blue-200/60 text-blue-900 text-[11px] leading-relaxed">
+                  <span className="font-bold">⚕️ Clinical Disclaimer:</span> FoodAI provides nutritional and chemical safety information for educational reference. It does not replace professional medical judgment, diagnosis, or prescription.
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Doctor Visit Prep / Symptom Triage Modal */}
+        <SymptomTriageModal
+          isOpen={showSymptomModal}
+          onClose={() => setShowSymptomModal(false)}
+        />
       </div>
     </SafeAreaView>
   )
