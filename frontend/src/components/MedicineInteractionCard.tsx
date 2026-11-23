@@ -40,11 +40,11 @@ export default function MedicineInteractionCard({ data, onReset }: MedicineInter
           </div>
         </div>
 
-        {/* Common Medical Uses */}
+        {/* Common Medical Uses Summary */}
         {data.common_uses && (
           <div className="mt-3.5 pt-3 border-t border-gray-100">
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400 block mb-1">
-              Indications / General Purpose
+              General Clinical Indication
             </span>
             <p className="text-xs text-gray-700 font-medium leading-relaxed">
               {data.common_uses}
@@ -53,7 +53,59 @@ export default function MedicineInteractionCard({ data, onReset }: MedicineInter
         )}
       </div>
 
-      {/* 🍽️ Food & Meal Timing Banner (CRITICAL FEATURE) */}
+      {/* 🎯 Why This Medicine Is Used & Target Symptoms (CRITICAL CLINICAL FEATURE) */}
+      {data.clinical_guidance && (
+        <div className="rounded-3xl bg-white shadow-card border border-gray-100 p-5 space-y-3.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🎯</span>
+              <div>
+                <h3 className="text-xs font-black uppercase tracking-wider text-gray-900">
+                  Why This Medicine Is Used & Symptoms
+                </h3>
+                <p className="text-[10px] text-gray-400 font-medium">
+                  Physician indications & clinical symptoms treated
+                </p>
+              </div>
+            </div>
+            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+              Medical Purpose
+            </span>
+          </div>
+
+          {/* Why Used Explanation */}
+          <div className="p-3.5 rounded-2xl bg-blue-50/50 border border-blue-100">
+            <span className="text-[10px] font-black uppercase tracking-wider text-blue-900 block mb-1">
+              Primary Medical Indication
+            </span>
+            <p className="text-xs text-blue-950 font-medium leading-relaxed">
+              {data.clinical_guidance.why_used}
+            </p>
+          </div>
+
+          {/* Target Symptoms Treated */}
+          {data.clinical_guidance.symptoms_treated && data.clinical_guidance.symptoms_treated.length > 0 && (
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-gray-500 block mb-2">
+                Target Symptoms Relieved:
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {data.clinical_guidance.symptoms_treated.map((sym, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-gray-800 bg-gray-50 border border-gray-200/80 px-2.5 py-1 rounded-xl"
+                  >
+                    <span className="text-emerald-600 text-xs font-extrabold">✓</span>
+                    <span>{sym}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 🍽️ Food & Meal Timing Banner */}
       <div className="rounded-3xl bg-emerald-500/10 border border-emerald-500/30 p-5">
         <div className="flex items-center gap-2 mb-2">
           <span className="text-xl">🍽️</span>
@@ -93,7 +145,101 @@ export default function MedicineInteractionCard({ data, onReset }: MedicineInter
         </div>
       )}
 
-      {/* 🔬 Biological Pharmacology & Organ Pathway (NEW) */}
+      {/* 📋 Clinical Medical Reference & Guidelines (According to Pharmacopeia) */}
+      {data.clinical_guidance && (
+        <div className="rounded-3xl bg-white shadow-card border border-gray-100 p-5 space-y-3.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🩺</span>
+              <div>
+                <h3 className="text-xs font-black uppercase tracking-wider text-gray-900">
+                  Medical Standards & Safety Guidance
+                </h3>
+                <p className="text-[10px] text-gray-400 font-medium">
+                  Pharmacopeial dosage, contraindications & red flags
+                </p>
+              </div>
+            </div>
+            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+              Clinical Reference
+            </span>
+          </div>
+
+          {/* Drug Class & Standard Dosage Guidance */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className="p-3 rounded-2xl bg-gray-50 border border-gray-200/70">
+              <span className="text-[10px] font-black uppercase tracking-wider text-gray-400 block mb-1">
+                Pharmacological Drug Class
+              </span>
+              <p className="text-xs font-bold text-gray-900 leading-snug">
+                {data.clinical_guidance.clinical_drug_class}
+              </p>
+            </div>
+            <div className="p-3 rounded-2xl bg-gray-50 border border-gray-200/70">
+              <span className="text-[10px] font-black uppercase tracking-wider text-gray-400 block mb-1">
+                Educational Dosage Guideline
+              </span>
+              <p className="text-xs font-bold text-gray-900 leading-snug">
+                {data.clinical_guidance.typical_dosage_instruction}
+              </p>
+            </div>
+          </div>
+
+          {/* Who Should NOT Take It (Contraindications) */}
+          {data.clinical_guidance.contraindications && data.clinical_guidance.contraindications.length > 0 && (
+            <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80">
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="text-base">🚫</span>
+                <h4 className="text-xs font-extrabold text-amber-950 uppercase tracking-wide">
+                  Contraindications (Who Should NOT Take It)
+                </h4>
+              </div>
+              <ul className="space-y-1.5 text-[11px] text-amber-900 font-medium">
+                {data.clinical_guidance.contraindications.map((c, idx) => (
+                  <li key={idx} className="flex items-start gap-1.5">
+                    <span className="text-amber-700 font-bold shrink-0">•</span>
+                    <span>{c}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Emergency Red Flag Symptoms */}
+          {data.clinical_guidance.when_to_see_doctor_urgently && data.clinical_guidance.when_to_see_doctor_urgently.length > 0 && (
+            <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200">
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="text-base">🚨</span>
+                <h4 className="text-xs font-extrabold text-rose-950 uppercase tracking-wide">
+                  Seek Immediate Medical Help If Experiencing:
+                </h4>
+              </div>
+              <ul className="space-y-1.5 text-[11px] text-rose-900 font-medium">
+                {data.clinical_guidance.when_to_see_doctor_urgently.map((rf, idx) => (
+                  <li key={idx} className="flex items-start gap-1.5">
+                    <span className="text-rose-700 font-bold shrink-0">⚠</span>
+                    <span>{rf}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Missed Dose Protocol */}
+          {data.clinical_guidance.missed_dose_advice && (
+            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+                ⏰ Missed Dose Protocol
+              </span>
+              <p className="text-xs text-slate-800 font-medium leading-relaxed">
+                {data.clinical_guidance.missed_dose_advice}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 🔬 Biological Pharmacology & Organ Pathway */}
       {data.pharmacological_profile && (
         <div className="rounded-3xl bg-white shadow-card border border-gray-100 p-5 space-y-3.5">
           <div className="flex items-center justify-between">
@@ -162,7 +308,7 @@ export default function MedicineInteractionCard({ data, onReset }: MedicineInter
         </div>
       )}
 
-      {/* 🧪 Inactive Excipients & Hidden Chemical Additives (NEW) */}
+      {/* 🧪 Inactive Excipients & Hidden Chemical Additives */}
       {excipients.length > 0 && (
         <div className="rounded-3xl bg-white shadow-card border border-gray-100 p-5 space-y-3">
           <div className="flex items-center justify-between">

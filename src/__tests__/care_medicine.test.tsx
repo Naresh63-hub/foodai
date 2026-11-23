@@ -110,6 +110,25 @@ const mockMedicineResult: MedicineAnalysisResult = {
       concern: 'Banned in EU food applications due to potential DNA genotoxicity accumulation concerns; permitted in medicines.',
     },
   ],
+  clinical_guidance: {
+    why_used: 'First-line clinical therapy for acute pyrexia (fever) and mild-to-moderate somatic pain.',
+    symptoms_treated: [
+      'Elevated body temperature / Chills',
+      'Throbbing tension or sinus headache',
+      'Viral influenza & dengue body aches',
+    ],
+    clinical_drug_class: 'Non-Opioid Analgesic & Anilide Antipyretic',
+    typical_dosage_instruction: 'Adults: 500mg to 650mg every 4 to 6 hours as needed. Never exceed 4,000mg in 24 hours.',
+    contraindications: [
+      'Severe active hepatic impairment or acute liver failure',
+      'Chronic alcoholism (>3 drinks daily increases toxic metabolite risk)',
+    ],
+    when_to_see_doctor_urgently: [
+      'Fever persisting above 103°F (>39.4°C) for more than 3 consecutive days',
+      'Yellowing of skin or whites of eyes (jaundice)',
+    ],
+    missed_dose_advice: 'Take as soon as remembered if symptoms persist. Do not take a double dose.',
+  },
   alcohol_contraindicated: true,
   generic_salt_name: 'Jan Aushadhi Paracetamol 650mg',
   common_side_effects: ['Nausea', 'Allergic rash', 'Upper right abdominal pain (overdose)'],
@@ -179,6 +198,18 @@ describe('Medicine & Interactions Component', () => {
     expect(screen.getByText(/Inactive Excipients & Additives/i)).toBeInTheDocument()
     expect(screen.getByText('Titanium Dioxide (E171)')).toBeInTheDocument()
     expect(screen.getByText('Microcrystalline Cellulose')).toBeInTheDocument()
+
+    // Test why used, symptoms treated & clinical guidance
+    expect(screen.getByText(/Why This Medicine Is Used & Symptoms/i)).toBeInTheDocument()
+    expect(screen.getByText(/First-line clinical therapy for acute pyrexia/i)).toBeInTheDocument()
+    expect(screen.getByText('Elevated body temperature / Chills')).toBeInTheDocument()
+    expect(screen.getByText('Viral influenza & dengue body aches')).toBeInTheDocument()
+    expect(screen.getByText(/Medical Standards & Safety Guidance/i)).toBeInTheDocument()
+    expect(screen.getByText('Non-Opioid Analgesic & Anilide Antipyretic')).toBeInTheDocument()
+    expect(screen.getByText(/Adults: 500mg to 650mg every 4 to 6 hours/i)).toBeInTheDocument()
+    expect(screen.getByText(/Severe active hepatic impairment/i)).toBeInTheDocument()
+    expect(screen.getByText(/Fever persisting above 103°F/i)).toBeInTheDocument()
+    expect(screen.getByText(/Take as soon as remembered if symptoms persist/i)).toBeInTheDocument()
 
     const checkAnotherBtn = screen.getByText('← Scan Another Medication')
     fireEvent.click(checkAnotherBtn)

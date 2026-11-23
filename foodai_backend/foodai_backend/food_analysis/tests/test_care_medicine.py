@@ -145,3 +145,23 @@ class CareAndMedicineAPITests(TestCase):
         self.assertIn("concern", excipient)
         self.assertIn("key_safety_warning", data)
         self.assertIn("disclaimer", data)
+
+    def test_medicine_clinical_guidance_and_symptoms(self):
+        """Tests that medicine evaluator returns why used, symptoms treated, clinical drug class, contraindications, and red flags."""
+        payload = {
+            "barcode": "8901043003001",  # Pan 40
+        }
+        res = self.client.post("/api/medicine/analyze/", payload, format="json")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        data = res.json()
+
+        self.assertIn("clinical_guidance", data)
+        guidance = data["clinical_guidance"]
+        self.assertIn("why_used", guidance)
+        self.assertIn("symptoms_treated", guidance)
+        self.assertGreaterEqual(len(guidance["symptoms_treated"]), 3)
+        self.assertIn("clinical_drug_class", guidance)
+        self.assertIn("typical_dosage_instruction", guidance)
+        self.assertIn("contraindications", guidance)
+        self.assertIn("when_to_see_doctor_urgently", guidance)
+        self.assertIn("missed_dose_advice", guidance)

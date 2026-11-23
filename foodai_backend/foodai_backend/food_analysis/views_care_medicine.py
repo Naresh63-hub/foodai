@@ -673,6 +673,249 @@ MEDICINE_EXCIPIENTS_DATABASE = {
     ],
 }
 
+MEDICINE_CLINICAL_GUIDANCE = {
+    "dolo": {
+        "why_used": "First-line clinical therapy for acute pyrexia (fever) and mild-to-moderate somatic pain (headaches, muscular strains, viral body aches, toothaches, post-vaccination discomfort).",
+        "symptoms_treated": [
+            "Elevated body temperature / Chills",
+            "Throbbing tension or sinus headache",
+            "Viral influenza & dengue body aches",
+            "Toothache & post-extraction discomfort",
+            "Musculoskeletal & joint soreness",
+        ],
+        "clinical_drug_class": "Non-Opioid Analgesic & Anilide Antipyretic",
+        "typical_dosage_instruction": "Adults: 500mg to 650mg every 4 to 6 hours as needed. Never exceed 4,000mg (maximum 6 tablets of 650mg) in 24 hours.",
+        "contraindications": [
+            "Severe active hepatic impairment or acute liver failure",
+            "Chronic alcoholism (>3 drinks daily increases toxic metabolite risk)",
+            "Known hypersensitivity to paracetamol / acetaminophen",
+        ],
+        "when_to_see_doctor_urgently": [
+            "Fever persisting above 103°F (>39.4°C) for more than 3 consecutive days",
+            "Yellowing of skin or whites of eyes (jaundice)",
+            "Pain in the upper right quadrant of the abdomen",
+            "Unexplained dark tea-colored urine or persistent vomiting",
+        ],
+        "missed_dose_advice": "Take as soon as remembered if symptoms persist. Do not take a double dose to make up for a missed tablet. Maintain a 4-hour minimum gap between doses.",
+    },
+    "paracetamol": {
+        "why_used": "First-line clinical therapy for acute pyrexia (fever) and mild-to-moderate somatic pain (headaches, muscular strains, viral body aches, toothaches, post-vaccination discomfort).",
+        "symptoms_treated": [
+            "Elevated body temperature / Chills",
+            "Throbbing tension or sinus headache",
+            "Viral influenza & dengue body aches",
+            "Toothache & post-extraction discomfort",
+            "Musculoskeletal & joint soreness",
+        ],
+        "clinical_drug_class": "Non-Opioid Analgesic & Anilide Antipyretic",
+        "typical_dosage_instruction": "Adults: 500mg to 650mg every 4 to 6 hours as needed. Never exceed 4,000mg in 24 hours.",
+        "contraindications": [
+            "Severe active hepatic impairment or acute liver failure",
+            "Chronic alcoholism (>3 drinks daily increases toxic metabolite risk)",
+            "Known hypersensitivity to paracetamol / acetaminophen",
+        ],
+        "when_to_see_doctor_urgently": [
+            "Fever persisting above 103°F (>39.4°C) for more than 3 consecutive days",
+            "Yellowing of skin or whites of eyes (jaundice)",
+            "Pain in the upper right quadrant of the abdomen",
+            "Unexplained dark tea-colored urine or persistent vomiting",
+        ],
+        "missed_dose_advice": "Take as soon as remembered if symptoms persist. Do not take a double dose to make up for a missed tablet. Maintain a 4-hour minimum gap between doses.",
+    },
+    "pan": {
+        "why_used": "Suppression of gastric acid secretion in gastroesophageal reflux disease (GERD), healing erosive esophagitis, duodenal/gastric ulcers, and gastroprotection during long-term NSAID therapy.",
+        "symptoms_treated": [
+            "Heartburn (burning retrosternal chest pain)",
+            "Acid regurgitation & sour fluid rising to mouth",
+            "Epigastric stomach burning or discomfort",
+            "Nausea from acid irritation & dyspepsia",
+            "Painful or difficult swallowing from acid reflux",
+        ],
+        "clinical_drug_class": "Substituted Benzimidazole Proton Pump Inhibitor (PPI)",
+        "typical_dosage_instruction": "Adults: 40mg once daily in the morning, swallowed whole 30 to 45 minutes before the first meal of the day.",
+        "contraindications": [
+            "Known hypersensitivity to pantoprazole or other substituted benzimidazoles (omeprazole, esomeprazole)",
+            "Co-administration with rilpivirine-containing HIV medications",
+            "Severe hypomagnesemia without clinical monitoring",
+        ],
+        "when_to_see_doctor_urgently": [
+            "Difficulty or pain when swallowing solid food (dysphagia)",
+            "Vomiting blood or coffee-ground material",
+            "Black, tarry, or bloody stools (melena)",
+            "Severe persistent watery diarrhea (risk of Clostridium difficile infection)",
+        ],
+        "missed_dose_advice": "Take as soon as remembered before your next meal. If it is already later in the day, skip the missed dose and resume normal schedule next morning. Never double up doses.",
+    },
+    "pantoprazole": {
+        "why_used": "Suppression of gastric acid secretion in gastroesophageal reflux disease (GERD), healing erosive esophagitis, duodenal/gastric ulcers, and gastroprotection during long-term NSAID therapy.",
+        "symptoms_treated": [
+            "Heartburn (burning retrosternal chest pain)",
+            "Acid regurgitation & sour fluid rising to mouth",
+            "Epigastric stomach burning or discomfort",
+            "Nausea from acid irritation & dyspepsia",
+            "Painful or difficult swallowing from acid reflux",
+        ],
+        "clinical_drug_class": "Substituted Benzimidazole Proton Pump Inhibitor (PPI)",
+        "typical_dosage_instruction": "Adults: 40mg once daily in the morning, swallowed whole 30 to 45 minutes before the first meal of the day.",
+        "contraindications": [
+            "Known hypersensitivity to pantoprazole or other substituted benzimidazoles (omeprazole, esomeprazole)",
+            "Co-administration with rilpivirine-containing HIV medications",
+            "Severe hypomagnesemia without clinical monitoring",
+        ],
+        "when_to_see_doctor_urgently": [
+            "Difficulty or pain when swallowing solid food (dysphagia)",
+            "Vomiting blood or coffee-ground material",
+            "Black, tarry, or bloody stools (melena)",
+            "Severe persistent watery diarrhea (risk of Clostridium difficile infection)",
+        ],
+        "missed_dose_advice": "Take as soon as remembered before your next meal. If it is already later in the day, skip the missed dose and resume normal schedule next morning. Never double up doses.",
+    },
+    "cetirizine": {
+        "why_used": "Relief of allergic symptoms associated with perennial & seasonal allergic rhinitis (hay fever), allergic conjunctivitis, and chronic idiopathic urticaria (hives).",
+        "symptoms_treated": [
+            "Continuous sneezing bouts",
+            "Rhinorrhea (profuse watery runny nose)",
+            "Nasal congestion & post-nasal drip",
+            "Red, itchy, watery swollen eyes",
+            "Urticarial wheals, severe skin itching (pruritus)",
+        ],
+        "clinical_drug_class": "Second-Generation Piperazine Peripheral H1-Antihistamine",
+        "typical_dosage_instruction": "Adults & adolescents >=12 years: 10mg once daily, preferably in the evening due to mild sedative potential.",
+        "contraindications": [
+            "Severe end-stage renal disease (CrCl < 10 mL/min) without dose adjustment",
+            "Hypersensitivity to cetirizine, hydroxyzine, or piperazine derivatives",
+            "Infants under 6 months of age",
+        ],
+        "when_to_see_doctor_urgently": [
+            "Swelling of the lips, tongue, face, or throat (angioedema)",
+            "Sudden wheezing, chest tightness, or respiratory distress (anaphylaxis)",
+            "Severe dizziness, palpitations, or fainting",
+            "Persistent urinary retention or difficulty passing urine",
+        ],
+        "missed_dose_advice": "Take as soon as remembered. If it is almost time for the next day's dose, skip the missed tablet and resume evening dosing. Do not take two tablets at once.",
+    },
+    "cetcip": {
+        "why_used": "Relief of allergic symptoms associated with perennial & seasonal allergic rhinitis (hay fever), allergic conjunctivitis, and chronic idiopathic urticaria (hives).",
+        "symptoms_treated": [
+            "Continuous sneezing bouts",
+            "Rhinorrhea (profuse watery runny nose)",
+            "Nasal congestion & post-nasal drip",
+            "Red, itchy, watery swollen eyes",
+            "Urticarial wheals, severe skin itching (pruritus)",
+        ],
+        "clinical_drug_class": "Second-Generation Piperazine Peripheral H1-Antihistamine",
+        "typical_dosage_instruction": "Adults & adolescents >=12 years: 10mg once daily, preferably in the evening due to mild sedative potential.",
+        "contraindications": [
+            "Severe end-stage renal disease (CrCl < 10 mL/min) without dose adjustment",
+            "Hypersensitivity to cetirizine, hydroxyzine, or piperazine derivatives",
+            "Infants under 6 months of age",
+        ],
+        "when_to_see_doctor_urgently": [
+            "Swelling of the lips, tongue, face, or throat (angioedema)",
+            "Sudden wheezing, chest tightness, or respiratory distress (anaphylaxis)",
+            "Severe dizziness, palpitations, or fainting",
+            "Persistent urinary retention or difficulty passing urine",
+        ],
+        "missed_dose_advice": "Take as soon as remembered. If it is almost time for the next day's dose, skip the missed tablet and resume evening dosing. Do not take two tablets at once.",
+    },
+    "amoxicillin": {
+        "why_used": "Eradication of susceptible beta-lactamase producing bacterial pathogens in acute bacterial sinusitis, community-acquired pneumonia, otitis media, skin/soft tissue infections, and urinary tract infections.",
+        "symptoms_treated": [
+            "Productive cough with purulent yellow/green sputum",
+            "Severe facial sinus pressure, throbbing headache, and congestion",
+            "Intense ear pain and middle-ear fluid inflammation",
+            "Painful or burning urination (dysuria) with urinary urgency",
+            "Red, hot, swollen skin cellulitis or infected wounds",
+        ],
+        "clinical_drug_class": "Broad-Spectrum Aminopenicillin + Beta-Lactamase Inhibitor Combination",
+        "typical_dosage_instruction": "Adults: 625mg (500/125) twice daily or 375mg three times daily, taken at the start of a meal for 5 to 7 days.",
+        "contraindications": [
+            "Documented history of penicillin, cephalosporin, or beta-lactam anaphylactic hypersensitivity",
+            "Prior history of amoxicillin-clavulanate-associated cholestatic jaundice or hepatic dysfunction",
+            "Infectious mononucleosis (causes widespread erythematous rash)",
+        ],
+        "when_to_see_doctor_urgently": [
+            "Sudden hives, facial swelling, or breathing difficulty (anaphylaxis)",
+            "Severe watery or bloody diarrhea with abdominal cramps",
+            "Widespread blistering, peeling skin rash or mouth sores (Stevens-Johnson syndrome)",
+            "Yellowing of skin/eyes or dark brown tea-colored urine (cholestatic jaundice)",
+        ],
+        "missed_dose_advice": "Take the missed dose as soon as remembered with food. If close to the next scheduled dose, skip it and continue your regular interval. Finish the entire prescribed course to prevent bacterial resistance.",
+    },
+    "augmentin": {
+        "why_used": "Eradication of susceptible beta-lactamase producing bacterial pathogens in acute bacterial sinusitis, community-acquired pneumonia, otitis media, skin/soft tissue infections, and urinary tract infections.",
+        "symptoms_treated": [
+            "Productive cough with purulent yellow/green sputum",
+            "Severe facial sinus pressure, throbbing headache, and congestion",
+            "Intense ear pain and middle-ear fluid inflammation",
+            "Painful or burning urination (dysuria) with urinary urgency",
+            "Red, hot, swollen skin cellulitis or infected wounds",
+        ],
+        "clinical_drug_class": "Broad-Spectrum Aminopenicillin + Beta-Lactamase Inhibitor Combination",
+        "typical_dosage_instruction": "Adults: 625mg (500/125) twice daily or 375mg three times daily, taken at the start of a meal for 5 to 7 days.",
+        "contraindications": [
+            "Documented history of penicillin, cephalosporin, or beta-lactam anaphylactic hypersensitivity",
+            "Prior history of amoxicillin-clavulanate-associated cholestatic jaundice or hepatic dysfunction",
+            "Infectious mononucleosis (causes widespread erythematous rash)",
+        ],
+        "when_to_see_doctor_urgently": [
+            "Sudden hives, facial swelling, or breathing difficulty (anaphylaxis)",
+            "Severe watery or bloody diarrhea with abdominal cramps",
+            "Widespread blistering, peeling skin rash or mouth sores (Stevens-Johnson syndrome)",
+            "Yellowing of skin/eyes or dark brown tea-colored urine (cholestatic jaundice)",
+        ],
+        "missed_dose_advice": "Take the missed dose as soon as remembered with food. If close to the next scheduled dose, skip it and continue your regular interval. Finish the entire prescribed course to prevent bacterial resistance.",
+    },
+    "atorvastatin": {
+        "why_used": "Primary and secondary prevention of atherosclerotic cardiovascular events (heart attacks, angina, stroke) and reduction of elevated total cholesterol, LDL-C, and triglycerides in patients with hypercholesterolemia.",
+        "symptoms_treated": [
+            "Elevated circulating serum LDL-C ('bad cholesterol')",
+            "Elevated blood triglyceride levels",
+            "Atherosclerotic coronary artery plaque progression",
+            "Elevated vascular inflammatory marker high-sensitivity CRP (hs-CRP)",
+            "Cardiovascular risk reduction in diabetic and hypertensive patients",
+        ],
+        "clinical_drug_class": "HMG-CoA Reductase Inhibitor (Second-Generation Lipophilic Statin)",
+        "typical_dosage_instruction": "Adults: 10mg to 40mg (up to 80mg in high-risk post-MI) taken once daily in the evening, with or without food.",
+        "contraindications": [
+            "Active liver disease or unexplained persistent elevations of serum transaminases (ALT/AST)",
+            "Pregnancy (Category X - potential fetal harm) and breastfeeding women",
+            "Concomitant therapy with strong CYP3A4 inhibitors (clarithromycin, itraconazole, protease inhibitors)",
+        ],
+        "when_to_see_doctor_urgently": [
+            "Unexplained, persistent muscle tenderness, weakness, or cramping (myopathy)",
+            "Muscle aches accompanied by fever and dark tea-colored or cola-colored urine (rhabdomyolysis)",
+            "Extreme fatigue, loss of appetite, right upper abdominal pain, or jaundice",
+            "Sudden chest tightness or shortness of breath",
+        ],
+        "missed_dose_advice": "Take as soon as remembered unless more than 12 hours have passed since your scheduled dose. If more than 12 hours late, skip the missed dose and take your next dose at normal time. Never take two doses together.",
+    },
+    "atorva": {
+        "why_used": "Primary and secondary prevention of atherosclerotic cardiovascular events (heart attacks, angina, stroke) and reduction of elevated total cholesterol, LDL-C, and triglycerides in patients with hypercholesterolemia.",
+        "symptoms_treated": [
+            "Elevated circulating serum LDL-C ('bad cholesterol')",
+            "Elevated blood triglyceride levels",
+            "Atherosclerotic coronary artery plaque progression",
+            "Elevated vascular inflammatory marker high-sensitivity CRP (hs-CRP)",
+            "Cardiovascular risk reduction in diabetic and hypertensive patients",
+        ],
+        "clinical_drug_class": "HMG-CoA Reductase Inhibitor (Second-Generation Lipophilic Statin)",
+        "typical_dosage_instruction": "Adults: 10mg to 40mg (up to 80mg in high-risk post-MI) taken once daily in the evening, with or without food.",
+        "contraindications": [
+            "Active liver disease or unexplained persistent elevations of serum transaminases (ALT/AST)",
+            "Pregnancy (Category X - potential fetal harm) and breastfeeding women",
+            "Concomitant therapy with strong CYP3A4 inhibitors (clarithromycin, itraconazole, protease inhibitors)",
+        ],
+        "when_to_see_doctor_urgently": [
+            "Unexplained, persistent muscle tenderness, weakness, or cramping (myopathy)",
+            "Muscle aches accompanied by fever and dark tea-colored or cola-colored urine (rhabdomyolysis)",
+            "Extreme fatigue, loss of appetite, right upper abdominal pain, or jaundice",
+            "Sudden chest tightness or shortness of breath",
+        ],
+        "missed_dose_advice": "Take as soon as remembered unless more than 12 hours have passed since your scheduled dose. If more than 12 hours late, skip the missed dose and take your next dose at normal time. Never take two doses together.",
+    },
+}
+
 
 def evaluate_medicine_fallback(query: str, recent_food: str = "") -> dict:
     """Clinical rule-based pharmaceutical evaluator with food-drug interaction check."""
@@ -749,11 +992,42 @@ def evaluate_medicine_fallback(query: str, recent_food: str = "") -> dict:
             {"name": "Titanium Dioxide (E171)", "category": "Film Coating Pigment", "concern": "Provides moisture barrier and white opacity."},
         ]
 
+    # Fetch clinical guidance (indications, symptoms, dosage, contraindications, red flags)
+    clinical_guidance = None
+    for k, cg in MEDICINE_CLINICAL_GUIDANCE.items():
+        if k in q or k in matched_key:
+            clinical_guidance = cg
+            break
+
+    if not clinical_guidance:
+        clinical_guidance = {
+            "why_used": f"Clinically prescribed for therapeutic treatment and symptom relief in {match.get('therapeutic_category', 'the designated medical indication')}.",
+            "symptoms_treated": [
+                "Primary symptomatic condition targeted by active salt",
+                "Secondary physical discomfort & localized inflammation",
+                "Clinical manifestations evaluated by prescribing physician",
+            ],
+            "clinical_drug_class": match.get("therapeutic_category", "Prescription Pharmaceutical Compound"),
+            "typical_dosage_instruction": "Take strictly according to prescription instructions. Do not alter dose or frequency without physician consultation.",
+            "contraindications": [
+                "Known hypersensitivity or allergic reaction to this active compound",
+                "Severe unmonitored hepatic or renal impairment",
+                "Consult physician if pregnant, nursing, or planning pregnancy",
+            ],
+            "when_to_see_doctor_urgently": [
+                "Signs of acute allergic reaction (facial swelling, hives, shortness of breath)",
+                "Severe persistent dizziness, palpitations, or collapse",
+                "Worsening clinical symptoms despite adherence to schedule",
+            ],
+            "missed_dose_advice": "Take as soon as remembered unless close to the next scheduled dose. Never take a double dose to compensate.",
+        }
+
     return {
         "medicine_name": query.title() if query else "Prescribed Medicine",
         **match,
         "pharmacological_profile": pharmacological_profile,
         "excipients_and_additives": excipients_list,
+        "clinical_guidance": clinical_guidance,
         "data_source": MEDICINE_BASELINE_SOURCE,
         "disclaimer": MEDICINE_DISCLAIMER,
     }
@@ -828,6 +1102,15 @@ class MedicineAnalyzeView(APIView):
             '      "interaction": "string explaining biochemical conflict"\n'
             '    }\n'
             '  ],\n'
+            '  "clinical_guidance": {\n'
+            '    "why_used": "string explaining why this medicine is prescribed",\n'
+            '    "symptoms_treated": ["string (symptom 1)", "string (symptom 2)", "string (symptom 3)"],\n'
+            '    "clinical_drug_class": "string (pharmacological classification)",\n'
+            '    "typical_dosage_instruction": "string (educational standard dosage and frequency guidance)",\n'
+            '    "contraindications": ["string (who should not take it)", "string"],\n'
+            '    "when_to_see_doctor_urgently": ["string (red flag emergency symptom 1)", "string"],\n'
+            '    "missed_dose_advice": "string"\n'
+            '  },\n'
             '  "alcohol_contraindicated": boolean,\n'
             '  "generic_salt_name": "string (Jan Aushadhi affordable salt name)",\n'
             '  "common_side_effects": ["string", "string"],\n'
@@ -853,6 +1136,13 @@ class MedicineAnalyzeView(APIView):
                 clean_json_str = re.sub(r"^```\s*", "", clean_json_str, flags=re.MULTILINE)
                 clean_json_str = re.sub(r"```$", "", clean_json_str.strip())
                 parsed = json.loads(clean_json_str)
+                fallback_data = evaluate_medicine_fallback(combined, recent_food)
+                if not parsed.get("clinical_guidance"):
+                    parsed["clinical_guidance"] = fallback_data.get("clinical_guidance")
+                if not parsed.get("pharmacological_profile"):
+                    parsed["pharmacological_profile"] = fallback_data.get("pharmacological_profile")
+                if not parsed.get("excipients_and_additives"):
+                    parsed["excipients_and_additives"] = fallback_data.get("excipients_and_additives")
                 parsed["data_source"] = GEMINI_VISION_SOURCE if image_base64 else GEMINI_TEXT_SOURCE
                 parsed["disclaimer"] = MEDICINE_DISCLAIMER
                 return Response(parsed)

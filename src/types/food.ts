@@ -314,6 +314,16 @@ export interface MedicineExcipient {
   concern: string
 }
 
+export interface MedicineClinicalGuidance {
+  why_used: string
+  symptoms_treated: string[]
+  clinical_drug_class: string
+  typical_dosage_instruction: string
+  contraindications: string[]
+  when_to_see_doctor_urgently: string[]
+  missed_dose_advice: string
+}
+
 export interface MedicineAnalysisResult {
   medicine_name: string
   active_salt: string
@@ -324,6 +334,7 @@ export interface MedicineAnalysisResult {
   food_drug_interactions: FoodDrugInteraction[]
   pharmacological_profile?: MedicinePharmaProfile
   excipients_and_additives?: MedicineExcipient[]
+  clinical_guidance?: MedicineClinicalGuidance
   alcohol_contraindicated: boolean
   generic_salt_name: string
   common_side_effects: string[]
