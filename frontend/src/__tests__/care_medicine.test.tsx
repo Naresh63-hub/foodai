@@ -272,6 +272,9 @@ describe('Scan Page Category Switcher', () => {
     fireEvent.click(medBtn)
     expect(screen.getByText('Medicine & Interactions')).toBeInTheDocument()
 
+    // Clarity banner confirming medical strips have no barcode
+    expect(screen.getByText(/No Barcode on Your Medical Strip\?/i)).toBeInTheDocument()
+
     // Strip Photo OCR sub-tab in Medicine mode
     expect(screen.getByText(/Scan Tablet Strip or Syrup Packaging/i)).toBeInTheDocument()
 
@@ -279,11 +282,15 @@ describe('Scan Page Category Switcher', () => {
     const medBarcodeBtn = screen.getByRole('button', { name: /Barcode/i })
     fireEvent.click(medBarcodeBtn)
     expect(screen.getByText(/Enter Medicine Barcode Number/i)).toBeInTheDocument()
+    expect(screen.getByText(/Medical foil strips do not have barcodes/i)).toBeInTheDocument()
 
-    // Switch to Search / Salt sub-tab in Medicine mode
-    const medSearchBtn = screen.getByRole('button', { name: /Search \/ Salt/i })
+    // Switch to Tablet Name / Search / Salt sub-tab in Medicine mode
+    const medSearchBtn = screen.getByRole('button', { name: /Tablet Name|Search \/ Salt/i })
     fireEvent.click(medSearchBtn)
     expect(screen.getByText('Check Food Conflicts & Meal Timing')).toBeInTheDocument()
-    expect(screen.getByText(/Dolo 650/i)).toBeInTheDocument()
+    expect(screen.getByText(/⚡ 1-Tap Tablets from Strip:/i)).toBeInTheDocument()
+    expect(screen.getAllByText(/Dolo 650/i)[0]).toBeInTheDocument()
+    expect(screen.getByText('+ Azithral 500')).toBeInTheDocument()
+    expect(screen.getByText('+ Combiflam')).toBeInTheDocument()
   })
 })

@@ -59,16 +59,46 @@ const MEDICINE_PRESETS = [
     desc: 'Pantoprazole 40mg • Acidity & GERD',
   },
   {
+    name: 'Augmentin 625 Duo',
+    food: 'Milk, high-calcium dairy',
+    icon: '🦠',
+    desc: 'Amoxicillin + Clavulanate • Bacterial Infections',
+  },
+  {
     name: 'Cetirizine 10mg',
     food: 'Alcohol, sedative beverages',
     icon: '🌿',
-    desc: 'Cetirizine HCl • Allergy & Cold',
+    desc: 'Cetirizine HCl • Allergy, Sneezing & Cold',
   },
   {
-    name: 'Amoxicillin 500mg',
-    food: 'Milk, Curd, Dairy products',
-    icon: '🦠',
-    desc: 'Antibiotic • Bacterial Infection',
+    name: 'Azithral 500 (Azithromycin)',
+    food: 'Antacids, alcohol',
+    icon: '💊',
+    desc: 'Azithromycin 500mg • Chest & Throat Infections',
+  },
+  {
+    name: 'Combiflam',
+    food: 'Alcohol, empty stomach',
+    icon: '⚡',
+    desc: 'Ibuprofen + Paracetamol • Pain & Inflammation',
+  },
+  {
+    name: 'Telma 40 (Telmisartan)',
+    food: 'Potassium salt substitutes, alcohol',
+    icon: '🫀',
+    desc: 'Telmisartan 40mg • Blood Pressure & Heart',
+  },
+  {
+    name: 'Metformin 500mg',
+    food: 'Alcohol, skipped meals',
+    icon: '🩺',
+    desc: 'Metformin HCl • Sugar & Insulin Control',
+  },
+  {
+    name: 'Cheston Cold',
+    food: 'Caffeine, energy drinks, alcohol',
+    icon: '❄️',
+    desc: 'Cold & Decongestant Triple-Action Tablet',
   },
   {
     name: 'Atorvastatin 20mg',
@@ -838,12 +868,20 @@ export default function Scan() {
 
         if (currentMode === 'medicine') {
           try {
-            const ocrRes = await scanOCR(file)
-            const extractedText = ocrRes?.text || ''
-            if (extractedText.trim()) {
-              setMedicineName(extractedText)
+            const base64Data = canvas.toDataURL('image/jpeg', 0.85)
+            let extractedText = ''
+            try {
+              const ocrRes = await scanOCR(file)
+              extractedText = ocrRes?.text || ''
+            } catch {
+              // Ignore OCR failure; multimodal vision handles image_base64 directly
+            }
+
+            if (extractedText.trim() || base64Data) {
+              if (extractedText.trim()) setMedicineName(extractedText)
               const res = await analyzeMedicine({
-                medicine_name: extractedText,
+                medicine_name: extractedText.trim() || undefined,
+                image_base64: base64Data || undefined,
                 recent_food: recentFoodQuery,
               })
               stopCamera()
@@ -954,12 +992,29 @@ export default function Scan() {
 
     if (currentMode === 'medicine') {
       try {
-        const ocrRes = await scanOCR(file)
-        const extractedText = ocrRes?.text || ''
-        if (extractedText.trim()) {
-          setMedicineName(extractedText)
+        let base64Data = ''
+        try {
+          const reader = new FileReader()
+          base64Data = await new Promise<string>((resolve) => {
+            reader.onload = () => resolve(reader.result as string)
+            reader.onerror = () => resolve('')
+            reader.readAsDataURL(file)
+          })
+        } catch {}
+
+        let extractedText = ''
+        try {
+          const ocrRes = await scanOCR(file)
+          extractedText = ocrRes?.text || ''
+        } catch {
+          // Ignore OCR failure; multimodal vision handles image_base64 directly
+        }
+
+        if (extractedText.trim() || base64Data) {
+          if (extractedText.trim()) setMedicineName(extractedText)
           const res = await analyzeMedicine({
-            medicine_name: extractedText,
+            medicine_name: extractedText.trim() || file.name.replace(/\.[^/.]+$/, ''),
+            image_base64: base64Data || undefined,
             recent_food: recentFoodQuery,
           })
           playScanSound()
@@ -2046,7 +2101,20 @@ export default function Scan() {
               <MedicineInteractionCard data={medicineResult} onReset={() => setMedicineResult(null)} />
             ) : (
               <>
-                {/* Sub-tabs for Medicine: Strip Photo (OCR) | Barcode | Search / Salt */}
+                {/* Medicine Strip vs Barcode Clarity Banner */}
+                <div className="rounded-2xl bg-indigo-50/90 border border-indigo-200/80 p-3.5 flex items-start gap-3 shadow-xs">
+                  <span className="text-xl shrink-0 mt-0.5">💡</span>
+                  <div className="text-xs text-indigo-950">
+                    <p className="font-extrabold text-[12px] text-indigo-900 mb-0.5">
+                      No Barcode on Your Medical Strip?
+                    </p>
+                    <p className="text-indigo-800/90 leading-relaxed text-[11px]">
+                      Medical blister strips only have the <strong>tablet name</strong> printed on the foil (barcodes are only on outer boxes). Simply <strong>type the tablet name</strong> under <strong>📝 Tablet Name</strong> or <strong>snap a photo of the printed strip</strong> under <strong>📷 Strip Photo</strong> — no barcode needed!
+                    </p>
+                  </div>
+                </div>
+
+                {/* Sub-tabs for Medicine: Strip Photo (OCR) | Search / Salt (Tablet Name) | Box Barcode */}
                 <div className="flex rounded-2xl bg-gray-100 p-1 shadow-xs">
                   <button
                     type="button"
@@ -2061,17 +2129,6 @@ export default function Scan() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setMedicineTab('barcode')}
-                    className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                      medicineTab === 'barcode'
-                        ? 'bg-white text-indigo-800 shadow-sm font-black'
-                        : 'text-gray-500 hover:text-gray-900'
-                    }`}
-                  >
-                    <span>📊 Barcode</span>
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => setMedicineTab('text')}
                     className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                       medicineTab === 'text'
@@ -2079,7 +2136,18 @@ export default function Scan() {
                         : 'text-gray-500 hover:text-gray-900'
                     }`}
                   >
-                    <span>📝 Search / Salt</span>
+                    <span>📝 Tablet Name / Search / Salt</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMedicineTab('barcode')}
+                    className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      medicineTab === 'barcode'
+                        ? 'bg-white text-indigo-800 shadow-sm font-black'
+                        : 'text-gray-500 hover:text-gray-900'
+                    }`}
+                  >
+                    <span>📦 Box Barcode</span>
                   </button>
                 </div>
 
@@ -2094,7 +2162,7 @@ export default function Scan() {
                         Scan Tablet Strip or Syrup Packaging
                       </h3>
                       <p className="text-[11px] text-gray-500 mb-3 max-w-xs mx-auto">
-                        Hold blister pack, tablet strip, or syrup label in focus under good lighting.
+                        No barcode needed! Hold your tablet strip in focus so the printed brand name and active salt text are clearly visible.
                       </p>
                       <label className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs font-bold hover:bg-indigo-100 transition-all cursor-pointer">
                         <span>📁 Choose Strip Photo</span>
@@ -2107,6 +2175,13 @@ export default function Scan() {
                 {/* Sub-tab 2: Barcode Scan */}
                 {medicineTab === 'barcode' && (
                   <div className="space-y-4">
+                    <div className="rounded-xl bg-amber-50 border border-amber-200 p-2.5 flex items-start gap-2 text-[11px] text-amber-900 font-medium">
+                      <span className="text-sm">📦</span>
+                      <p>
+                        <strong>Outer Box Barcode Only:</strong> Medical foil strips do not have barcodes. Use this scanner only if you have the outer carton box. Otherwise, use <strong>📝 Tablet Name</strong> or <strong>📷 Strip Photo</strong>.
+                      </p>
+                    </div>
+
                     {renderCameraView('single')}
 
                     <form
@@ -2182,9 +2257,39 @@ export default function Scan() {
                           type="text"
                           value={medicineName}
                           onChange={(e) => setMedicineName(e.target.value)}
-                          placeholder="e.g. Dolo 650, Pan 40, Amoxicillin, Cetirizine..."
+                          placeholder="e.g. Dolo 650, Pan 40, Augmentin, Cetirizine, Azithral..."
                           className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
+                        <div className="mt-2.5">
+                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                            ⚡ 1-Tap Tablets from Strip:
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {[
+                              'Dolo 650',
+                              'Pan 40',
+                              'Augmentin 625',
+                              'Cetirizine 10mg',
+                              'Azithral 500',
+                              'Combiflam',
+                              'Telma 40',
+                              'Metformin 500',
+                              'Cheston Cold',
+                            ].map((tabName) => (
+                              <button
+                                key={tabName}
+                                type="button"
+                                onClick={() => {
+                                  setMedicineName(tabName)
+                                  handleMedicineSubmit(undefined, { name: tabName, food: recentFoodQuery })
+                                }}
+                                className="px-2.5 py-1 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/60 text-indigo-800 text-[11px] font-bold transition-all active:scale-95 cursor-pointer shadow-2xs"
+                              >
+                                + {tabName}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
                       </div>
 
                       <div>

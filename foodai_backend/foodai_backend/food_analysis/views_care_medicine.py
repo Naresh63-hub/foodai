@@ -607,6 +607,139 @@ MEDICINE_KNOWLEDGE_BASE = {
         "common_side_effects": ["Muscle soreness (myalgia)", "Joint pain", "Mild digestive disturbance"],
         "key_safety_warning": "Report unexplained muscle pain, tenderness, or dark brown urine immediately to your physician.",
     },
+    "azithral": {
+        "active_salt": "Azithromycin Dihydrate",
+        "strength": "500mg",
+        "therapeutic_category": "Macrolide Antibiotic",
+        "common_uses": "Bacterial respiratory tract infections, acute bronchitis, tonsillitis, sinusitis, and skin infections.",
+        "meal_timing": "Take once daily, 1 hour before meals or 2 hours after meals with water. Can be taken with light food if stomach upset occurs.",
+        "food_drug_interactions": [
+            {
+                "food_or_beverage": "Antacids (Magnesium & Aluminium)",
+                "severity": "Moderate / Space out by 2 hours",
+                "interaction": "Antacids lower peak serum concentration of azithromycin. Space intake at least 2 hours apart.",
+            },
+            {
+                "food_or_beverage": "Alcohol",
+                "severity": "Avoid",
+                "interaction": "Alcohol burdens hepatic enzymes and exacerbates gastrointestinal adverse effects.",
+            },
+        ],
+        "alcohol_contraindicated": True,
+        "generic_salt_name": "Jan Aushadhi Azithromycin 500mg Tablets",
+        "common_side_effects": ["Mild diarrhea / abdominal cramping", "Nausea", "Headache"],
+        "key_safety_warning": "Complete the full 3-day or 5-day prescribed regimen. Do not stop early to prevent superinfection.",
+    },
+    "azithromycin": {
+        "active_salt": "Azithromycin Dihydrate",
+        "strength": "500mg",
+        "therapeutic_category": "Macrolide Antibiotic",
+        "common_uses": "Throat infections, tonsillitis, community-acquired pneumonia, otitis media, and skin infections.",
+        "meal_timing": "Take once daily at the same time each day with plenty of plain water.",
+        "food_drug_interactions": [
+            {
+                "food_or_beverage": "Aluminium/Magnesium Hydroxide Antacids",
+                "severity": "Moderate / 2-hour separation",
+                "interaction": "Reduces peak rate of drug absorption.",
+            },
+        ],
+        "alcohol_contraindicated": True,
+        "generic_salt_name": "Jan Aushadhi Azithromycin 500mg Tablets",
+        "common_side_effects": ["Loose stools", "Nausea", "Stomach cramps"],
+        "key_safety_warning": "Discontinue and consult doctor if persistent watery diarrhea or skin rash occurs.",
+    },
+    "combiflam": {
+        "active_salt": "Ibuprofen (400mg) + Paracetamol (325mg)",
+        "strength": "400mg / 325mg",
+        "therapeutic_category": "NSAID + Anilide Analgesic Combination",
+        "common_uses": "Moderate to severe acute pain, dental ache, joint inflammation, muscular cramps, and post-injury swelling.",
+        "meal_timing": "Strictly take immediately AFTER meals or with milk to shield gastric mucosa from NSAID irritation.",
+        "food_drug_interactions": [
+            {
+                "food_or_beverage": "Alcohol & Alcoholic Drinks",
+                "severity": "Severe / Dangerous",
+                "interaction": "Doubles the risk of acute gastric mucosal hemorrhage and compounds paracetamol hepatotoxicity.",
+            },
+            {
+                "food_or_beverage": "Empty Stomach / Fasting",
+                "severity": "Severe / High Risk",
+                "interaction": "Taking NSAIDs on an empty stomach triggers severe acid erosion, gastritis, and peptic ulcer risk.",
+            },
+        ],
+        "alcohol_contraindicated": True,
+        "generic_salt_name": "Jan Aushadhi Ibuprofen 400mg + Paracetamol 325mg Tablets",
+        "common_side_effects": ["Heartburn / acid dyspepsia", "Nausea", "Gastric heaviness"],
+        "key_safety_warning": "Never take on an empty stomach. Contraindicated in active peptic ulcer disease and bleeding disorders.",
+    },
+    "telma": {
+        "active_salt": "Telmisartan",
+        "strength": "40mg",
+        "therapeutic_category": "Angiotensin II Receptor Blocker (ARB / Antihypertensive)",
+        "common_uses": "Essential hypertension (high blood pressure) management and reduction of cardiovascular morbidity.",
+        "meal_timing": "Take once daily at a consistent time each morning or evening, with or without food.",
+        "food_drug_interactions": [
+            {
+                "food_or_beverage": "Potassium Salt Substitutes & High-Potassium Diet",
+                "severity": "Moderate / Caution",
+                "interaction": "Inhibition of angiotensin II reduces aldosterone, which can cause serum potassium buildup (hyperkalemia).",
+            },
+            {
+                "food_or_beverage": "Alcohol",
+                "severity": "Moderate / Avoid",
+                "interaction": "Alcohol compounds vasodilation, precipitating orthostatic hypotension, dizziness, and fainting.",
+            },
+        ],
+        "alcohol_contraindicated": True,
+        "generic_salt_name": "Jan Aushadhi Telmisartan 40mg Tablets",
+        "common_side_effects": ["Dizziness / lightheadedness on standing", "Sinusitis", "Back pain"],
+        "key_safety_warning": "Strictly contraindicated during pregnancy due to severe fetal renal and cranial toxicity.",
+    },
+    "metformin": {
+        "active_salt": "Metformin Hydrochloride",
+        "strength": "500mg",
+        "therapeutic_category": "Biguanide Oral Antidiabetic",
+        "common_uses": "Type 2 diabetes mellitus glycemic management, insulin sensitization, and PCOS metabolic regulation.",
+        "meal_timing": "Take WITH meals or immediately after meals with a glass of water to minimize gastrointestinal discomfort.",
+        "food_drug_interactions": [
+            {
+                "food_or_beverage": "Alcohol & Binge Drinking",
+                "severity": "Critical / Potentially Fatal",
+                "interaction": "Alcohol impairs lactate clearance in the liver, drastically elevating the risk of life-threatening lactic acidosis.",
+            },
+            {
+                "food_or_beverage": "Prolonged Fasting",
+                "severity": "Moderate / Hypoglycemia Risk",
+                "interaction": "Skipping meals while taking antidiabetics can precipitate hypoglycemia and dizziness.",
+            },
+        ],
+        "alcohol_contraindicated": True,
+        "generic_salt_name": "Jan Aushadhi Metformin 500mg Sustained-Release Tablets",
+        "common_side_effects": ["Mild nausea", "Metallic taste in mouth", "Transient diarrhea (subsides in 1-2 weeks)"],
+        "key_safety_warning": "Contraindicated in severe renal failure (eGFR <30 mL/min). Stop medication before iodinated X-ray contrast dye scans.",
+    },
+    "cheston": {
+        "active_salt": "Cetirizine (5mg) + Paracetamol (325mg) + Phenylephrine HCl (10mg)",
+        "strength": "Cold Combo Formulation",
+        "therapeutic_category": "Multi-Action Cold, Antihistaminic & Decongestant",
+        "common_uses": "Relief of common cold symptoms, sinus headache, blocked nasal passages, watery eyes, and sneezing with fever.",
+        "meal_timing": "Take after meals with a full glass of water. Avoid taking late at night if phenylephrine causes alertness.",
+        "food_drug_interactions": [
+            {
+                "food_or_beverage": "Caffeine & Energy Drinks",
+                "severity": "Moderate / Avoid",
+                "interaction": "Caffeine compounds the vasoconstrictive effect of phenylephrine, precipitating tachycardia and nervousness.",
+            },
+            {
+                "food_or_beverage": "Alcohol",
+                "severity": "Severe / Avoid",
+                "interaction": "Amphifies sedation from cetirizine while increasing paracetamol hepatotoxicity.",
+            },
+        ],
+        "alcohol_contraindicated": True,
+        "generic_salt_name": "Jan Aushadhi Cold Relief Tablets",
+        "common_side_effects": ["Drowsiness", "Dry mouth", "Mild heart palpitation / alertness"],
+        "key_safety_warning": "Avoid in patients with severe uncontrolled high blood pressure or hyperthyroidism.",
+    },
 }
 
 MEDICINE_PHARMA_PROFILES = {
@@ -640,6 +773,42 @@ MEDICINE_PHARMA_PROFILES = {
         "kidneys": "Less than 2% eliminated by kidneys; primarily cleared via biliary and fecal excretion.",
         "stomach": "Take with or without food. High-fat meals do not alter total statin absorption.",
     },
+    "azithral": {
+        "mechanism": "Reversibly binds to the 50S ribosomal subunit of susceptible microorganisms, inhibiting transpeptidation and protein translocation without affecting mammalian DNA.",
+        "liver": "Heavily concentrated in phagocytes and hepatic tissues; biliary excretion is the predominant route of elimination.",
+        "kidneys": "Less than 6% excreted in active form via urine. Safe without dose adjustments in mild-to-moderate renal decline.",
+        "stomach": "Direct gastric motility stimulation may trigger mild cramps. Taking with food cushions gastric mucosa.",
+    },
+    "azithromycin": {
+        "mechanism": "Reversibly binds to 50S bacterial ribosomal subunits, halting transpeptidation and protein synthesis.",
+        "liver": "Concentrated in liver tissues; primarily eliminated via biliary excretion.",
+        "kidneys": "Only ~6% cleared via renal route.",
+        "stomach": "May cause mild nausea; take with food if stomach sensitivity occurs.",
+    },
+    "combiflam": {
+        "mechanism": "Dual peripheral and central COX inhibition: Ibuprofen provides peripheral anti-inflammatory and analgesic effect via COX-1/2 suppression, while Paracetamol modulates central nervous system pain and hypothalamic pyrexia.",
+        "liver": "Both components undergo hepatic metabolism (Ibuprofen via CYP2C9; Paracetamol via glucuronidation/CYP2E1).",
+        "kidneys": "Ibuprofen reduces renal prostaglandin synthesis (caution in dehydrated patients); metabolites cleared renally.",
+        "stomach": "High risk of gastric mucosal irritation and ulceration from Ibuprofen's COX-1 suppression. Must always be taken after meals.",
+    },
+    "telma": {
+        "mechanism": "Selective Angiotensin II Type 1 (AT1) receptor antagonist with high affinity, blocking vasoconstriction and aldosterone-secreting effects of angiotensin II.",
+        "liver": "Metabolized exclusively by conjugation to inactive glucuronide. Not metabolized by cytochrome P450 enzymes.",
+        "kidneys": "Less than 1% excreted renally. Very well tolerated across renal insufficiency without dosage titration.",
+        "stomach": "Virtually non-irritating to stomach lining. High oral bioavailability.",
+    },
+    "metformin": {
+        "mechanism": "Activates AMP-activated protein kinase (AMPK), decreasing hepatic glucose production, lowering intestinal glucose absorption, and improving peripheral insulin sensitivity.",
+        "liver": "Not metabolized by the liver; does not induce or inhibit CYP enzymes. Inhibits gluconeogenesis in hepatocytes.",
+        "kidneys": "Excreted 90% unchanged via active tubular renal clearance within 24 hours. Renal function (eGFR) monitoring is essential.",
+        "stomach": "Commonly causes transient bloating or loose stools due to altered local glucose absorption; taking with food eliminates this.",
+    },
+    "cheston": {
+        "mechanism": "Multi-target: Cetirizine blocks peripheral H1 histamine receptors; Paracetamol reduces pain and fever centrally; Phenylephrine stimulates alpha-1 adrenergic receptors causing vasoconstriction and decongesting nasal mucosa.",
+        "liver": "Paracetamol undergoes hepatic glucuronidation; phenylephrine undergoes gut wall and liver monoamine oxidase metabolism.",
+        "kidneys": "Cetirizine and paracetamol conjugates excreted renally.",
+        "stomach": "Well tolerated when taken with or after food.",
+    },
 }
 
 MEDICINE_EXCIPIENTS_DATABASE = {
@@ -648,6 +817,28 @@ MEDICINE_EXCIPIENTS_DATABASE = {
         {"name": "Sodium Starch Glycolate", "category": "Superdisintegrant", "concern": "Promotes rapid water uptake to break the tablet apart within 3-5 minutes for prompt analgesia."},
         {"name": "Magnesium Stearate", "category": "Tableting Lubricant", "concern": "Vegetable-derived fatty acid salt that prevents powder from sticking to pharmaceutical tablet presses."},
         {"name": "Colloidal Silicon Dioxide", "category": "Glidant", "concern": "Prevents clumping during powder mixing and tablet compression."},
+    ],
+    "azithral": [
+        {"name": "Pregelatinized Starch", "category": "Tablet Binder", "concern": "Modified corn starch ensuring consistent tablet hardness and disintegration."},
+        {"name": "Croscarmellose Sodium", "category": "Internal Superdisintegrant", "concern": "Accelerates dissolution of azithromycin in gastric fluid."},
+        {"name": "Titanium Dioxide (E171)", "category": "Film Coating Opacifier", "concern": "Provides bright white film coat to protect light-sensitive azithromycin dihydrate."},
+    ],
+    "combiflam": [
+        {"name": "Maize Starch", "category": "Disintegrant & Binder", "concern": "Natural grain starch used to bind powder granules safely."},
+        {"name": "Colloidal Anhydrous Silica", "category": "Glidant", "concern": "Improves powder flow in high-speed tableting presses."},
+        {"name": "Purified Talc", "category": "Anti-adherent & Lubricant", "concern": "Purified pharmaceutical-grade talc ensuring smooth tablet ejection."},
+    ],
+    "telma": [
+        {"name": "Sodium Hydroxide & Meglumine", "category": "Alkalizing Solubilizers", "concern": "Creates an alkaline micro-environment essential for telmisartan dissolution at physiological pH."},
+        {"name": "Sorbitol", "category": "Diluent / Bulking Agent", "concern": "Sugar alcohol providing tablet mass; negligible caloric impact."},
+    ],
+    "metformin": [
+        {"name": "Hypromellose (HPMC)", "category": "Sustained-Release Hydrophilic Matrix", "concern": "Forms a hydrophilic gel barrier in the stomach for steady 12-hour sustained drug release."},
+        {"name": "Povidone (PVP K30)", "category": "Binding Agent", "concern": "Water-soluble polymer standard in pharmaceutical tableting."},
+    ],
+    "cheston": [
+        {"name": "Microcrystalline Cellulose", "category": "Tablet Core Binder", "concern": "Inert plant fiber."},
+        {"name": "Sunset Yellow FCF (E110)", "category": "Coloring Agent", "concern": "Pharmaceutical dye used for distinctive tablet color coding."},
     ],
     "pan": [
         {"name": "Methacrylic Acid Copolymer", "category": "Enteric Coating Polymer", "concern": "Crucial acid-resistant shield that prevents gastric stomach acid from destroying pantoprazole, releasing it in the small intestine."},
@@ -913,6 +1104,123 @@ MEDICINE_CLINICAL_GUIDANCE = {
             "Sudden chest tightness or shortness of breath",
         ],
         "missed_dose_advice": "Take as soon as remembered unless more than 12 hours have passed since your scheduled dose. If more than 12 hours late, skip the missed dose and take your next dose at normal time. Never take two doses together.",
+    },
+    "azithral": {
+        "why_used": "Short-course therapeutic treatment of acute upper and lower respiratory tract infections, bacterial pharyngitis/tonsillitis, community-acquired pneumonia, skin infections, and urethritis.",
+        "symptoms_treated": [
+            "Severe throat irritation and pain while swallowing",
+            "Persistent deep chest cough with bronchial congestion",
+            "Middle ear throbbing and inflammation (otitis media)",
+            "Acute paranasal sinus tenderness and purulent discharge",
+        ],
+        "clinical_drug_class": "Second-Generation Macrolide (Azalide Subclass) Antibacterial",
+        "typical_dosage_instruction": "Adults: 500mg once daily for 3 consecutive days (total 1,500mg course) or 500mg on day 1 followed by 250mg once daily on days 2 to 5.",
+        "contraindications": [
+            "Known hypersensitivity to azithromycin, erythromycin, or any macrolide/ketolide antibiotic",
+            "History of cholestatic jaundice or hepatic dysfunction associated with prior azithromycin use",
+            "Congenital or documented acquired QT prolongation or concurrent use with antiarrhythmics",
+        ],
+        "when_to_see_doctor_urgently": [
+            "Sudden heart palpitations, dizziness, or fainting episodes (torsades de pointes / arrhythmia)",
+            "Severe persistent watery diarrhea with abdominal cramping and fever (C. difficile colitis)",
+            "Facial, periorbital, lip, or laryngeal angioedema",
+            "Yellowing of skin or dark urine indicative of cholestatic hepatitis",
+        ],
+        "missed_dose_advice": "Take the missed dose as soon as remembered on that day. If it is already the next day, take that day's scheduled dose. Do not take two doses at the same time. Finish the entire prescribed course.",
+    },
+    "combiflam": {
+        "why_used": "Rapid dual-action symptomatic relief of acute moderate-to-severe inflammatory pain, musculoskeletal trauma, dental toothaches, dysmenorrhea (menstrual cramps), and arthritic flare-ups with fever.",
+        "symptoms_treated": [
+            "Severe dental pain, post-extraction soreness, and jaw inflammation",
+            "Musculoskeletal sprains, tendonitis, and joint stiffness",
+            "Painful menstrual cramps with pelvic aching",
+            "High fever with intense inflammatory headache and muscle aches",
+        ],
+        "clinical_drug_class": "Non-Selective COX Inhibitor (Propionic Acid NSAID) + Central Anilide Analgesic",
+        "typical_dosage_instruction": "Adults: 1 tablet after food every 6 to 8 hours as needed. Never take on an empty stomach. Maximum 3 tablets in 24 hours.",
+        "contraindications": [
+            "Active or history of recurrent peptic ulcer disease, gastric perforation, or gastrointestinal bleeding",
+            "Severe heart failure (NYHA Class IV), severe hepatic failure, or severe renal impairment",
+            "Third trimester of pregnancy (causes premature closure of ductus arteriosus and fetal renal impairment)",
+            "Aspirin or NSAID-induced asthma, urticaria, or acute rhinitis",
+        ],
+        "when_to_see_doctor_urgently": [
+            "Vomiting blood or coffee-ground material, or passing black tarry stools (melena)",
+            "Severe burning upper stomach pain or acute abdominal rigidity",
+            "Sudden shortness of breath, chest tightness, or wheezing",
+            "Swelling in feet, ankles, or rapid unexplained weight gain (fluid retention)",
+        ],
+        "missed_dose_advice": "Take as soon as remembered strictly with food or milk if pain persists. Never take a double dose to make up for a missed tablet.",
+    },
+    "telma": {
+        "why_used": "First-line clinical management of essential arterial hypertension (high blood pressure) to prevent hypertensive target-organ damage and lower cardiovascular death risk.",
+        "symptoms_treated": [
+            "Chronically elevated systolic and diastolic blood pressure readings",
+            "Morning occipital hypertension headaches",
+            "Cardiovascular end-organ stress in patients with diabetic nephropathy",
+        ],
+        "clinical_drug_class": "Non-Peptide Angiotensin II Type 1 (AT1) Receptor Blocker (ARB)",
+        "typical_dosage_instruction": "Adults: 40mg once daily taken at the same time each day (morning or evening), with or without food. Can be titrated to 80mg under physician supervision.",
+        "contraindications": [
+            "Pregnancy (causes fetal oligohydramnios, skull hypoplasia, and intrauterine death) - terminate immediately if pregnancy occurs",
+            "Bilateral renal artery stenosis or renal stenosis in a solitary kidney",
+            "Severe hepatic impairment or biliary obstructive disorders",
+            "Concomitant use with aliskiren in patients with diabetes mellitus",
+        ],
+        "when_to_see_doctor_urgently": [
+            "Extreme dizziness, vertigo, confusion, or syncopal fainting (severe hypotension)",
+            "Severe muscle weakness, tingling, or irregular pulse (signs of hyperkalemia)",
+            "Swelling of the face, lips, tongue, or throat causing difficulty swallowing or breathing",
+            "Marked decrease in urine volume or acute puffiness around eyes and limbs",
+        ],
+        "missed_dose_advice": "Take the missed dose as soon as remembered on that day. If it is already the following morning, skip the missed dose and resume your regular daily schedule. Do not take double the dose on one day.",
+    },
+    "metformin": {
+        "why_used": "First-line oral pharmacotherapy for type 2 diabetes mellitus to enhance insulin sensitivity, suppress excessive hepatic gluconeogenesis, and prevent long-term microvascular complications.",
+        "symptoms_treated": [
+            "Elevated fasting and postprandial blood glucose levels (hyperglycemia)",
+            "Excessive unquenchable thirst (polydipsia)",
+            "Frequent nighttime and daytime urination (polyuria)",
+            "Metabolic insulin resistance and PCOS hyperandrogenism",
+        ],
+        "clinical_drug_class": "Biguanide Antihyperglycemic / Insulin Sensitizer",
+        "typical_dosage_instruction": "Adults: 500mg once or twice daily with or immediately after meals. Gradually titrated in weekly intervals to reduce gastrointestinal side effects.",
+        "contraindications": [
+            "Severe renal failure (eGFR < 30 mL/min/1.73m²) due to severe lactic acidosis accumulation risk",
+            "Acute or chronic metabolic acidosis, including diabetic ketoacidosis",
+            "Severe hypoxia, acute congestive heart failure, or severe sepsis",
+            "Administration of intravascular iodinated radiocontrast agents (withhold 48h before and after procedure)",
+        ],
+        "when_to_see_doctor_urgently": [
+            "Symptoms of lactic acidosis: deep rapid sighing breathing, unexplained severe muscle aches, hypothermia, severe stomach pain, or persistent somnolence",
+            "Signs of severe hypoglycemia (when combined with other agents): tremors, diaphoresis, sudden confusion",
+            "Persistent intractable vomiting causing dehydration",
+        ],
+        "missed_dose_advice": "Take the missed dose with your next scheduled meal. If you remember right before the next dose, skip the missed one. Never take extra tablets to compensate.",
+    },
+    "cheston": {
+        "why_used": "Multi-symptom comprehensive relief for acute viral upper respiratory tract infections, seasonal allergic rhinitis complicated by sinus congestion, and fever with headache.",
+        "symptoms_treated": [
+            "Blocked, stuffy nasal passages and sinus congestion",
+            "Continuous sneezing, rhinorrhea (runny nose), and itching",
+            "Fever with generalized body aches and tension headache",
+            "Watery, burning allergic eyes",
+        ],
+        "clinical_drug_class": "Triple Action: Peripheral H1-Antihistamine + Central Analgesic/Antipyretic + Alpha-1 Adrenergic Decongestant",
+        "typical_dosage_instruction": "Adults: 1 tablet after food twice daily. Avoid taking immediately before sleep if phenylephrine causes alertness.",
+        "contraindications": [
+            "Severe uncontrolled hypertension or coronary artery disease",
+            "Concurrent or recent (within 14 days) monoamine oxidase inhibitor (MAOI) therapy",
+            "Angle-closure glaucoma or severe urinary bladder neck obstruction",
+            "Severe active hepatic impairment",
+        ],
+        "when_to_see_doctor_urgently": [
+            "Sudden severe throbbing headache, palpitations, or racing heart rate (tachycardia)",
+            "Acute difficulty passing urine or inability to urinate (urinary retention)",
+            "Severe dizziness, tremor, or anxiety",
+            "Skin rash, facial swelling, or breathing distress",
+        ],
+        "missed_dose_advice": "Take as soon as remembered after a meal. If it is close to your next dose, skip the missed dose and resume normal timing. Do not take a double dose.",
     },
 }
 
