@@ -42,7 +42,128 @@ SYMPTOM_DISCLAIMER = (
 
 
 # ============================================================================
-# 1. PERSONAL CARE & COSMETICS EVALUATOR (CREAMS, SOAPS, SHAMPOOS, LOTIONS)
+# 1. CURATED BARCODE CATALOGS FOR CARE & MEDICINE
+# ============================================================================
+
+CARE_BARCODE_CATALOG = {
+    "8901030382348": {
+        "product_name": "Dove Cream Beauty Bathing Bar",
+        "product_category": "soap",
+        "ingredients_text": "Sodium Lauroyl Isethionate, Stearic Acid, Lauric Acid, Sodium Palmitate, Aqua, Sodium Isethionate, Sodium Stearate, Cocamidopropyl Betaine, Sodium Palm Kernelate, Glycerin, Parfum, Sodium Chloride, Zinc Oxide, Tetrasodium EDTA, Tetrasodium Etidronate, Alumina, CI 77891",
+    },
+    "4005900108990": {
+        "product_name": "Nivea Soft Light Moisturiser",
+        "product_category": "cream",
+        "ingredients_text": "Aqua, Glycerin, Paraffinum Liquidum, Myristyl Alcohol, Butylene Glycol, Alcohol Denat, Stearic Acid, Myristyl Myristate, Cera Microcristallina, Glyceryl Stearate, Hydrogenated Coco-Glycerides, Simmondsia Chinensis Seed Oil, Tocopheryl Acetate, Lanolin Alcohol, Dimethicone, Sodium Carbomer, Phenoxyethanol, Linalool, Citronellol, Alpha-Isomethyl Ionone, Benzyl Alcohol, Limonene, Benzyl Salicylate, Parfum",
+    },
+    "8901030612148": {
+        "product_name": "Pears Pure & Gentle Soap Bar",
+        "product_category": "soap",
+        "ingredients_text": "Sorbitol, Aqua, Sodium Palmate, Sodium Stearate, Sodium Palm Kernelate, Sodium Rosinate, Propylene Glycol, Sodium Lauryl Sulfate, PEG-4, Alcohol, Glycerin, Parfum, Sodium Chloride, Isopropyl Alcohol, Tocopheryl Acetate, Tetrasodium EDTA, Tetrasodium Etidronate, BHT",
+    },
+    "8901207010415": {
+        "product_name": "Dettol Original Bathing Soap",
+        "product_category": "soap",
+        "ingredients_text": "Sodium Palmate, Sodium Palm Kernelate, Aqua, Talc, Glycerin, Parfum, Sodium Chloride, Chloroxylenol, Tetrasodium EDTA, Tetrasodium Etidronate, CI 11680, CI 12150",
+    },
+    "8901030383727": {
+        "product_name": "Dove Daily Shine Hair Shampoo",
+        "product_category": "shampoo",
+        "ingredients_text": "Water, Sodium Laureth Sulfate, Dimethiconol, Cocamidopropyl Betaine, Sodium Chloride, Perfume, Glycol Distearate, Glycerin, Carbomer, Sodium Hydroxide, Guar Hydroxypropyltrimonium Chloride, Mica, Titanium Dioxide, Disodium EDTA, PEG-45M, DMDM Hydantoin, Methylchloroisothiazolinone, Methylisothiazolinone",
+    },
+}
+
+MEDICINE_BARCODE_CATALOG = {
+    "8901117002014": {
+        "medicine_name": "Dolo 650 Tablet",
+        "active_salt": "Paracetamol (Acetaminophen)",
+        "strength": "650mg",
+        "recent_food": "Tea, Coffee, Alcohol",
+    },
+    "8901043003001": {
+        "medicine_name": "Pan 40 Tablet",
+        "active_salt": "Pantoprazole Sodium",
+        "strength": "40mg",
+        "recent_food": "Breakfast, coffee",
+    },
+    "8901148211028": {
+        "medicine_name": "Augmentin 625 Duo Tablet",
+        "active_salt": "Amoxicillin and Potassium Clavulanate",
+        "strength": "625mg",
+        "recent_food": "Milk, Curd, Dairy",
+    },
+    "8901120014028": {
+        "medicine_name": "Cetcip 10 (Cetirizine)",
+        "active_salt": "Cetirizine Hydrochloride",
+        "strength": "10mg",
+        "recent_food": "Alcohol, sedative drinks",
+    },
+    "8901117180019": {
+        "medicine_name": "Atorva 20 (Atorvastatin)",
+        "active_salt": "Atorvastatin Calcium",
+        "strength": "20mg",
+        "recent_food": "Grapefruit, high-fat feast",
+    },
+}
+
+
+# ============================================================================
+# 2. INCI COSMETIC CHEMICAL DATABASE
+# ============================================================================
+
+INCI_CHEMICAL_DATABASE = {
+    "water": {"name": "Purified Water (Aqua)", "rating": "safe", "function": "Solvent / Skin Hydration Base", "comedogenic": 0, "explanation": "Essential vehicle for delivering hydrophilic actives and maintaining emulsion integrity."},
+    "aqua": {"name": "Purified Water (Aqua)", "rating": "safe", "function": "Solvent / Skin Hydration Base", "comedogenic": 0, "explanation": "Essential vehicle for delivering hydrophilic actives and maintaining emulsion integrity."},
+    "glycerin": {"name": "Glycerin (Glycerol)", "rating": "safe", "function": "Humectant / Moisture Magnet", "comedogenic": 0, "explanation": "Gold-standard biocompatible humectant that draws water into the stratum corneum and strengthens barrier hydration."},
+    "glycerol": {"name": "Glycerin (Glycerol)", "rating": "safe", "function": "Humectant / Moisture Magnet", "comedogenic": 0, "explanation": "Gold-standard biocompatible humectant that draws water into the stratum corneum and strengthens barrier hydration."},
+    "sodium lauroyl isethionate": {"name": "Sodium Lauroyl Isethionate", "rating": "safe", "function": "Gentle Syndet Surfactant", "comedogenic": 0, "explanation": "Ultra-mild synthetic surfactant used in syndet beauty bars; cleanses without disrupting the acidic skin mantle."},
+    "stearic acid": {"name": "Stearic Acid", "rating": "safe", "function": "Emollient / Fatty Acid Thickener", "comedogenic": 2, "explanation": "Natural saturated fatty acid that softens skin and stabilizes emulsions; mild pore clogging in acne-prone skin."},
+    "lauric acid": {"name": "Lauric Acid", "rating": "safe", "function": "Antimicrobial Fatty Acid", "comedogenic": 4, "explanation": "Medium-chain fatty acid with antibacterial properties against C. acnes; moderate-high comedogenic risk on oily skin."},
+    "sodium palmitate": {"name": "Sodium Palmitate", "rating": "caution", "function": "True Saponified Soap Salt", "comedogenic": 2, "explanation": "Alkaline salt of palmitic acid. In traditional soaps, high pH (9-10) can temporarily raise skin pH."},
+    "sodium stearate": {"name": "Sodium Stearate", "rating": "caution", "function": "Soap Salt / Hardening Agent", "comedogenic": 2, "explanation": "Saponified fatty acid that gives structure to soap bars and deodorant sticks; alkaline pH."},
+    "sodium isethionate": {"name": "Sodium Isethionate", "rating": "safe", "function": "Mild Syndet Cleanser Salt", "comedogenic": 0, "explanation": "Conditioning syndet ingredient that creates a creamy, low-irritancy foam profile."},
+    "sodium palm kernelate": {"name": "Sodium Palm Kernelate", "rating": "caution", "function": "Saponified Cleanser", "comedogenic": 2, "explanation": "Saponified palm kernel oil providing hardness and quick lather in cleansing bars."},
+    "cocamidopropyl betaine": {"name": "Cocamidopropyl Betaine (CAPB)", "rating": "safe", "function": "Secondary Amphoteric Cleanser", "comedogenic": 0, "explanation": "Mild coconut-derived surfactant that reduces irritancy of primary cleansers and creates rich lather."},
+    "sodium chloride": {"name": "Sodium Chloride (Salt)", "rating": "safe", "function": "Viscosity Builder / Texture", "comedogenic": 1, "explanation": "Common mineral salt used to thicken surfactant solutions into gel textures."},
+    "zinc oxide": {"name": "Zinc Oxide", "rating": "safe", "function": "Skin Protectant / Calming Mineral", "comedogenic": 1, "explanation": "Anti-inflammatory mineral that soothes diaper rash, calms redness, and offers physical UV protection."},
+    "tetrasodium edta": {"name": "Tetrasodium EDTA", "rating": "caution", "function": "Chelating Agent / Stabilizer", "comedogenic": 0, "explanation": "Binds trace heavy metal ions in tap water to prevent formula rancidity; enhances penetration of other chemicals."},
+    "disodium edta": {"name": "Disodium EDTA", "rating": "caution", "function": "Chelating Agent / Stabilizer", "comedogenic": 0, "explanation": "Binds metallic ions to preserve product clarity and fragrance stability over shelf life."},
+    "tetrasodium etidronate": {"name": "Tetrasodium Etidronate", "rating": "caution", "function": "Chelating Agent / Preservative Booster", "comedogenic": 0, "explanation": "Chelates calcium and magnesium ions in hard water; prevents soap scum formation."},
+    "alumina": {"name": "Alumina (Aluminum Oxide)", "rating": "safe", "function": "Opacifier / Viscosity Regulator", "comedogenic": 0, "explanation": "Inert mineral carrier often used to coat colorants and sunscreens; non-penetrating topically."},
+    "ci 77891": {"name": "Titanium Dioxide (CI 77891)", "rating": "safe", "function": "White Pigment / Opacifier", "comedogenic": 0, "explanation": "Inert white mineral pigment used for brightness and physical opacity; non-irritating to skin."},
+    "titanium dioxide": {"name": "Titanium Dioxide", "rating": "safe", "function": "Physical UV Shield / Opacifier", "comedogenic": 0, "explanation": "Inert mineral that reflects UV radiation and imparts opaque white color."},
+    "parfum": {"name": "Parfum / Synthetic Fragrance", "rating": "hazardous", "function": "Aromatic Fragrance Blend", "comedogenic": 0, "explanation": "Proprietary mix of synthetic aroma chemicals; leading cause of allergic contact dermatitis and skin sensitization."},
+    "perfume": {"name": "Parfum / Synthetic Fragrance", "rating": "hazardous", "function": "Aromatic Fragrance Blend", "comedogenic": 0, "explanation": "Proprietary mix of synthetic aroma chemicals; leading cause of allergic contact dermatitis and skin sensitization."},
+    "fragrance": {"name": "Parfum / Synthetic Fragrance", "rating": "hazardous", "function": "Aromatic Fragrance Blend", "comedogenic": 0, "explanation": "Proprietary mix of synthetic aroma chemicals; leading cause of allergic contact dermatitis and skin sensitization."},
+    "paraben": {"name": "Parabens (Preservative)", "rating": "hazardous", "function": "Synthetic Preservative", "comedogenic": 0, "explanation": "Endocrine disruptor with weak estrogenic mimicking activity; restricted in clean formulations."},
+    "methylparaben": {"name": "Methylparaben", "rating": "hazardous", "function": "Synthetic Preservative", "comedogenic": 0, "explanation": "Common paraben preservative; suspected endocrine disruptor and allergen in sensitized individuals."},
+    "propylparaben": {"name": "Propylparaben", "rating": "hazardous", "function": "Synthetic Preservative", "comedogenic": 0, "explanation": "High-potency paraben with higher lipophilic tissue persistence; restricted under EU cosmetic standards."},
+    "butylparaben": {"name": "Butylparaben", "rating": "hazardous", "function": "Synthetic Preservative", "comedogenic": 0, "explanation": "Long-chain paraben strongly linked to estrogenic endocrine activity; banned in infant leave-on cosmetics in EU."},
+    "sodium laureth sulfate": {"name": "Sodium Laureth Sulfate (SLES)", "rating": "caution", "function": "Anionic Cleansing Surfactant", "comedogenic": 0, "explanation": "Ethoxylated foaming agent. Milder than SLS, but can cause barrier dryness and may contain 1,4-dioxane traces."},
+    "sodium lauryl sulfate": {"name": "Sodium Lauryl Sulfate (SLS)", "rating": "hazardous", "function": "Harsh Stripping Surfactant", "comedogenic": 0, "explanation": "Known skin irritant used as standard irritancy benchmark; strips skin intercellular lipids and breaks moisture barrier."},
+    "dimethicone": {"name": "Dimethicone (Silicone)", "rating": "caution", "function": "Breathable Occlusive / Slip Agent", "comedogenic": 1, "explanation": "Synthetic silicone fluid that forms a velvety shield preventing water loss; may trap sweat/sebum on acne skin."},
+    "dimethiconol": {"name": "Dimethiconol", "rating": "caution", "function": "Conditioning Silicone Gum", "comedogenic": 1, "explanation": "Heavy silicone polymer that smooths damaged hair cuticles and skin micro-fissures."},
+    "paraffinum liquidum": {"name": "Mineral Oil (Paraffinum Liquidum)", "rating": "caution", "function": "Petroleum Occlusive Emollient", "comedogenic": 2, "explanation": "Highly refined petroleum hydrocarbon that traps moisture; can feel heavy and occlusive for oily skin."},
+    "mineral oil": {"name": "Mineral Oil (Paraffinum Liquidum)", "rating": "caution", "function": "Petroleum Occlusive Emollient", "comedogenic": 2, "explanation": "Highly refined petroleum hydrocarbon that traps moisture; can feel heavy and occlusive for oily skin."},
+    "myristyl alcohol": {"name": "Myristyl Alcohol", "rating": "caution", "function": "Fatty Alcohol Emollient", "comedogenic": 3, "explanation": "Fatty alcohol thickener providing luxurious body to lotions; moderate comedogenic risk for acne-prone pores."},
+    "alcohol denat": {"name": "Denatured Alcohol (Alcohol Denat)", "rating": "caution", "function": "Penetration Enhancer / Solvent", "comedogenic": 0, "explanation": "Short-chain drying alcohol that delivers quick-drying matte finish but strips skin lipids if high in ingredient list."},
+    "dmdm hydantoin": {"name": "DMDM Hydantoin", "rating": "hazardous", "function": "Formaldehyde-Releasing Preservative", "comedogenic": 0, "explanation": "Slowly releases formaldehyde over time to kill bacteria; potential allergen and carcinogen risk."},
+    "methylchloroisothiazolinone": {"name": "Methylchloroisothiazolinone (MCI)", "rating": "hazardous", "function": "Strong Preservative Biocide", "comedogenic": 0, "explanation": "Potent sensitizer and contact allergen; banned in leave-on cosmetics in EU and restricted in rinse-off."},
+    "methylisothiazolinone": {"name": "Methylisothiazolinone (MIT)", "rating": "hazardous", "function": "Strong Preservative Biocide", "comedogenic": 0, "explanation": "Severe skin allergen responsible for contact allergy epidemics; restricted exclusively to rinse-off formulas."},
+    "bht": {"name": "BHT (Butylated Hydroxytoluene)", "rating": "hazardous", "function": "Synthetic Antioxidant / Preservative", "comedogenic": 0, "explanation": "Synthetic toluene derivative used to prevent lipid oxidation; suspected endocrine and liver toxicity concerns."},
+    "phenoxyethanol": {"name": "Phenoxyethanol", "rating": "safe", "function": "Broad-Spectrum Preservative", "comedogenic": 0, "explanation": "Modern paraben-free preservative widely used under 1% concentration; safe and well-tolerated."},
+    "niacinamide": {"name": "Niacinamide (Vitamin B3)", "rating": "safe", "function": "Barrier Restorative Active", "comedogenic": 0, "explanation": "Dermatologist-recommended active that boosts ceramide synthesis, reduces pore inflammation, and regulates sebum."},
+    "hyaluronic acid": {"name": "Hyaluronic Acid (Sodium Hyaluronate)", "rating": "safe", "function": "Super-Humectant", "comedogenic": 0, "explanation": "Endogenous glycosaminoglycan holding up to 1000x its molecular weight in water, instantly plumping skin."},
+    "ceramide np": {"name": "Ceramide NP (Ceramide 3)", "rating": "safe", "function": "Bio-Identical Barrier Lipid", "comedogenic": 0, "explanation": "Crucial structural lipid naturally occurring in the skin barrier; repairs eczema, redness, and damaged moisture barriers."},
+    "tocopheryl acetate": {"name": "Vitamin E Acetate (Tocopheryl Acetate)", "rating": "safe", "function": "Lipophilic Antioxidant", "comedogenic": 1, "explanation": "Stable form of Vitamin E that scavenges free radicals generated by UV exposure and pollution."},
+    "simmondsia chinensis seed oil": {"name": "Jojoba Seed Oil", "rating": "safe", "function": "Biomimetic Liquid Wax", "comedogenic": 2, "explanation": "Structurally mimics natural human sebum, dissolving hardened plugs while conditioning skin."},
+    "chloroxylenol": {"name": "Chloroxylenol (PCMX)", "rating": "caution", "function": "Antibacterial Biocide", "comedogenic": 0, "explanation": "Broad-spectrum antiseptic chemical in antibacterial soaps; can disrupt healthy skin microbiome with daily use."},
+    "talc": {"name": "Cosmetic Talc", "rating": "caution", "function": "Slip Agent / Oil Absorbent", "comedogenic": 1, "explanation": "Natural hydrous magnesium silicate used for dry velvety slip; must be verified asbestos-free."},
+}
+
+
+# ============================================================================
+# 3. PERSONAL CARE & COSMETICS EVALUATOR
 # ============================================================================
 
 def evaluate_care_product_fallback(
@@ -53,11 +174,10 @@ def evaluate_care_product_fallback(
     """Deterministic, clinical rule-based evaluator for skincare, soaps, and cosmetics."""
     full_text = f"{query} {ingredients_text}".lower()
 
-    # Default clean baseline
     clean_score = 82
-    hazard_level = "Clean / Low Risk"
+    hazard_level = "Clean / Low Hazard"
     product_category = "Skincare & Personal Care"
-    comedogenic_rating = 1  # 0 to 5
+    comedogenic_rating = 1
 
     if any(k in full_text for k in ["soap", "bar", "bath"]):
         product_category = "Bathing Soap / Cleansing Bar"
@@ -70,93 +190,94 @@ def evaluate_care_product_fallback(
     elif any(k in full_text for k in ["serum", "oil", "face"]):
         product_category = "Facial Treatment / Serum"
 
+    # Split ingredients by comma, semicolon, or newline
+    raw_tokens = re.split(r"[,;\n•]+", ingredients_text or query)
+    cleaned_tokens = [t.strip() for t in raw_tokens if len(t.strip()) > 1]
+
+    all_ingredients_breakdown = []
     harmful_ingredients = []
     beneficial_ingredients = []
 
-    # Check for Harsh Surfactants (SLS / SLES)
-    if any(k in full_text for k in ["sodium lauryl sulfate", "sodium laureth sulfate", "sls", "sles"]):
-        clean_score -= 18
-        harmful_ingredients.append({
-            "name": "Sodium Lauryl/Laureth Sulfate (SLS/SLES)",
-            "hazard_severity": "Moderate",
-            "category": "Harsh Surfactant",
-            "concern": "Can strip natural epidermal lipid barrier, leading to transepidermal water loss and irritation.",
-        })
+    for token in cleaned_tokens:
+        tok_clean = token.lower().strip()
+        matched_info = None
 
-    # Check for Parabens (Endocrine disruptors)
-    if any(k in full_text for k in ["paraben", "methylparaben", "propylparaben", "butylparaben"]):
-        clean_score -= 25
-        harmful_ingredients.append({
-            "name": "Parabens (Preservative)",
-            "hazard_severity": "High",
-            "category": "Endocrine Disruptor",
-            "concern": "Synthetic preservative with documented estrogenic activity and hormonal disruption concerns.",
-        })
+        # Exact or partial match in INCI chemical database
+        for key, data in INCI_CHEMICAL_DATABASE.items():
+            if key == tok_clean or key in tok_clean:
+                matched_info = data
+                break
 
-    # Check for Synthetic Fragrance / Parfum
-    if any(k in full_text for k in ["fragrance", "parfum", "synthetic scent"]):
-        clean_score -= 10
-        harmful_ingredients.append({
-            "name": "Artificial Fragrance / Parfum",
-            "hazard_severity": "Low-Moderate",
-            "category": "Allergen & Sensitizer",
-            "concern": "Common trigger for contact dermatitis, skin redness, and allergic sensitivities.",
-        })
+        if matched_info:
+            item_name = matched_info["name"]
+            item_rating = matched_info["rating"]
+            item_func = matched_info["function"]
+            item_comedogenic = matched_info["comedogenic"]
+            item_explanation = matched_info["explanation"]
+        else:
+            # Heuristic classification for unlisted ingredients
+            item_name = token.title()
+            if any(h in tok_clean for h in ["paraben", "sulfate", "phthalate", "dmdm", "formaldehyde", "bht", "bha"]):
+                item_rating = "hazardous"
+                item_func = "Synthetic Preservative / Chemical Additive"
+                item_comedogenic = 0
+                item_explanation = "Flagged chemical compound associated with dermatological irritation or systemic health concerns."
+            elif any(c in tok_clean for c in ["fragrance", "parfum", "alcohol", "silicone", "dimethicone", "oil", "ci ", "edta"]):
+                item_rating = "caution"
+                item_func = "Processing Additive / Texture Modifier"
+                item_comedogenic = 2
+                item_explanation = "Cosmetic formulation ingredient requiring caution for sensitive or acne-prone skin types."
+            else:
+                item_rating = "safe"
+                item_func = "Cosmetic Emollient / Skin Conditioning"
+                item_comedogenic = 0
+                item_explanation = "Standard cosmetic ingredient with documented low topical hazard profile."
 
-    # Check for Phthalates
-    if "phthalate" in full_text or "dep" in full_text:
-        clean_score -= 20
-        harmful_ingredients.append({
-            "name": "Phthalates",
-            "hazard_severity": "High",
-            "category": "Plasticizer / Endocrine Disruptor",
-            "concern": "Linked to endocrine and reproductive interference; restricted in clean cosmetics.",
-        })
+        # Assign regulatory flag tags
+        reg_flags = []
+        if item_rating == "hazardous":
+            reg_flags.append("Toxic Concern")
+            clean_score -= 15
+        elif item_rating == "caution":
+            reg_flags.append("Use with Caution")
+            clean_score -= 5
+        else:
+            reg_flags.append("Safe Formulation")
 
-    # Check for Silicones / Microplastics
-    if any(k in full_text for k in ["dimethicone", "cyclopentasiloxane", "silicone"]):
-        clean_score -= 8
-        harmful_ingredients.append({
-            "name": "Silicones (Dimethicone / Cyclopentasiloxane)",
-            "hazard_severity": "Low",
-            "category": "Occlusive / Non-Biodegradable",
-            "concern": "Creates a temporary synthetic barrier on skin; can trap sebum in acne-prone skin.",
-        })
+        if item_comedogenic >= 3:
+            reg_flags.append(f"Pore Clogging (Rating {item_comedogenic}/5)")
+            if item_comedogenic > comedogenic_rating:
+                comedogenic_rating = item_comedogenic
 
-    # Comedogenic Pore Clogging
-    if any(k in full_text for k in ["coconut oil", "isopropyl myristate", "wheat germ oil"]):
-        comedogenic_rating = 4
-    elif any(k in full_text for k in ["shea butter", "mineral oil", "petrolatum"]):
-        comedogenic_rating = 2
-    else:
-        comedogenic_rating = 1
+        ingredient_entry = {
+            "name": item_name,
+            "safety_rating": item_rating,
+            "function": item_func,
+            "comedogenic_score": item_comedogenic,
+            "explanation": item_explanation,
+            "regulatory_flags": reg_flags,
+        }
+        all_ingredients_breakdown.append(ingredient_entry)
 
-    # Beneficial Ingredients
-    if any(k in full_text for k in ["hyaluronic acid", "sodium hyaluronate"]):
-        beneficial_ingredients.append({
-            "name": "Hyaluronic Acid",
-            "benefit": "Powerful humectant capable of holding 1,000x its weight in water, plumping skin cells.",
-        })
-    if any(k in full_text for k in ["niacinamide", "vitamin b3"]):
-        beneficial_ingredients.append({
-            "name": "Niacinamide (Vitamin B3)",
-            "benefit": "Strengthens ceramide lipid barrier, calms inflammation, and regulates sebum production.",
-        })
-    if any(k in full_text for k in ["ceramide", "ceramides"]):
-        beneficial_ingredients.append({
-            "name": "Ceramides",
-            "benefit": "Bio-identical lipids that rebuild damaged skin barriers and lock in hydration.",
-        })
-    if any(k in full_text for k in ["aloe", "aloe vera"]):
-        beneficial_ingredients.append({
-            "name": "Aloe Vera Extract",
-            "benefit": "Soothing phytocompounds that relieve erythema and hydrate sensitive skin.",
-        })
-    if any(k in full_text for k in ["glycerin", "glycerol"]):
-        beneficial_ingredients.append({
-            "name": "Glycerin",
-            "benefit": "Gold-standard gentle humectant that restores natural hydration without clogging pores.",
-        })
+        if item_rating == "hazardous":
+            harmful_ingredients.append({
+                "name": item_name,
+                "hazard_severity": "High",
+                "category": item_func,
+                "concern": item_explanation,
+            })
+        elif item_rating == "caution" and any(k in tok_clean for k in ["edta", "alcohol", "fragrance", "parfum", "sulfate"]):
+            harmful_ingredients.append({
+                "name": item_name,
+                "hazard_severity": "Moderate",
+                "category": item_func,
+                "concern": item_explanation,
+            })
+        elif item_rating == "safe" and any(b in tok_clean for b in ["glycerin", "ceramide", "niacinamide", "hyaluron", "zinc", "aloe", "tocopherol"]):
+            beneficial_ingredients.append({
+                "name": item_name,
+                "benefit": item_explanation,
+            })
 
     # If no beneficial ingredients found, add standard moisturizing actives
     if not beneficial_ingredients:
@@ -193,6 +314,17 @@ def evaluate_care_product_fallback(
         },
     ]
 
+    safe_count = sum(1 for i in all_ingredients_breakdown if i["safety_rating"] == "safe")
+    caution_count = sum(1 for i in all_ingredients_breakdown if i["safety_rating"] == "caution")
+    hazardous_count = sum(1 for i in all_ingredients_breakdown if i["safety_rating"] == "hazardous")
+
+    hazard_summary = {
+        "total_ingredients": len(all_ingredients_breakdown),
+        "safe_count": safe_count,
+        "moderate_hazard_count": caution_count,
+        "high_hazard_count": hazardous_count,
+    }
+
     return {
         "product_name": query.title() if query else "Personal Care Product",
         "product_category": product_category,
@@ -201,6 +333,8 @@ def evaluate_care_product_fallback(
         "comedogenic_rating": comedogenic_rating,
         "harmful_ingredients": harmful_ingredients,
         "beneficial_ingredients": beneficial_ingredients,
+        "all_ingredients_breakdown": all_ingredients_breakdown,
+        "hazard_summary": hazard_summary,
         "skin_compatibility": skin_compatibility,
         "clean_swaps": clean_swaps,
         "data_source": CARE_BASELINE_SOURCE,
@@ -211,29 +345,39 @@ def evaluate_care_product_fallback(
 class CareProductAnalyzeView(APIView):
     """
     Evaluates personal care products, creams, soaps, lotions, shampoos, and cosmetics.
-    Identifies clean score, endocrine disruptors, parabens, sulfates, comedogenic ratings,
-    and toxin-free clean swaps.
+    Identifies clean score, full chemical ingredients breakdown, endocrine disruptors,
+    comedogenic pore clogging, and toxin-free clean swaps.
     """
     permission_classes = [AllowAny]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def post(self, request):
+        barcode = (request.data.get("barcode") or "").strip()
         product_name = (request.data.get("product_name") or "").strip()
         ingredients_text = (request.data.get("ingredients_text") or "").strip()
         skin_type = (request.data.get("skin_type") or "all").strip().lower()
         image_base64 = (request.data.get("image_base64") or "").strip()
 
+        # Check barcode in curated care catalog
+        if barcode and barcode in CARE_BARCODE_CATALOG:
+            cat_entry = CARE_BARCODE_CATALOG[barcode]
+            if not product_name:
+                product_name = cat_entry["product_name"]
+            if not ingredients_text:
+                ingredients_text = cat_entry["ingredients_text"]
+
         combined_query = f"{product_name} {ingredients_text}".strip()
         if not combined_query and not image_base64:
             return Response(
-                {"error": "Please provide a product name, ingredients text, or label photo."},
+                {"error": "Please provide a barcode, product name, ingredients text, or label photo."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         prompt = (
             "You are a clinical cosmetic chemist and dermatologist. Analyze this personal care / cosmetic product "
-            "(soap, cream, lotion, shampoo, serum, or sunscreen). Evaluate its safety, ingredients, and toxicity.\n"
+            "(soap, cream, lotion, shampoo, serum, or sunscreen). Provide a complete chemical analysis of all ingredients.\n"
             f"Product: {product_name or 'Unspecified'}\n"
+            f"Barcode: {barcode or 'N/A'}\n"
             f"Ingredients Text: {ingredients_text or 'Infer from label photo or product name'}\n"
             f"Target Skin Type: {skin_type}\n\n"
             "Return ONLY valid JSON matching this exact structure:\n"
@@ -243,18 +387,34 @@ class CareProductAnalyzeView(APIView):
             '  "clean_score": integer (0 to 100, where 100 is completely non-toxic and natural),\n'
             '  "hazard_level": "Clean / Low Hazard" | "Moderate / Caution" | "High Hazard / Contains Toxins",\n'
             '  "comedogenic_rating": integer (0 to 5 pore-clogging scale),\n'
+            '  "all_ingredients_breakdown": [\n'
+            '    {\n'
+            '      "name": "string (chemical name)",\n'
+            '      "safety_rating": "safe" | "caution" | "hazardous",\n'
+            '      "function": "string (e.g. Humectant, Surfactant, Preservative, Emollient, Chelating Agent)",\n'
+            '      "comedogenic_score": integer (0 to 5),\n'
+            '      "explanation": "string explaining biological impact on skin",\n'
+            '      "regulatory_flags": ["string", "string"]\n'
+            '    }\n'
+            "  ],\n"
+            '  "hazard_summary": {\n'
+            '    "total_ingredients": integer,\n'
+            '    "safe_count": integer,\n'
+            '    "moderate_hazard_count": integer,\n'
+            '    "high_hazard_count": integer\n'
+            "  },\n"
             '  "harmful_ingredients": [\n'
             '    {\n'
-            '      "name": "string (e.g. Propylparaben)",\n'
+            '      "name": "string",\n'
             '      "hazard_severity": "Low" | "Moderate" | "High",\n'
-            '      "category": "string (e.g. Endocrine Disruptor, Harsh Surfactant)",\n'
-            '      "concern": "string explaining biological impact"\n'
+            '      "category": "string",\n'
+            '      "concern": "string"\n'
             '    }\n'
             "  ],\n"
             '  "beneficial_ingredients": [\n'
             '    {\n'
-            '      "name": "string (e.g. Niacinamide)",\n'
-            '      "benefit": "string explaining dermal benefits"\n'
+            '      "name": "string",\n'
+            '      "benefit": "string"\n'
             '    }\n'
             "  ],\n"
             '  "skin_compatibility": {\n'
@@ -281,7 +441,7 @@ class CareProductAnalyzeView(APIView):
 
         payload = {
             "contents": [{"parts": parts}],
-            "generationConfig": {"temperature": 0.1, "maxOutputTokens": 1024},
+            "generationConfig": {"temperature": 0.1, "maxOutputTokens": 1500},
         }
 
         raw_text, error_reason = call_gemini(payload, timeout=20)
@@ -307,7 +467,7 @@ class CareProductAnalyzeView(APIView):
 
 
 # ============================================================================
-# 2. MEDICINE & SYRUP INFORMATION WITH FOOD-DRUG INTERACTIONS
+# 4. MEDICINE & PHARMACOLOGICAL EVALUATOR
 # ============================================================================
 
 MEDICINE_KNOWLEDGE_BASE = {
@@ -319,20 +479,20 @@ MEDICINE_KNOWLEDGE_BASE = {
         "meal_timing": "Can be taken with or without food. With water.",
         "food_drug_interactions": [
             {
-                "food_or_beverage": "Alcohol",
-                "severity": "Dangerous / Avoid",
-                "interaction": "Concurrent alcohol consumption significantly accelerates hepatotoxicity and liver strain.",
+                "food_or_beverage": "Alcohol & Ethanol",
+                "severity": "Severe / Dangerous",
+                "interaction": "Alcohol induces CYP2E1 enzymes, significantly increasing toxic NAPQI metabolites and liver necrosis risk.",
             },
             {
-                "food_or_beverage": "High-Pectin / High-Fiber Foods (Pears, Apples)",
-                "severity": "Minor / Safe",
-                "interaction": "Extremely high dietary pectin can slightly slow drug absorption without reducing overall efficacy.",
+                "food_or_beverage": "High-Carbohydrate Meals",
+                "severity": "Minor / Delayed",
+                "interaction": "Very high pectin or carbohydrate content may slightly slow rate of absorption, but does not reduce overall effectiveness.",
             },
         ],
         "alcohol_contraindicated": True,
-        "generic_salt_name": "Paracetamol 650mg Tablets (Jan Aushadhi ~₹10/strip)",
-        "common_side_effects": ["Rare allergic rash", "Nausea if taken in excess", "Hepatotoxicity in overdose"],
-        "key_safety_warning": "Do not exceed 4,000 mg in 24 hours. Check other cold syrups to avoid double-dosing paracetamol.",
+        "generic_salt_name": "Jan Aushadhi Paracetamol 650mg Tablets",
+        "common_side_effects": ["Nausea (rare)", "Allergic skin rash (rare)", "Liver toxicity with overdose (>4,000mg/day)"],
+        "key_safety_warning": "Do not exceed 4,000mg in 24 hours. Check other cold remedies to prevent accidental paracetamol overdose.",
     },
     "dolo": {
         "active_salt": "Paracetamol (Acetaminophen)",
@@ -342,31 +502,49 @@ MEDICINE_KNOWLEDGE_BASE = {
         "meal_timing": "Take with water. Taking with or after light food is gentler on sensitive stomachs.",
         "food_drug_interactions": [
             {
-                "food_or_beverage": "Alcoholic Beverages",
-                "severity": "Dangerous / Strictly Avoid",
-                "interaction": "Depletes hepatic glutathione stores, elevating risk of paracetamol-induced liver injury.",
+                "food_or_beverage": "Alcohol & Alcoholic Beverages",
+                "severity": "Severe / Dangerous",
+                "interaction": "Concurrent alcohol consumption dramatically accelerates toxic metabolite conversion in the liver.",
             },
         ],
         "alcohol_contraindicated": True,
-        "generic_salt_name": "Paracetamol 650mg IP (Pradhan Mantri Jan Aushadhi generic equivalent)",
-        "common_side_effects": ["Drowsiness if combined with antihistamines", "Mild nausea"],
-        "key_safety_warning": "Maintain at least 4 to 6 hours between successive doses. Consult physician if fever persists > 3 days.",
+        "generic_salt_name": "Jan Aushadhi Paracetamol 650mg Tablets",
+        "common_side_effects": ["Rare skin reaction", "Mild gastric heaviness"],
+        "key_safety_warning": "Maintain a minimum 4 to 6-hour gap between doses. Maximum 4 tablets in 24 hours.",
     },
     "pantoprazole": {
-        "active_salt": "Pantoprazole Sodium Gastro-resistant",
+        "active_salt": "Pantoprazole Sodium (Enteric Coated)",
         "strength": "40mg",
-        "therapeutic_category": "Proton Pump Inhibitor (PPI / Gastric Acid Reducer)",
-        "common_uses": "Gastroesophageal reflux disease (GERD), heartburn, peptic ulcers, and NSAID-induced gastritis prevention.",
-        "meal_timing": "Strictly 30 to 60 minutes BEFORE breakfast on an empty stomach with a glass of water.",
+        "therapeutic_category": "Proton Pump Inhibitor (PPI / Antacid)",
+        "common_uses": "Gastroesophageal reflux disease (GERD), acid peptic disease, stomach ulcers, and heartburn.",
+        "meal_timing": "Strictly take 30 to 45 minutes before morning breakfast on an empty stomach with a full glass of plain water.",
         "food_drug_interactions": [
             {
-                "food_or_beverage": "Caffeine, Citrus & Fried/Spicy Meals",
-                "severity": "Moderate / Avoid",
-                "interaction": "Directly triggers acid oversecretion, counteracting the healing purpose of the antacid.",
+                "food_or_beverage": "Heavy Fatty Foods & Coffee at time of dose",
+                "severity": "Moderate / Ineffective",
+                "interaction": "Food in the stomach delays PPI gastric emptying and blunts proton pump inhibition. Take on an empty stomach.",
             },
         ],
-        "alcohol_contraindicated": True,
-        "generic_salt_name": "Pantoprazole 40mg Gastro-resistant Tablets",
+        "alcohol_contraindicated": False,
+        "generic_salt_name": "Jan Aushadhi Pantoprazole 40mg Gastro-Resistant Tablets",
+        "common_side_effects": ["Mild headache", "Diarrhea", "Long-term use may impair B12 & Calcium absorption"],
+        "key_safety_warning": "Swallow tablet whole; do not crush or chew gastro-resistant enteric coating.",
+    },
+    "pan": {
+        "active_salt": "Pantoprazole Sodium (Enteric Coated)",
+        "strength": "40mg",
+        "therapeutic_category": "Proton Pump Inhibitor (PPI / Antacid)",
+        "common_uses": "Gastroesophageal reflux disease (GERD), acid peptic disease, stomach ulcers, and heartburn.",
+        "meal_timing": "Strictly take 30 to 45 minutes before morning breakfast on an empty stomach with a full glass of plain water.",
+        "food_drug_interactions": [
+            {
+                "food_or_beverage": "Heavy Breakfast & Coffee at time of dose",
+                "severity": "Moderate / Ineffective",
+                "interaction": "PPI must reach peak plasma levels when gastric parietal proton pumps activate with food. Always take 30 mins before eating.",
+            },
+        ],
+        "alcohol_contraindicated": False,
+        "generic_salt_name": "Jan Aushadhi Pantoprazole 40mg Tablets",
         "common_side_effects": ["Mild headache", "Diarrhea", "Long-term use may impair B12 & Calcium absorption"],
         "key_safety_warning": "Swallow tablet whole; do not crush or chew gastro-resistant enteric coating.",
     },
@@ -384,7 +562,7 @@ MEDICINE_KNOWLEDGE_BASE = {
             },
         ],
         "alcohol_contraindicated": True,
-        "generic_salt_name": "Cetirizine 10mg Tablets",
+        "generic_salt_name": "Jan Aushadhi Cetirizine 10mg Tablets",
         "common_side_effects": ["Mild sedation / drowsiness", "Dry mouth", "Fatigue"],
         "key_safety_warning": "May cause drowsiness; avoid driving or operating heavy machinery until your response is known.",
     },
@@ -396,7 +574,7 @@ MEDICINE_KNOWLEDGE_BASE = {
         "meal_timing": "Take at the start of a meal or immediately after food to minimize stomach upset and optimize absorption.",
         "food_drug_interactions": [
             {
-                "food_or_beverage": "High-Calcium Milk & Dairy (if taking with Tetracyclines/Fluoroquinolones)",
+                "food_or_beverage": "High-Calcium Milk & Dairy",
                 "severity": "Moderate / Space out by 2 hours",
                 "interaction": "Heavy calcium binding can inhibit intestinal absorption. Space out dairy by 2 hours.",
             },
@@ -407,7 +585,7 @@ MEDICINE_KNOWLEDGE_BASE = {
             },
         ],
         "alcohol_contraindicated": True,
-        "generic_salt_name": "Amoxicillin and Potassium Clavulanate 625mg Tablets",
+        "generic_salt_name": "Jan Aushadhi Amoxicillin and Potassium Clavulanate 625mg Tablets",
         "common_side_effects": ["Mild diarrhea", "Nausea", "Yeast overgrowth (candidiasis)"],
         "key_safety_warning": "Always complete the full prescribed antibiotic course even if feeling better, to avoid antimicrobial resistance.",
     },
@@ -425,10 +603,74 @@ MEDICINE_KNOWLEDGE_BASE = {
             },
         ],
         "alcohol_contraindicated": True,
-        "generic_salt_name": "Atorvastatin 10mg / 20mg Tablets",
+        "generic_salt_name": "Jan Aushadhi Atorvastatin 10mg / 20mg Tablets",
         "common_side_effects": ["Muscle soreness (myalgia)", "Joint pain", "Mild digestive disturbance"],
         "key_safety_warning": "Report unexplained muscle pain, tenderness, or dark brown urine immediately to your physician.",
     },
+}
+
+MEDICINE_PHARMA_PROFILES = {
+    "dolo": {
+        "mechanism": "Selectively inhibits prostaglandin synthesis via central COX-2 pathway, elevating the pain threshold and acting on the hypothalamic heat-regulating center to lower fever.",
+        "liver": "90-95% metabolized in the liver via glucuronidation and sulfation. 5% metabolized by CYP2E1 into toxic NAPQI, which is neutralized by glutathione. Concurrent alcohol drains glutathione, causing hepatotoxicity.",
+        "kidneys": "Less than 5% excreted unchanged by the kidneys; metabolite conjugates are excreted in urine.",
+        "stomach": "Lacks peripheral COX-1 inhibition; does not erode gastric mucosal barrier unlike Aspirin or Ibuprofen.",
+    },
+    "pan": {
+        "mechanism": "Irreversibly binds to H+/K+ ATPase enzyme systems (proton pumps) on the secretory surface of gastric parietal cells, shutting down both basal and stimulated gastric acid secretion.",
+        "liver": "Extensively metabolized by cytochrome P450 isoenzymes (primarily CYP2C19 and CYP3A4) into inactive sulfone and desmethyl metabolites.",
+        "kidneys": "Approx. 80% of metabolites eliminated via renal urine excretion, 20% in feces.",
+        "stomach": "Target organ: Raises intragastric pH above 4.0, healing peptic ulcers and preventing acid reflux into the esophagus.",
+    },
+    "amoxicillin": {
+        "mechanism": "Amoxicillin inhibits bacterial cell wall synthesis during active replication; Potassium Clavulanate acts as a suicide inhibitor of bacterial beta-lactamase enzymes, preventing antibiotic breakdown.",
+        "liver": "Low hepatic metabolism (approx. 10%). Clavulanic acid can occasionally cause cholestatic jaundice in rare susceptible patients.",
+        "kidneys": "50-70% excreted unchanged in urine via glomerular filtration and tubular secretion within 6 hours. Stay well hydrated.",
+        "stomach": "Can cause local irritation, nausea, or altered gut flora diarrhea. Must be taken at the start of a meal.",
+    },
+    "cetirizine": {
+        "mechanism": "Potent and selective competitive antagonist of peripheral H1-histamine receptors, preventing allergic mediator cascade without crossing the blood-brain barrier at low doses.",
+        "liver": "Minimal hepatic metabolism; not dependent on CYP450 enzymes.",
+        "kidneys": "70% excreted unchanged via urine. Dose adjustment needed in patients with impaired renal clearance.",
+        "stomach": "Well tolerated; non-irritating to gastric mucosa.",
+    },
+    "atorvastatin": {
+        "mechanism": "Competitively inhibits HMG-CoA reductase, the rate-limiting enzyme in hepatic cholesterol synthesis, upregulating LDL receptors on hepatocytes and clearing LDL from circulation.",
+        "liver": "Extensively metabolized by hepatic CYP3A4. Grapefruit juice blocks CYP3A4, causing dangerous 300% blood spikes and muscle toxicity.",
+        "kidneys": "Less than 2% eliminated by kidneys; primarily cleared via biliary and fecal excretion.",
+        "stomach": "Take with or without food. High-fat meals do not alter total statin absorption.",
+    },
+}
+
+MEDICINE_EXCIPIENTS_DATABASE = {
+    "dolo": [
+        {"name": "Microcrystalline Cellulose (MCC)", "category": "Binder & Bulking Agent", "concern": "Inert plant cellulose fiber that ensures the tablet holds shape and dissolves rapidly in the stomach. Completely non-toxic."},
+        {"name": "Sodium Starch Glycolate", "category": "Superdisintegrant", "concern": "Promotes rapid water uptake to break the tablet apart within 3-5 minutes for prompt analgesia."},
+        {"name": "Magnesium Stearate", "category": "Tableting Lubricant", "concern": "Vegetable-derived fatty acid salt that prevents powder from sticking to pharmaceutical tablet presses."},
+        {"name": "Colloidal Silicon Dioxide", "category": "Glidant", "concern": "Prevents clumping during powder mixing and tablet compression."},
+    ],
+    "pan": [
+        {"name": "Methacrylic Acid Copolymer", "category": "Enteric Coating Polymer", "concern": "Crucial acid-resistant shield that prevents gastric stomach acid from destroying pantoprazole, releasing it in the small intestine."},
+        {"name": "Titanium Dioxide (E171)", "category": "Opacifying Coating Pigment", "concern": "Provides crisp white film coating; banned in EU food in 2022 due to nano-particle genotoxicity debate, still permitted in pharmaceuticals."},
+        {"name": "Triethyl Citrate", "category": "Film Plasticizer", "concern": "Gives elasticity to the enteric film coating to prevent cracking during swallowing."},
+        {"name": "Iron Oxide Yellow (E172)", "category": "Tableting Colorant", "concern": "Pharma-grade mineral colorant for distinctive yellow tablet identification."},
+    ],
+    "amoxicillin": [
+        {"name": "Microcrystalline Cellulose", "category": "Binder / Bulking Filler", "concern": "Bulking excipient to achieve optimal tablet dosage volume."},
+        {"name": "Colloidal Anhydrous Silica", "category": "Desiccant & Anti-Caking", "concern": "Protects moisture-sensitive clavulanic acid from hydrolytic breakdown."},
+        {"name": "Hypromellose (HPMC)", "category": "Film Coating Agent", "concern": "Smooth polymer film coat enabling easy swallowing and masking bitter antibiotic taste."},
+        {"name": "Titanium Dioxide (E171)", "category": "Film Opacifier", "concern": "Coating opacifier for moisture and light protection."},
+    ],
+    "cetirizine": [
+        {"name": "Lactose Monohydrate", "category": "Bulking Filler", "concern": "Common pharmaceutical filler; individuals with severe lactose intolerance may experience mild bloating."},
+        {"name": "Hypromellose", "category": "Film Coat", "concern": "Protective moisture-barrier coating."},
+        {"name": "Polyethylene Glycol (PEG 400)", "category": "Coating Plasticizer", "concern": "Water-soluble polymer for smooth tablet finish."},
+    ],
+    "atorvastatin": [
+        {"name": "Calcium Carbonate", "category": "Stabilizing Antacid Buffer", "concern": "Creates an alkaline micro-environment to prevent acid degradation of atorvastatin calcium."},
+        {"name": "Candelilla Wax", "category": "Polishing Agent", "concern": "Natural plant wax applied to give a smooth glossy finish for frictionless swallowing."},
+        {"name": "Hydroxypropyl Cellulose", "category": "Disintegrant", "concern": "Expands in digestive fluids to ensure prompt systemic absorption."},
+    ],
 }
 
 
@@ -436,14 +678,15 @@ def evaluate_medicine_fallback(query: str, recent_food: str = "") -> dict:
     """Clinical rule-based pharmaceutical evaluator with food-drug interaction check."""
     q = (query or "").lower().strip()
     match = None
+    matched_key = "dolo"
 
     for key, data in MEDICINE_KNOWLEDGE_BASE.items():
         if key in q:
             match = data
+            matched_key = key
             break
 
     if not match:
-        # Generic safe clinical synthesis
         match = {
             "active_salt": query.title() if query else "Pharmaceutical Compound",
             "strength": "Standard clinical strength",
@@ -468,9 +711,49 @@ def evaluate_medicine_fallback(query: str, recent_food: str = "") -> dict:
             "key_safety_warning": "Keep out of reach of children. Store in a cool, dry place away from direct sunlight.",
         }
 
+    # Fetch pharmacological profile
+    pharma_data = None
+    for k, p in MEDICINE_PHARMA_PROFILES.items():
+        if k in q or k in matched_key:
+            pharma_data = p
+            break
+
+    if not pharma_data:
+        pharma_data = {
+            "mechanism": "Binds specific biological receptors and enzymes to modulate metabolic and cellular signaling pathways.",
+            "liver": "Metabolized primarily through hepatic pathways. Avoid excessive alcohol to prevent enzyme saturation.",
+            "kidneys": "Renal clearance via glomerular filtration. Ensure consistent daily hydration.",
+            "stomach": "Swallow with water. Can be taken with meals if gastric sensitivity occurs.",
+        }
+
+    pharmacological_profile = {
+        "mechanism_of_action": pharma_data["mechanism"],
+        "organ_impact": {
+            "liver": pharma_data["liver"],
+            "kidneys": pharma_data["kidneys"],
+            "stomach": pharma_data["stomach"],
+        },
+    }
+
+    # Fetch inactive excipients & chemical additives
+    excipients_list = None
+    for k, ex in MEDICINE_EXCIPIENTS_DATABASE.items():
+        if k in q or k in matched_key:
+            excipients_list = ex
+            break
+
+    if not excipients_list:
+        excipients_list = [
+            {"name": "Microcrystalline Cellulose", "category": "Bulking Binder", "concern": "Inert plant cellulose providing tablet volume. Non-toxic."},
+            {"name": "Magnesium Stearate", "category": "Tableting Lubricant", "concern": "Common pharmaceutical processing aid."},
+            {"name": "Titanium Dioxide (E171)", "category": "Film Coating Pigment", "concern": "Provides moisture barrier and white opacity."},
+        ]
+
     return {
         "medicine_name": query.title() if query else "Prescribed Medicine",
         **match,
+        "pharmacological_profile": pharmacological_profile,
+        "excipients_and_additives": excipients_list,
         "data_source": MEDICINE_BASELINE_SOURCE,
         "disclaimer": MEDICINE_DISCLAIMER,
     }
@@ -486,23 +769,33 @@ class MedicineAnalyzeView(APIView):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def post(self, request):
+        barcode = (request.data.get("barcode") or "").strip()
         medicine_name = (request.data.get("medicine_name") or "").strip()
         label_text = (request.data.get("label_text") or "").strip()
-        recent_food = (request.data.get("recent_food") or "").strip()
+        recent_food = (request.data.get("recent_food") or request.data.get("recent_food_eaten") or "").strip()
         image_base64 = (request.data.get("image_base64") or "").strip()
+
+        # Check barcode in curated medicine catalog
+        if barcode and barcode in MEDICINE_BARCODE_CATALOG:
+            med_entry = MEDICINE_BARCODE_CATALOG[barcode]
+            if not medicine_name:
+                medicine_name = med_entry["medicine_name"]
+            if not recent_food and "food" in med_entry:
+                recent_food = med_entry["food"]
 
         combined = f"{medicine_name} {label_text}".strip()
         if not combined and not image_base64:
             return Response(
-                {"error": "Please provide a medicine name, blister strip text, or label photo."},
+                {"error": "Please provide a barcode, medicine name, blister strip text, or label photo."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         prompt = (
             "You are a clinical pharmacologist and healthcare educator. Analyze this pharmaceutical medication "
             "(tablet, capsule, syrup, or drops). Provide active salt details, meal timing instructions, "
-            "food-drug interactions, and generic Jan Aushadhi alternatives.\n"
+            "food-drug interactions, pharmacological organ pathways, inactive chemical excipients, and Jan Aushadhi generic alternatives.\n"
             f"Medicine Input: {medicine_name or 'Unspecified'}\n"
+            f"Barcode: {barcode or 'N/A'}\n"
             f"Label Text: {label_text or 'Infer from blister photo or name'}\n"
             f"User's Recent Food Context: {recent_food or 'None specified'}\n\n"
             "Return ONLY valid JSON matching this exact structure:\n"
@@ -513,13 +806,28 @@ class MedicineAnalyzeView(APIView):
             '  "therapeutic_category": "string (e.g. Analgesic & Antipyretic, Antibiotic, Antacid PPI)",\n'
             '  "common_uses": "string summarizing medical indications",\n'
             '  "meal_timing": "string (e.g. Strictly 30 mins before breakfast on empty stomach OR Take after meals)",\n'
+            '  "pharmacological_profile": {\n'
+            '    "mechanism_of_action": "string describing how the drug works biologically",\n'
+            '    "organ_impact": {\n'
+            '      "liver": "string describing hepatic metabolism and safety",\n'
+            '      "kidneys": "string describing renal clearance",\n'
+            '      "stomach": "string describing gastric mucosal effects"\n'
+            '    }\n'
+            '  },\n'
+            '  "excipients_and_additives": [\n'
+            '    {\n'
+            '      "name": "string (e.g. Titanium Dioxide E171, Sodium Benzoate, Sorbitol)",\n'
+            '      "category": "string (e.g. Tablet Coating Opacifier, Preservative, Sweetener)",\n'
+            '      "concern": "string explaining excipient purpose and potential concerns"\n'
+            '    }\n'
+            '  ],\n'
             '  "food_drug_interactions": [\n'
             '    {\n'
             '      "food_or_beverage": "string (e.g. Alcohol, Grapefruit Juice, Dairy/Calcium)",\n'
             '      "severity": "Minor" | "Moderate" | "Severe / Dangerous",\n'
             '      "interaction": "string explaining biochemical conflict"\n'
             '    }\n'
-            "  ],\n"
+            '  ],\n'
             '  "alcohol_contraindicated": boolean,\n'
             '  "generic_salt_name": "string (Jan Aushadhi affordable salt name)",\n'
             '  "common_side_effects": ["string", "string"],\n'
@@ -535,7 +843,7 @@ class MedicineAnalyzeView(APIView):
 
         payload = {
             "contents": [{"parts": parts}],
-            "generationConfig": {"temperature": 0.1, "maxOutputTokens": 1024},
+            "generationConfig": {"temperature": 0.1, "maxOutputTokens": 1500},
         }
 
         raw_text, error_reason = call_gemini(payload, timeout=20)
@@ -556,7 +864,7 @@ class MedicineAnalyzeView(APIView):
 
 
 # ============================================================================
-# 3. SYMPTOM GUIDE & DOCTOR PREPARATION ASSISTANT (SAFE CLINICAL TRIAGE)
+# 5. SYMPTOM GUIDE & DOCTOR PREPARATION ASSISTANT (SAFE CLINICAL TRIAGE)
 # ============================================================================
 
 class SymptomGuideView(APIView):

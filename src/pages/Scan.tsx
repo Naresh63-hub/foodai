@@ -78,6 +78,72 @@ const MEDICINE_PRESETS = [
   },
 ]
 
+const CARE_BARCODE_PRESETS = [
+  {
+    name: 'Dove Beauty Moisture Bar',
+    code: '8901030382348',
+    icon: '🧼',
+    desc: 'Mild syndet bar with glycerin & zinc oxide',
+  },
+  {
+    name: 'Nivea Soft Light Moisturiser',
+    code: '4005900108990',
+    icon: '🧴',
+    desc: 'Light daily cream with Jojoba oil & Vit E',
+  },
+  {
+    name: 'Pears Pure & Gentle Soap',
+    code: '8901030612148',
+    icon: '✨',
+    desc: 'Pure glycerin soap with natural oils',
+  },
+  {
+    name: 'Dettol Original Germ Protection',
+    code: '8901207010415',
+    icon: '🛡️',
+    desc: 'Chloroxylenol antibacterial cleansing bar',
+  },
+  {
+    name: 'Dove Intense Repair Shampoo',
+    code: '8901030383727',
+    icon: '🫧',
+    desc: 'Fiber active keratin repair shampoo',
+  },
+]
+
+const MEDICINE_BARCODE_PRESETS = [
+  {
+    name: 'Dolo 650 Tablets',
+    code: '8901117002014',
+    icon: '💊',
+    desc: 'Paracetamol 650mg • Antipyretic & Analgesic',
+  },
+  {
+    name: 'Pan 40 Gastro-Resistant',
+    code: '8901043003001',
+    icon: '🛡️',
+    desc: 'Pantoprazole 40mg • Acid Reflux & GERD',
+  },
+  {
+    name: 'Augmentin 625 Duo',
+    code: '8901148211028',
+    icon: '🦠',
+    desc: 'Amoxicillin + Clavulanic Acid • Antibiotic',
+  },
+  {
+    name: 'Cetcip 10mg (Cetirizine)',
+    code: '8901120014028',
+    icon: '🌿',
+    desc: 'Cetirizine HCl • Anti-allergy & Rhinitis',
+  },
+  {
+    name: 'Atorva 20mg (Atorvastatin)',
+    code: '8901117180019',
+    icon: '❤️',
+    desc: 'Atorvastatin • Lipid & Cholesterol Control',
+  },
+]
+
 export default function Scan() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -96,6 +162,8 @@ export default function Scan() {
   const [fileName, setFileName] = useState<string | null>(null)
 
   // Care & Cosmetics State
+  const [careTab, setCareTab] = useState<'barcode' | 'ocr' | 'text'>('barcode')
+  const [careBarcode, setCareBarcode] = useState('')
   const [careProductName, setCareProductName] = useState('')
   const [careIngredients, setCareIngredients] = useState('')
   const [careCategory, setCareCategory] = useState<'soap' | 'cream' | 'shampoo' | 'lotion' | 'facewash' | 'other'>('cream')
@@ -103,6 +171,8 @@ export default function Scan() {
   const [careResult, setCareResult] = useState<CareAnalysisResult | null>(null)
 
   // Medicine & Doctor Prep State
+  const [medicineTab, setMedicineTab] = useState<'ocr' | 'barcode' | 'text'>('ocr')
+  const [medicineBarcode, setMedicineBarcode] = useState('')
   const [medicineName, setMedicineName] = useState('')
   const [recentFoodQuery, setRecentFoodQuery] = useState('')
   const [medicineResult, setMedicineResult] = useState<MedicineAnalysisResult | null>(null)
@@ -134,11 +204,26 @@ export default function Scan() {
   const lastScannedTimeRef = useRef<number>(0)
   const isProcessingRef = useRef<boolean>(false)
   const tabRef = useRef(tab)
+  const categoryModeRef = useRef(categoryMode)
+  const careTabRef = useRef(careTab)
+  const medicineTabRef = useRef(medicineTab)
   const lightIntervalRef = useRef<any>(null)
 
   useEffect(() => {
     tabRef.current = tab
   }, [tab])
+
+  useEffect(() => {
+    categoryModeRef.current = categoryMode
+  }, [categoryMode])
+
+  useEffect(() => {
+    careTabRef.current = careTab
+  }, [careTab])
+
+  useEffect(() => {
+    medicineTabRef.current = medicineTab
+  }, [medicineTab])
 
   useEffect(() => {
     try {
@@ -288,6 +373,29 @@ export default function Scan() {
 
     setDetectedCode(code)
     setScannerStatus(`Detected: ${code}`)
+
+    const currentMode = categoryModeRef.current
+    if (currentMode === 'care') {
+      isProcessingRef.current = true
+      setCareBarcode(code)
+      toast.success(`Care barcode detected: ${code}`)
+      setTimeout(() => {
+        stopCamera()
+        handleCareBarcodeSubmit(code)
+      }, 350)
+      return
+    }
+
+    if (currentMode === 'medicine') {
+      isProcessingRef.current = true
+      setMedicineBarcode(code)
+      toast.success(`Medicine barcode detected: ${code}`)
+      setTimeout(() => {
+        stopCamera()
+        handleMedicineBarcodeSubmit(code)
+      }, 350)
+      return
+    }
 
     const currentTab = tabRef.current
     if (currentTab === 'batch') {
@@ -528,10 +636,29 @@ export default function Scan() {
 
   // Auto-activate camera if permission was previously granted
   useEffect(() => {
-    if (permissionStatus === 'granted' && (tab === 'barcode' || tab === 'batch') && !cameraActive) {
+    const shouldAutoStart =
+      permissionStatus === 'granted' &&
+      !cameraActive &&
+      ((categoryMode === 'food' && (tab === 'barcode' || tab === 'batch')) ||
+        (categoryMode === 'care' && (careTab === 'barcode' || careTab === 'ocr')) ||
+        (categoryMode === 'medicine' && (medicineTab === 'barcode' || medicineTab === 'ocr')))
+    if (shouldAutoStart) {
       startCamera()
     }
-  }, [permissionStatus, tab])
+  }, [permissionStatus, tab, categoryMode, careTab, medicineTab, cameraActive])
+
+  // Stop camera if user switches to a manual text tab
+  useEffect(() => {
+    if (
+      (categoryMode === 'food' && tab === 'text') ||
+      (categoryMode === 'care' && careTab === 'text') ||
+      (categoryMode === 'medicine' && medicineTab === 'text')
+    ) {
+      if (cameraActive) {
+        stopCamera()
+      }
+    }
+  }, [categoryMode, tab, careTab, medicineTab, cameraActive])
 
   const toggleTorch = async () => {
     if (!streamRef.current) {
@@ -663,7 +790,15 @@ export default function Scan() {
         navigator.vibrate([60, 30, 60])
       } catch {}
     }
-    toast.info('Extracting nutrition label text...')
+
+    const currentMode = categoryModeRef.current
+    if (currentMode === 'care') {
+      toast.info('Extracting cosmetic ingredients from label...')
+    } else if (currentMode === 'medicine') {
+      toast.info('Extracting medication strip details...')
+    } else {
+      toast.info('Extracting nutrition label text...')
+    }
     setLoading(true)
 
     canvas.toBlob(
@@ -673,6 +808,60 @@ export default function Scan() {
           return
         }
         const file = new File([blob], 'label_scan.jpg', { type: 'image/jpeg' })
+
+        if (currentMode === 'care') {
+          try {
+            const ocrRes = await scanOCR(file)
+            const extractedText = ocrRes?.text || ''
+            if (extractedText.trim()) {
+              setCareIngredients(extractedText)
+              const res = await analyzeCareProduct({
+                product_name: careProductName.trim() || 'Scanned Care Product',
+                ingredients_text: extractedText,
+                category: careCategory,
+                skin_type: skinType,
+              })
+              stopCamera()
+              setCareResult(res)
+              playScanSound()
+              toast.success(`Analysis ready for ${res.product_name}`)
+            } else {
+              toast.error('No readable text found on packaging. Please hold camera closer.')
+            }
+          } catch (err: any) {
+            toast.error(err.response?.data?.detail || 'Unable to read ingredients from label.')
+          } finally {
+            setLoading(false)
+          }
+          return
+        }
+
+        if (currentMode === 'medicine') {
+          try {
+            const ocrRes = await scanOCR(file)
+            const extractedText = ocrRes?.text || ''
+            if (extractedText.trim()) {
+              setMedicineName(extractedText)
+              const res = await analyzeMedicine({
+                medicine_name: extractedText,
+                recent_food: recentFoodQuery,
+              })
+              stopCamera()
+              setMedicineResult(res)
+              playScanSound()
+              toast.success(`Identified: ${res.medicine_name}`)
+            } else {
+              toast.error('No readable text found on medication strip. Hold camera closer.')
+            }
+          } catch (err: any) {
+            toast.error(err.response?.data?.detail || 'Unable to identify medication from photo.')
+          } finally {
+            setLoading(false)
+          }
+          return
+        }
+
+        // Food mode
         const { age, weightKg, healthConditions } = getUserPreferences()
         try {
           const ocrRes = await scanOCR(file)
@@ -734,6 +923,59 @@ export default function Scan() {
 
     setFileName(file.name)
     setLoading(true)
+
+    const currentMode = categoryModeRef.current
+
+    if (currentMode === 'care') {
+      try {
+        const ocrRes = await scanOCR(file)
+        const extractedText = ocrRes?.text || ''
+        if (extractedText.trim()) {
+          setCareIngredients(extractedText)
+          const res = await analyzeCareProduct({
+            product_name: careProductName.trim() || file.name.replace(/\.[^/.]+$/, ''),
+            ingredients_text: extractedText,
+            category: careCategory,
+            skin_type: skinType,
+          })
+          playScanSound()
+          setCareResult(res)
+          toast.success(`Analyzed ingredients from ${file.name}`)
+        } else {
+          toast.error('No readable ingredients found in this image.')
+        }
+      } catch (err: any) {
+        toast.error(err.response?.data?.detail || 'Care OCR failed. Please try a clearer picture.')
+      } finally {
+        setLoading(false)
+      }
+      return
+    }
+
+    if (currentMode === 'medicine') {
+      try {
+        const ocrRes = await scanOCR(file)
+        const extractedText = ocrRes?.text || ''
+        if (extractedText.trim()) {
+          setMedicineName(extractedText)
+          const res = await analyzeMedicine({
+            medicine_name: extractedText,
+            recent_food: recentFoodQuery,
+          })
+          playScanSound()
+          setMedicineResult(res)
+          toast.success(`Identified medicine from ${file.name}`)
+        } else {
+          toast.error('No readable medication text found in this image.')
+        }
+      } catch (err: any) {
+        toast.error(err.response?.data?.detail || 'Medicine OCR failed. Please try a clearer picture.')
+      } finally {
+        setLoading(false)
+      }
+      return
+    }
+
     const { age, weightKg, healthConditions } = getUserPreferences()
 
     try {
@@ -868,7 +1110,50 @@ export default function Scan() {
     }
   }
 
+  const handleCareBarcodeSubmit = async (codeToScan?: string) => {
+    const cleanCode = (codeToScan || careBarcode).trim()
+    if (!cleanCode) {
+      toast.error('Please enter a barcode number')
+      return
+    }
+    setLoading(true)
+    try {
+      const res = await analyzeCareProduct({ barcode: cleanCode, skin_type: skinType })
+      setCareResult(res)
+      playScanSound()
+      toast.success(`Identified: ${res.product_name}`)
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Product barcode lookup failed. Try manual entry.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleMedicineBarcodeSubmit = async (codeToScan?: string) => {
+    const cleanCode = (codeToScan || medicineBarcode).trim()
+    if (!cleanCode) {
+      toast.error('Please enter a medicine barcode')
+      return
+    }
+    setLoading(true)
+    try {
+      const res = await analyzeMedicine({ barcode: cleanCode, recent_food: recentFoodQuery })
+      setMedicineResult(res)
+      playScanSound()
+      toast.success(`Identified: ${res.medicine_name}`)
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Medicine barcode lookup failed. Try search by name.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const renderCameraView = (mode: 'single' | 'batch') => {
+    const isOcrActive =
+      (categoryMode === 'food' && tab === 'ocr') ||
+      (categoryMode === 'care' && careTab === 'ocr') ||
+      (categoryMode === 'medicine' && medicineTab === 'ocr')
+
     return (
       <div className="relative rounded-3xl bg-gray-950 overflow-hidden text-center text-white p-3 sm:p-4 shadow-card border border-gray-800 min-h-[260px] flex flex-col items-center justify-center">
         {cameraActive ? (
@@ -894,12 +1179,18 @@ export default function Scan() {
 
             {/* Viewfinder Target Reticle */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-4">
-              {tab === 'ocr' ? (
+              {isOcrActive ? (
                 /* OCR Document / Nutrition Label Frame */
                 <div className="relative w-72 h-48 border-2 border-dashed border-emerald-400/90 rounded-2xl flex flex-col items-center justify-between p-3 bg-black/20 backdrop-blur-[1px] shadow-[0_0_20px_rgba(16,185,129,0.3)]">
                   <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-400/60 text-[10px] font-black tracking-wide text-emerald-300">
-                    <span>📋</span>
-                    <span>ALIGN NUTRITION FACTS OR INGREDIENTS</span>
+                    <span>{categoryMode === 'medicine' ? '💊' : categoryMode === 'care' ? '🧴' : '📋'}</span>
+                    <span>
+                      {categoryMode === 'medicine'
+                        ? 'ALIGN TABLET STRIP / PACKAGING'
+                        : categoryMode === 'care'
+                        ? 'ALIGN COSMETIC INGREDIENT LIST'
+                        : 'ALIGN NUTRITION FACTS OR INGREDIENTS'}
+                    </span>
                   </div>
                   <div className="absolute -top-1 -left-1 w-5 h-5 border-t-4 border-l-4 border-emerald-400 rounded-tl-sm" />
                   <div className="absolute -top-1 -right-1 w-5 h-5 border-t-4 border-r-4 border-emerald-400 rounded-tr-sm" />
@@ -991,7 +1282,7 @@ export default function Scan() {
             </div>
 
             {/* Bottom In-Viewfinder Camera Shutter for OCR */}
-            {tab === 'ocr' && (
+            {isOcrActive && (
               <div className="absolute bottom-3 inset-x-0 z-20 flex justify-center pointer-events-auto">
                 <button
                   type="button"
@@ -1003,7 +1294,15 @@ export default function Scan() {
                   className="px-5 py-2.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 active:scale-95 text-white font-extrabold text-xs shadow-lg flex items-center gap-2 border border-white/30 backdrop-blur-sm cursor-pointer"
                 >
                   <span className="text-base">📸</span>
-                  <span>{loading ? 'Reading Label...' : 'Snap & Extract Label'}</span>
+                  <span>
+                    {loading
+                      ? 'Reading Label...'
+                      : categoryMode === 'care'
+                      ? 'Snap & Analyze Packaging'
+                      : categoryMode === 'medicine'
+                      ? 'Snap & Identify Medication'
+                      : 'Snap & Extract Label'}
+                  </span>
                 </button>
               </div>
             )}
@@ -1043,10 +1342,22 @@ export default function Scan() {
           <div className="w-64 h-36 border-2 border-dashed border-emerald-400/80 rounded-2xl flex flex-col items-center justify-center relative p-3 overflow-hidden bg-gray-900/40">
             <span className="text-3xl">📷</span>
             <p className="text-xs font-bold text-emerald-300 mt-1">
-              {mode === 'batch' ? 'Continuous Barcode Scanner' : 'Live Auto-Detect Barcode'}
+              {categoryMode === 'care'
+                ? 'Care Product Scanner'
+                : categoryMode === 'medicine'
+                ? 'Medicine Scanner'
+                : mode === 'batch'
+                ? 'Continuous Barcode Scanner'
+                : 'Live Auto-Detect Barcode'}
             </p>
             <p className="text-[10px] text-gray-400">
-              {mode === 'batch' ? 'Scan items rapidly into cart' : 'Instant detection • laser auto-aim'}
+              {categoryMode === 'care'
+                ? 'Instant INCI hazard & clean score check'
+                : categoryMode === 'medicine'
+                ? 'Instant food conflict & pharmacology check'
+                : mode === 'batch'
+                ? 'Scan items rapidly into cart'
+                : 'Instant detection • laser auto-aim'}
             </p>
             <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-emerald-400" />
             <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-emerald-400" />
@@ -1448,127 +1759,253 @@ export default function Scan() {
               <CareResultsCard data={careResult} onReset={() => setCareResult(null)} />
             ) : (
               <>
-                <form
-                  onSubmit={handleCareSubmit}
-                  className="rounded-3xl bg-white shadow-card p-5 border border-gray-100 space-y-4"
-                >
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                      Product Name (Optional)
-                    </label>
-                    <input
-                      type="text"
-                      value={careProductName}
-                      onChange={(e) => setCareProductName(e.target.value)}
-                      placeholder="e.g. Dove Beauty Bar, Nivea Moisturiser..."
-                      className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                      Product Category
-                    </label>
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {[
-                        { id: 'soap', label: '🧼 Soap / Bar' },
-                        { id: 'cream', label: '🧴 Cream' },
-                        { id: 'shampoo', label: '🫧 Shampoo' },
-                        { id: 'facewash', label: '✨ Facewash' },
-                        { id: 'lotion', label: '💧 Lotion' },
-                        { id: 'other', label: '📦 Other' },
-                      ].map((cat) => (
-                        <button
-                          key={cat.id}
-                          type="button"
-                          onClick={() => setCareCategory(cat.id as any)}
-                          className={`py-2 px-2 rounded-xl text-xs font-bold transition-all border text-center cursor-pointer ${
-                            careCategory === cat.id
-                              ? 'bg-teal-600 text-white border-teal-600 shadow-xs'
-                              : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
-                          }`}
-                        >
-                          {cat.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                      Target Skin Type
-                    </label>
-                    <div className="grid grid-cols-4 gap-1.5">
-                      {['normal', 'oily', 'dry', 'sensitive'].map((st) => (
-                        <button
-                          key={st}
-                          type="button"
-                          onClick={() => setSkinType(st)}
-                          className={`py-1.5 rounded-xl text-xs font-bold capitalize transition-all border text-center cursor-pointer ${
-                            skinType === st
-                              ? 'bg-teal-50 text-teal-800 border-teal-300 font-extrabold'
-                              : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'
-                          }`}
-                        >
-                          {st}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                      Ingredients (INCI List)
-                    </label>
-                    <textarea
-                      rows={4}
-                      value={careIngredients}
-                      onChange={(e) => setCareIngredients(e.target.value)}
-                      placeholder="e.g. Aqua, Glycerin, Sodium Laureth Sulfate, Cocamidopropyl Betaine, Methylparaben, Dimethicone, Parfum..."
-                      className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-xs leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 font-mono"
-                    />
-                    <p className="text-[10px] text-gray-400 mt-1">
-                      Paste full ingredient list from packaging label.
-                    </p>
-                  </div>
-
+                {/* Sub-tabs for Care: Barcode | Label Photo (OCR) | Manual */}
+                <div className="flex rounded-2xl bg-gray-100 p-1 shadow-xs">
                   <button
-                    type="submit"
-                    disabled={loading || !careIngredients.trim()}
-                    className="w-full rounded-2xl bg-teal-600 hover:bg-teal-700 active:scale-95 text-white font-black py-3 text-sm transition-all disabled:opacity-50 shadow-soft cursor-pointer"
+                    type="button"
+                    onClick={() => setCareTab('barcode')}
+                    className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      careTab === 'barcode'
+                        ? 'bg-white text-teal-800 shadow-sm font-black'
+                        : 'text-gray-500 hover:text-gray-900'
+                    }`}
                   >
-                    {loading ? 'Evaluating INCI Chemicals...' : 'Analyze Clean Score & Hazards'}
+                    <span>📊 Barcode</span>
                   </button>
-                </form>
-
-                {/* 1-Tap Quick Sample Presets for Personal Care */}
-                <div className="mt-6">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2.5">
-                    ⚡ Instant Care Demos:
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {CARE_PRESETS.map((p) => (
-                      <button
-                        key={p.name}
-                        type="button"
-                        onClick={() => {
-                          setCareProductName(p.name)
-                          setCareCategory(p.category)
-                          setCareIngredients(p.ingredients)
-                          handleCareSubmit(undefined, p)
-                        }}
-                        disabled={loading}
-                        className="flex flex-col text-left p-3 rounded-2xl bg-white hover:bg-teal-50/50 border border-gray-200/80 hover:border-teal-300 shadow-xs transition-all cursor-pointer"
-                      >
-                        <div className="flex items-center gap-1.5 mb-1">
-                          <span className="text-xl">{p.icon}</span>
-                          <span className="text-xs font-bold text-gray-900 truncate">{p.name}</span>
-                        </div>
-                        <p className="text-[10px] text-gray-500 line-clamp-2">{p.desc}</p>
-                      </button>
-                    ))}
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCareTab('ocr')}
+                    className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      careTab === 'ocr'
+                        ? 'bg-white text-teal-800 shadow-sm font-black'
+                        : 'text-gray-500 hover:text-gray-900'
+                    }`}
+                  >
+                    <span>📷 Label Photo</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCareTab('text')}
+                    className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      careTab === 'text'
+                        ? 'bg-white text-teal-800 shadow-sm font-black'
+                        : 'text-gray-500 hover:text-gray-900'
+                    }`}
+                  >
+                    <span>📝 Manual / INCI</span>
+                  </button>
                 </div>
+
+                {/* Sub-tab 1: Barcode Scan */}
+                {careTab === 'barcode' && (
+                  <div className="space-y-4">
+                    {renderCameraView('single')}
+
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault()
+                        handleCareBarcodeSubmit()
+                      }}
+                      className="rounded-2xl bg-white shadow-card p-4 border border-gray-100"
+                    >
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                        Enter Care Product Barcode
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={careBarcode}
+                          onChange={(e) => setCareBarcode(e.target.value)}
+                          placeholder="e.g. 8901030382348"
+                          className="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        />
+                        <button
+                          type="submit"
+                          disabled={loading || !careBarcode.trim()}
+                          className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-soft disabled:opacity-50 transition-all cursor-pointer"
+                        >
+                          {loading ? 'Searching...' : 'Lookup'}
+                        </button>
+                      </div>
+                    </form>
+
+                    {/* Instant Barcode Demos */}
+                    <div className="mt-4">
+                      <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                        ⚡ Curated Barcode Presets (Dove, Nivea, Pears, Dettol):
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {CARE_BARCODE_PRESETS.map((p) => (
+                          <button
+                            key={p.code}
+                            type="button"
+                            onClick={() => {
+                              setCareBarcode(p.code)
+                              handleCareBarcodeSubmit(p.code)
+                            }}
+                            disabled={loading}
+                            className="flex flex-col text-left p-2.5 rounded-2xl bg-white hover:bg-teal-50/50 border border-gray-200/80 hover:border-teal-300 shadow-xs transition-all cursor-pointer"
+                          >
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                              <span className="text-lg">{p.icon}</span>
+                              <span className="text-xs font-bold text-gray-900 truncate">{p.name}</span>
+                            </div>
+                            <span className="text-[10px] font-mono text-teal-700 font-bold">{p.code}</span>
+                            <p className="text-[10px] text-gray-500 line-clamp-1">{p.desc}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Sub-tab 2: Label Photo OCR */}
+                {careTab === 'ocr' && (
+                  <div className="space-y-4">
+                    {renderCameraView('single')}
+
+                    <div className="rounded-2xl bg-white shadow-card p-5 border border-gray-100 text-center">
+                      <span className="text-3xl block mb-2">🧴</span>
+                      <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-800 mb-1">
+                        Scan Cosmetic Packaging or Upload Photo
+                      </h3>
+                      <p className="text-[11px] text-gray-500 mb-3 max-w-xs mx-auto">
+                        Snap the ingredient list (INCI) on the back of your bottle, tube, or soap box.
+                      </p>
+                      <label className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-50 border border-teal-200 text-teal-800 text-xs font-bold hover:bg-teal-100 transition-all cursor-pointer">
+                        <span>📁 Choose Label Photo</span>
+                        <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {/* Sub-tab 3: Manual / INCI */}
+                {careTab === 'text' && (
+                  <div className="space-y-4">
+                    <form
+                      onSubmit={handleCareSubmit}
+                      className="rounded-3xl bg-white shadow-card p-5 border border-gray-100 space-y-4"
+                    >
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                          Product Name (Optional)
+                        </label>
+                        <input
+                          type="text"
+                          value={careProductName}
+                          onChange={(e) => setCareProductName(e.target.value)}
+                          placeholder="e.g. Dove Beauty Bar, Nivea Moisturiser..."
+                          className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                          Product Category
+                        </label>
+                        <div className="grid grid-cols-3 gap-1.5">
+                          {[
+                            { id: 'soap', label: '🧼 Soap / Bar' },
+                            { id: 'cream', label: '🧴 Cream' },
+                            { id: 'shampoo', label: '🫧 Shampoo' },
+                            { id: 'facewash', label: '✨ Facewash' },
+                            { id: 'lotion', label: '💧 Lotion' },
+                            { id: 'other', label: '📦 Other' },
+                          ].map((cat) => (
+                            <button
+                              key={cat.id}
+                              type="button"
+                              onClick={() => setCareCategory(cat.id as any)}
+                              className={`py-2 px-2 rounded-xl text-xs font-bold transition-all border text-center cursor-pointer ${
+                                careCategory === cat.id
+                                  ? 'bg-teal-600 text-white border-teal-600 shadow-xs'
+                                  : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                              }`}
+                            >
+                              {cat.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                          Target Skin Type
+                        </label>
+                        <div className="grid grid-cols-4 gap-1.5">
+                          {['normal', 'oily', 'dry', 'sensitive'].map((st) => (
+                            <button
+                              key={st}
+                              type="button"
+                              onClick={() => setSkinType(st)}
+                              className={`py-1.5 rounded-xl text-xs font-bold capitalize transition-all border text-center cursor-pointer ${
+                                skinType === st
+                                  ? 'bg-teal-50 text-teal-800 border-teal-300 font-extrabold'
+                                  : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'
+                              }`}
+                            >
+                              {st}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                          Ingredients (INCI List)
+                        </label>
+                        <textarea
+                          rows={4}
+                          value={careIngredients}
+                          onChange={(e) => setCareIngredients(e.target.value)}
+                          placeholder="e.g. Aqua, Glycerin, Sodium Laureth Sulfate, Cocamidopropyl Betaine, Methylparaben, Dimethicone, Parfum..."
+                          className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-xs leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 font-mono"
+                        />
+                        <p className="text-[10px] text-gray-400 mt-1">
+                          Paste full ingredient list from packaging label.
+                        </p>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={loading || !careIngredients.trim()}
+                        className="w-full rounded-2xl bg-teal-600 hover:bg-teal-700 active:scale-95 text-white font-black py-3 text-sm transition-all disabled:opacity-50 shadow-soft cursor-pointer"
+                      >
+                        {loading ? 'Evaluating INCI Chemicals...' : 'Analyze Clean Score & Hazards'}
+                      </button>
+                    </form>
+
+                    {/* 1-Tap Quick Sample Presets for Personal Care */}
+                    <div className="mt-4">
+                      <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2.5">
+                        ⚡ Instant Care Demos:
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {CARE_PRESETS.map((p) => (
+                          <button
+                            key={p.name}
+                            type="button"
+                            onClick={() => {
+                              setCareProductName(p.name)
+                              setCareCategory(p.category)
+                              setCareIngredients(p.ingredients)
+                              handleCareSubmit(undefined, p)
+                            }}
+                            disabled={loading}
+                            className="flex flex-col text-left p-3 rounded-2xl bg-white hover:bg-teal-50/50 border border-gray-200/80 hover:border-teal-300 shadow-xs transition-all cursor-pointer"
+                          >
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <span className="text-xl">{p.icon}</span>
+                              <span className="text-xs font-bold text-gray-900 truncate">{p.name}</span>
+                            </div>
+                            <p className="text-[10px] text-gray-500 line-clamp-2">{p.desc}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -1609,80 +2046,206 @@ export default function Scan() {
               <MedicineInteractionCard data={medicineResult} onReset={() => setMedicineResult(null)} />
             ) : (
               <>
-                <form
-                  onSubmit={handleMedicineSubmit}
-                  className="rounded-3xl bg-white shadow-card p-5 border border-gray-100 space-y-4"
-                >
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                      Medicine / Tablet / Syrup Name
-                    </label>
-                    <input
-                      type="text"
-                      value={medicineName}
-                      onChange={(e) => setMedicineName(e.target.value)}
-                      placeholder="e.g. Dolo 650, Pan 40, Amoxicillin, Cetirizine..."
-                      className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                      Recent Food / Drink Eaten (Optional)
-                    </label>
-                    <input
-                      type="text"
-                      value={recentFoodQuery}
-                      onChange={(e) => setRecentFoodQuery(e.target.value)}
-                      placeholder="e.g. Milk, Curd, Coffee, Grapefruit, Alcohol..."
-                      className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
-                    <p className="text-[10px] text-gray-400 mt-1">
-                      We check if this food blocks drug absorption or risks toxicity.
-                    </p>
-                  </div>
-
+                {/* Sub-tabs for Medicine: Strip Photo (OCR) | Barcode | Search / Salt */}
+                <div className="flex rounded-2xl bg-gray-100 p-1 shadow-xs">
                   <button
-                    type="submit"
-                    disabled={loading || !medicineName.trim()}
-                    className="w-full rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-black py-3 text-sm transition-all disabled:opacity-50 shadow-soft cursor-pointer"
+                    type="button"
+                    onClick={() => setMedicineTab('ocr')}
+                    className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      medicineTab === 'ocr'
+                        ? 'bg-white text-indigo-800 shadow-sm font-black'
+                        : 'text-gray-500 hover:text-gray-900'
+                    }`}
                   >
-                    {loading ? 'Checking Pharmacology Rules...' : 'Check Food Conflicts & Meal Timing'}
+                    <span>📷 Strip Photo</span>
                   </button>
-                </form>
-
-                {/* 1-Tap Quick Sample Presets for Medicines */}
-                <div className="mt-6">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2.5">
-                    ⚡ Common Medicines & Food Conflicts:
-                  </p>
-                  <div className="grid grid-cols-1 gap-2">
-                    {MEDICINE_PRESETS.map((p) => (
-                      <button
-                        key={p.name}
-                        type="button"
-                        onClick={() => {
-                          setMedicineName(p.name)
-                          setRecentFoodQuery(p.food)
-                          handleMedicineSubmit(undefined, p)
-                        }}
-                        disabled={loading}
-                        className="flex items-center justify-between p-3 rounded-2xl bg-white hover:bg-indigo-50/50 border border-gray-200/80 hover:border-indigo-300 shadow-xs transition-all text-left cursor-pointer"
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <span className="text-2xl shrink-0">{p.icon}</span>
-                          <div className="min-w-0">
-                            <p className="text-xs font-bold text-gray-900 truncate">{p.name}</p>
-                            <p className="text-[10px] text-gray-500 truncate">{p.desc}</p>
-                          </div>
-                        </div>
-                        <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg shrink-0">
-                          {p.food ? `vs ${p.food}` : 'Inspect'}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setMedicineTab('barcode')}
+                    className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      medicineTab === 'barcode'
+                        ? 'bg-white text-indigo-800 shadow-sm font-black'
+                        : 'text-gray-500 hover:text-gray-900'
+                    }`}
+                  >
+                    <span>📊 Barcode</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMedicineTab('text')}
+                    className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      medicineTab === 'text'
+                        ? 'bg-white text-indigo-800 shadow-sm font-black'
+                        : 'text-gray-500 hover:text-gray-900'
+                    }`}
+                  >
+                    <span>📝 Search / Salt</span>
+                  </button>
                 </div>
+
+                {/* Sub-tab 1: Strip Photo OCR */}
+                {medicineTab === 'ocr' && (
+                  <div className="space-y-4">
+                    {renderCameraView('single')}
+
+                    <div className="rounded-2xl bg-white shadow-card p-5 border border-gray-100 text-center">
+                      <span className="text-3xl block mb-2">💊</span>
+                      <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-800 mb-1">
+                        Scan Tablet Strip or Syrup Packaging
+                      </h3>
+                      <p className="text-[11px] text-gray-500 mb-3 max-w-xs mx-auto">
+                        Hold blister pack, tablet strip, or syrup label in focus under good lighting.
+                      </p>
+                      <label className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs font-bold hover:bg-indigo-100 transition-all cursor-pointer">
+                        <span>📁 Choose Strip Photo</span>
+                        <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {/* Sub-tab 2: Barcode Scan */}
+                {medicineTab === 'barcode' && (
+                  <div className="space-y-4">
+                    {renderCameraView('single')}
+
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault()
+                        handleMedicineBarcodeSubmit()
+                      }}
+                      className="rounded-2xl bg-white shadow-card p-4 border border-gray-100"
+                    >
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                        Enter Medicine Barcode Number
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={medicineBarcode}
+                          onChange={(e) => setMedicineBarcode(e.target.value)}
+                          placeholder="e.g. 8901117002014"
+                          className="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        />
+                        <button
+                          type="submit"
+                          disabled={loading || !medicineBarcode.trim()}
+                          className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-soft disabled:opacity-50 transition-all cursor-pointer"
+                        >
+                          {loading ? 'Searching...' : 'Lookup'}
+                        </button>
+                      </div>
+                    </form>
+
+                    {/* Curated Medicine Barcodes */}
+                    <div className="mt-4">
+                      <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                        ⚡ Curated Medicine Barcodes (Dolo, Pan 40, Augmentin):
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {MEDICINE_BARCODE_PRESETS.map((p) => (
+                          <button
+                            key={p.code}
+                            type="button"
+                            onClick={() => {
+                              setMedicineBarcode(p.code)
+                              handleMedicineBarcodeSubmit(p.code)
+                            }}
+                            disabled={loading}
+                            className="flex flex-col text-left p-2.5 rounded-2xl bg-white hover:bg-indigo-50/50 border border-gray-200/80 hover:border-indigo-300 shadow-xs transition-all cursor-pointer"
+                          >
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                              <span className="text-lg">{p.icon}</span>
+                              <span className="text-xs font-bold text-gray-900 truncate">{p.name}</span>
+                            </div>
+                            <span className="text-[10px] font-mono text-indigo-700 font-bold">{p.code}</span>
+                            <p className="text-[10px] text-gray-500 line-clamp-1">{p.desc}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Sub-tab 3: Search / Salt */}
+                {medicineTab === 'text' && (
+                  <div className="space-y-4">
+                    <form
+                      onSubmit={handleMedicineSubmit}
+                      className="rounded-3xl bg-white shadow-card p-5 border border-gray-100 space-y-4"
+                    >
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                          Medicine / Tablet / Syrup Name
+                        </label>
+                        <input
+                          type="text"
+                          value={medicineName}
+                          onChange={(e) => setMedicineName(e.target.value)}
+                          placeholder="e.g. Dolo 650, Pan 40, Amoxicillin, Cetirizine..."
+                          className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                          Recent Food / Drink Eaten (Optional)
+                        </label>
+                        <input
+                          type="text"
+                          value={recentFoodQuery}
+                          onChange={(e) => setRecentFoodQuery(e.target.value)}
+                          placeholder="e.g. Milk, Curd, Coffee, Grapefruit, Alcohol..."
+                          className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        />
+                        <p className="text-[10px] text-gray-400 mt-1">
+                          We check if this food blocks drug absorption or risks toxicity.
+                        </p>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={loading || !medicineName.trim()}
+                        className="w-full rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-black py-3 text-sm transition-all disabled:opacity-50 shadow-soft cursor-pointer"
+                      >
+                        {loading ? 'Checking Pharmacology Rules...' : 'Check Food Conflicts & Meal Timing'}
+                      </button>
+                    </form>
+
+                    {/* 1-Tap Quick Sample Presets for Medicines */}
+                    <div className="mt-4">
+                      <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2.5">
+                        ⚡ Common Medicines & Food Conflicts:
+                      </p>
+                      <div className="grid grid-cols-1 gap-2">
+                        {MEDICINE_PRESETS.map((p) => (
+                          <button
+                            key={p.name}
+                            type="button"
+                            onClick={() => {
+                              setMedicineName(p.name)
+                              setRecentFoodQuery(p.food)
+                              handleMedicineSubmit(undefined, p)
+                            }}
+                            disabled={loading}
+                            className="flex items-center justify-between p-3 rounded-2xl bg-white hover:bg-indigo-50/50 border border-gray-200/80 hover:border-indigo-300 shadow-xs transition-all text-left cursor-pointer"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <span className="text-2xl shrink-0">{p.icon}</span>
+                              <div className="min-w-0">
+                                <p className="text-xs font-bold text-gray-900 truncate">{p.name}</p>
+                                <p className="text-[10px] text-gray-500 truncate">{p.desc}</p>
+                              </div>
+                            </div>
+                            <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg shrink-0">
+                              {p.food ? `vs ${p.food}` : 'Inspect'}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Clinical Safety & Regulatory Banner */}
                 <div className="p-3.5 rounded-2xl bg-blue-50/70 border border-blue-200/60 text-blue-900 text-[11px] leading-relaxed">

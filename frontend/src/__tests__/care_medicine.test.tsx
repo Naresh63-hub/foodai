@@ -29,6 +29,37 @@ const mockCareResult: CareAnalysisResult = {
       benefit: 'Natural humectant that draws water into the stratum corneum.',
     },
   ],
+  all_ingredients_breakdown: [
+    {
+      name: 'Glycerin',
+      safety_rating: 'safe',
+      function: 'Humectant & Skin Conditioner',
+      comedogenic_score: 0,
+      explanation: 'Skin-identical humectant; deeply hydrates barrier without irritation.',
+    },
+    {
+      name: 'Tetrasodium EDTA',
+      safety_rating: 'caution',
+      function: 'Chelating Agent',
+      comedogenic_score: 0,
+      explanation: 'Binds heavy metal ions to stabilize formula.',
+      regulatory_flags: ['Penetration Enhancer'],
+    },
+    {
+      name: 'Sodium Laureth Sulfate',
+      safety_rating: 'hazardous',
+      function: 'Anionic Surfactant',
+      comedogenic_score: 3,
+      explanation: 'Harsh cleansing detergent prone to barrier stripping and 1,4-dioxane trace risk.',
+      regulatory_flags: ['High Hazard', 'Pore Clogging'],
+    },
+  ],
+  hazard_summary: {
+    total_ingredients: 3,
+    safe_count: 1,
+    moderate_hazard_count: 1,
+    high_hazard_count: 1,
+  },
   skin_compatibility: {
     sensitive_skin: true,
     dry_skin: true,
@@ -59,6 +90,26 @@ const mockMedicineResult: MedicineAnalysisResult = {
       interaction: 'Concurrent alcohol significantly increases CYP2E1 hepatotoxicity risk.',
     },
   ],
+  pharmacological_profile: {
+    mechanism_of_action: 'Inhibits central nervous system prostaglandin synthesis via COX enzyme modulation.',
+    organ_impact: {
+      liver: '90-95% hepatic metabolism via glucuronidation and sulfation. CYP2E1 pathway generates toxic NAPQI.',
+      kidneys: 'Less than 5% excreted unchanged in urine. Safe at normal therapeutic dosages.',
+      stomach: 'Weak peripheral COX inhibition; minimal direct gastric mucosal damage compared to NSAIDs.',
+    },
+  },
+  excipients_and_additives: [
+    {
+      name: 'Microcrystalline Cellulose',
+      category: 'Tablet Binder / Filler',
+      concern: 'Inert plant fiber. Non-toxic and generally recognized safe (GRAS).',
+    },
+    {
+      name: 'Titanium Dioxide (E171)',
+      category: 'Film Coating Opacifier',
+      concern: 'Banned in EU food applications due to potential DNA genotoxicity accumulation concerns; permitted in medicines.',
+    },
+  ],
   alcohol_contraindicated: true,
   generic_salt_name: 'Jan Aushadhi Paracetamol 650mg',
   common_side_effects: ['Nausea', 'Allergic rash', 'Upper right abdominal pain (overdose)'],
@@ -85,15 +136,21 @@ const mockSymptomResult: SymptomGuideResult = {
 }
 
 describe('Care & Cosmetics Component', () => {
-  it('renders CareResultsCard with clean score, ingredients, and clean swaps', () => {
+  it('renders CareResultsCard with clean score, chemical breakdown, and clean swaps', () => {
     const handleReset = vi.fn()
     render(<CareResultsCard data={mockCareResult} onReset={handleReset} />)
 
     expect(screen.getByText('Dove Beauty Moisture Bar')).toBeInTheDocument()
     expect(screen.getByText('85')).toBeInTheDocument()
-    expect(screen.getByText('Tetrasodium EDTA')).toBeInTheDocument()
-    expect(screen.getByText('Glycerin')).toBeInTheDocument()
+    expect(screen.getByText(/Label Chemical Breakdown/i)).toBeInTheDocument()
+    expect(screen.getAllByText('Tetrasodium EDTA')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('Glycerin')[0]).toBeInTheDocument()
     expect(screen.getByText('Cetaphil Gentle Cleansing Bar')).toBeInTheDocument()
+
+    // Test filter tabs
+    const safeTab = screen.getByRole('button', { name: /Safe/i })
+    fireEvent.click(safeTab)
+    expect(screen.getAllByText('Glycerin')[0]).toBeInTheDocument()
 
     const scanAnotherBtn = screen.getByText('← Scan Another Care Product')
     fireEvent.click(scanAnotherBtn)
@@ -102,7 +159,7 @@ describe('Care & Cosmetics Component', () => {
 })
 
 describe('Medicine & Interactions Component', () => {
-  it('renders MedicineInteractionCard with active salt, meal timing, and food-drug interaction', () => {
+  it('renders MedicineInteractionCard with pharmacology profile, organ pathways, and excipients', () => {
     const handleReset = vi.fn()
     render(<MedicineInteractionCard data={mockMedicineResult} onReset={handleReset} />)
 
@@ -111,6 +168,17 @@ describe('Medicine & Interactions Component', () => {
     expect(screen.getByText(/Can be taken with or after food/i)).toBeInTheDocument()
     expect(screen.getByText('Alcohol')).toBeInTheDocument()
     expect(screen.getByText('Jan Aushadhi Paracetamol 650mg')).toBeInTheDocument()
+
+    // Test new pharmacology & organ impact section
+    expect(screen.getByText(/Pharmacology & Organ Pathway/i)).toBeInTheDocument()
+    expect(screen.getByText(/Liver Pathway/i)).toBeInTheDocument()
+    expect(screen.getByText(/Kidney Clearance/i)).toBeInTheDocument()
+    expect(screen.getByText(/Stomach Lining/i)).toBeInTheDocument()
+
+    // Test inactive excipients & additives
+    expect(screen.getByText(/Inactive Excipients & Additives/i)).toBeInTheDocument()
+    expect(screen.getByText('Titanium Dioxide (E171)')).toBeInTheDocument()
+    expect(screen.getByText('Microcrystalline Cellulose')).toBeInTheDocument()
 
     const checkAnotherBtn = screen.getByText('← Scan Another Medication')
     fireEvent.click(checkAnotherBtn)
@@ -143,7 +211,7 @@ describe('Symptom Triage Modal', () => {
 })
 
 describe('Scan Page Category Switcher', () => {
-  it('allows switching between Food, Care & Soaps, and Medicine modes', () => {
+  it('allows switching between Food, Care & Soaps, and Medicine modes with sub-tabs', () => {
     render(
       <BrowserRouter>
         <Scan />
@@ -157,13 +225,33 @@ describe('Scan Page Category Switcher', () => {
     const careBtn = screen.getByRole('button', { name: /Care & Soaps/i })
     fireEvent.click(careBtn)
     expect(screen.getByText('Care & Cosmetics')).toBeInTheDocument()
+
+    // Barcode sub-tab in Care mode
+    expect(screen.getByText(/Enter Care Product Barcode/i)).toBeInTheDocument()
+    expect(screen.getByText(/Curated Barcode Presets/i)).toBeInTheDocument()
+
+    // Switch to Manual tab in Care mode
+    const careManualBtn = screen.getByRole('button', { name: /Manual \/ INCI/i })
+    fireEvent.click(careManualBtn)
     expect(screen.getByText('Analyze Clean Score & Hazards')).toBeInTheDocument()
     expect(screen.getByText('Dove Beauty Moisture Bar')).toBeInTheDocument()
 
-    // Switch to Medicine
+    // Switch to Medicine mode
     const medBtn = screen.getByRole('button', { name: /Medicine/i })
     fireEvent.click(medBtn)
     expect(screen.getByText('Medicine & Interactions')).toBeInTheDocument()
+
+    // Strip Photo OCR sub-tab in Medicine mode
+    expect(screen.getByText(/Scan Tablet Strip or Syrup Packaging/i)).toBeInTheDocument()
+
+    // Switch to Barcode sub-tab in Medicine mode
+    const medBarcodeBtn = screen.getByRole('button', { name: /Barcode/i })
+    fireEvent.click(medBarcodeBtn)
+    expect(screen.getByText(/Enter Medicine Barcode Number/i)).toBeInTheDocument()
+
+    // Switch to Search / Salt sub-tab in Medicine mode
+    const medSearchBtn = screen.getByRole('button', { name: /Search \/ Salt/i })
+    fireEvent.click(medSearchBtn)
     expect(screen.getByText('Check Food Conflicts & Meal Timing')).toBeInTheDocument()
     expect(screen.getByText(/Dolo 650/i)).toBeInTheDocument()
   })

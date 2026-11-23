@@ -255,6 +255,22 @@ export interface CareCleanSwap {
   why_better: string
 }
 
+export interface CareIngredientDetail {
+  name: string
+  safety_rating: 'safe' | 'caution' | 'hazardous' | string
+  function: string
+  comedogenic_score: number
+  explanation: string
+  regulatory_flags?: string[]
+}
+
+export interface CareHazardSummary {
+  total_ingredients: number
+  safe_count: number
+  moderate_hazard_count: number
+  high_hazard_count: number
+}
+
 export interface CareAnalysisResult {
   product_name: string
   product_category: string
@@ -263,6 +279,8 @@ export interface CareAnalysisResult {
   comedogenic_rating: number
   harmful_ingredients: CareHarmfulIngredient[]
   beneficial_ingredients: CareBeneficialIngredient[]
+  all_ingredients_breakdown?: CareIngredientDetail[]
+  hazard_summary?: CareHazardSummary
   skin_compatibility: CareSkinCompatibility
   clean_swaps: CareCleanSwap[]
   data_source?: string
@@ -279,6 +297,23 @@ export interface FoodDrugInteraction {
   interaction: string
 }
 
+export interface MedicineOrganImpact {
+  liver: string
+  kidneys: string
+  stomach: string
+}
+
+export interface MedicinePharmaProfile {
+  mechanism_of_action: string
+  organ_impact: MedicineOrganImpact
+}
+
+export interface MedicineExcipient {
+  name: string
+  category: string
+  concern: string
+}
+
 export interface MedicineAnalysisResult {
   medicine_name: string
   active_salt: string
@@ -287,6 +322,8 @@ export interface MedicineAnalysisResult {
   common_uses: string
   meal_timing: string
   food_drug_interactions: FoodDrugInteraction[]
+  pharmacological_profile?: MedicinePharmaProfile
+  excipients_and_additives?: MedicineExcipient[]
   alcohol_contraindicated: boolean
   generic_salt_name: string
   common_side_effects: string[]

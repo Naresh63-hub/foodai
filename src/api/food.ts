@@ -1284,6 +1284,7 @@ export async function sendChatMessage(payload: {
 // ============================================================================
 
 export async function analyzeCareProduct(payload: {
+  barcode?: string
   product_name?: string
   ingredients_text?: string
   category?: string
@@ -1319,6 +1320,7 @@ export async function analyzeCareProduct(payload: {
 }
 
 export async function analyzeMedicine(payload: {
+  barcode?: string
   medicine_name?: string
   label_text?: string
   recent_food?: string

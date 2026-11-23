@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { MedicineAnalysisResult } from '../types/food'
 
 interface MedicineInteractionCardProps {
@@ -7,6 +7,11 @@ interface MedicineInteractionCardProps {
 }
 
 export default function MedicineInteractionCard({ data, onReset }: MedicineInteractionCardProps) {
+  const [showAllExcipients, setShowAllExcipients] = useState(false)
+
+  const excipients = data.excipients_and_additives || []
+  const visibleExcipients = showAllExcipients ? excipients : excipients.slice(0, 4)
+
   return (
     <div className="space-y-4 animate-fade-in-up">
       {/* Top Header Card */}
@@ -30,7 +35,7 @@ export default function MedicineInteractionCard({ data, onReset }: MedicineInter
               )}
             </div>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl shrink-0 font-bold border border-blue-100">
+          <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl shrink-0 font-bold border border-blue-100 shadow-xs">
             Rx
           </div>
         </div>
@@ -88,6 +93,124 @@ export default function MedicineInteractionCard({ data, onReset }: MedicineInter
         </div>
       )}
 
+      {/* 🔬 Biological Pharmacology & Organ Pathway (NEW) */}
+      {data.pharmacological_profile && (
+        <div className="rounded-3xl bg-white shadow-card border border-gray-100 p-5 space-y-3.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🔬</span>
+              <h3 className="text-xs font-extrabold text-gray-900 uppercase tracking-wider">
+                Pharmacology & Organ Pathway
+              </h3>
+            </div>
+            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+              Metabolism
+            </span>
+          </div>
+
+          {/* Mechanism of Action */}
+          <div className="bg-slate-50 rounded-2xl p-3 border border-slate-200/80">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Mechanism of Action
+            </span>
+            <p className="text-xs text-slate-800 font-medium leading-relaxed">
+              {data.pharmacological_profile.mechanism_of_action}
+            </p>
+          </div>
+
+          {/* 3 Organ Impact Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+            {/* Liver */}
+            <div className="p-3 rounded-2xl bg-amber-50/60 border border-amber-200/70">
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <span className="text-base">🫀</span>
+                <span className="text-[11px] font-black text-amber-950 uppercase tracking-wide">
+                  Liver Pathway
+                </span>
+              </div>
+              <p className="text-[11px] text-amber-900/90 leading-relaxed font-medium">
+                {data.pharmacological_profile.organ_impact.liver}
+              </p>
+            </div>
+
+            {/* Kidneys */}
+            <div className="p-3 rounded-2xl bg-sky-50/60 border border-sky-200/70">
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <span className="text-base">🫘</span>
+                <span className="text-[11px] font-black text-sky-950 uppercase tracking-wide">
+                  Kidney Clearance
+                </span>
+              </div>
+              <p className="text-[11px] text-sky-900/90 leading-relaxed font-medium">
+                {data.pharmacological_profile.organ_impact.kidneys}
+              </p>
+            </div>
+
+            {/* Stomach */}
+            <div className="p-3 rounded-2xl bg-emerald-50/60 border border-emerald-200/70">
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <span className="text-base">🛡️</span>
+                <span className="text-[11px] font-black text-emerald-950 uppercase tracking-wide">
+                  Stomach Lining
+                </span>
+              </div>
+              <p className="text-[11px] text-emerald-900/90 leading-relaxed font-medium">
+                {data.pharmacological_profile.organ_impact.stomach}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🧪 Inactive Excipients & Hidden Chemical Additives (NEW) */}
+      {excipients.length > 0 && (
+        <div className="rounded-3xl bg-white shadow-card border border-gray-100 p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🧪</span>
+              <h3 className="text-xs font-extrabold text-gray-900 uppercase tracking-wider">
+                Inactive Excipients & Additives ({excipients.length})
+              </h3>
+            </div>
+            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
+              Non-Active Binders & Dyes
+            </span>
+          </div>
+          <p className="text-[11px] text-gray-500 leading-relaxed">
+            Formulation excipients (coatings, binders, preservatives) do not provide therapeutic action but may trigger allergies or dietary restrictions.
+          </p>
+
+          <div className="space-y-2 pt-1">
+            {visibleExcipients.map((item, idx) => (
+              <div
+                key={idx}
+                className="p-3 rounded-2xl bg-gray-50 border border-gray-200/70 flex flex-col gap-1 transition-all"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-black text-gray-950">{item.name}</span>
+                  <span className="text-[9px] font-bold text-gray-600 bg-white px-2 py-0.5 rounded-md border border-gray-200 shrink-0">
+                    {item.category}
+                  </span>
+                </div>
+                <p className="text-[11px] text-gray-600 leading-relaxed font-medium">
+                  {item.concern}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {excipients.length > 4 && (
+            <button
+              type="button"
+              onClick={() => setShowAllExcipients(!showAllExcipients)}
+              className="w-full py-2 text-center text-xs font-extrabold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+            >
+              {showAllExcipients ? 'Show Less Excipients ▲' : `View All ${excipients.length} Excipients ▼`}
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Generic Salt & Jan Aushadhi Affordable Alternative */}
       {data.generic_salt_name && (
         <div className="rounded-3xl bg-white shadow-card border border-gray-100 p-5">
@@ -141,7 +264,7 @@ export default function MedicineInteractionCard({ data, onReset }: MedicineInter
         <button
           type="button"
           onClick={onReset}
-          className="w-full py-3.5 px-4 rounded-2xl bg-gray-900 hover:bg-black active:scale-[0.98] text-white text-xs font-bold transition-all shadow-md"
+          className="w-full py-3.5 px-4 rounded-2xl bg-gray-900 hover:bg-black active:scale-[0.98] text-white text-xs font-bold transition-all shadow-md cursor-pointer"
         >
           ← Scan Another Medication
         </button>

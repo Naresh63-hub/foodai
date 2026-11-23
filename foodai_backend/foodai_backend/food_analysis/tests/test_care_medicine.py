@@ -100,4 +100,48 @@ class CareAndMedicineAPITests(TestCase):
         self.assertGreaterEqual(len(data["questions_for_doctor"]), 2)
         self.assertIn("red_flag_warnings", data)
         self.assertIn("home_comfort_measures", data)
+
+    def test_care_analyze_full_ingredients_breakdown_and_barcode(self):
+        """Tests that personal care evaluator returns full chemical breakdown and resolves barcode."""
+        payload = {
+            "barcode": "8901030382348",  # Dove Soap Bar
+        }
+        res = self.client.post("/api/care/analyze/", payload, format="json")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        data = res.json()
+
+        self.assertIn("all_ingredients_breakdown", data)
+        self.assertGreater(len(data["all_ingredients_breakdown"]), 5)
+        self.assertIn("hazard_summary", data)
+        first_ing = data["all_ingredients_breakdown"][0]
+        self.assertIn("name", first_ing)
+        self.assertIn("safety_rating", first_ing)
+        self.assertIn("function", first_ing)
+        self.assertIn("comedogenic_score", first_ing)
+        self.assertIn("explanation", first_ing)
+
+    def test_medicine_pharmacological_profile_and_excipients(self):
+        """Tests that medicine evaluator returns pharmacology organ impacts and inactive excipients."""
+        payload = {
+            "barcode": "8901117002014",  # Dolo 650
+        }
+        res = self.client.post("/api/medicine/analyze/", payload, format="json")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        data = res.json()
+
+        self.assertIn("pharmacological_profile", data)
+        pharma = data["pharmacological_profile"]
+        self.assertIn("mechanism_of_action", pharma)
+        self.assertIn("organ_impact", pharma)
+        self.assertIn("liver", pharma["organ_impact"])
+        self.assertIn("kidneys", pharma["organ_impact"])
+        self.assertIn("stomach", pharma["organ_impact"])
+
+        self.assertIn("excipients_and_additives", data)
+        self.assertGreaterEqual(len(data["excipients_and_additives"]), 1)
+        excipient = data["excipients_and_additives"][0]
+        self.assertIn("name", excipient)
+        self.assertIn("category", excipient)
+        self.assertIn("concern", excipient)
+        self.assertIn("key_safety_warning", data)
         self.assertIn("disclaimer", data)

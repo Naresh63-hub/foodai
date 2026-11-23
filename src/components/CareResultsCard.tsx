@@ -1,5 +1,5 @@
-import React from 'react'
-import { CareAnalysisResult } from '../types/food'
+import React, { useState } from 'react'
+import { CareAnalysisResult, CareIngredientDetail } from '../types/food'
 
 interface CareResultsCardProps {
   data: CareAnalysisResult
@@ -7,6 +7,9 @@ interface CareResultsCardProps {
 }
 
 export default function CareResultsCard({ data, onReset }: CareResultsCardProps) {
+  const [filter, setFilter] = useState<'all' | 'hazardous' | 'caution' | 'safe'>('all')
+  const [expandedChemical, setExpandedChemical] = useState<string | null>(null)
+
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-emerald-600 bg-emerald-50 border-emerald-200'
     if (score >= 50) return 'text-amber-600 bg-amber-50 border-amber-200'
@@ -16,13 +19,27 @@ export default function CareResultsCard({ data, onReset }: CareResultsCardProps)
   const getSeverityBadge = (severity?: string) => {
     switch ((severity || '').toLowerCase()) {
       case 'high':
+      case 'hazardous':
         return 'bg-rose-100 text-rose-800 border-rose-200'
       case 'moderate':
+      case 'caution':
         return 'bg-amber-100 text-amber-800 border-amber-200'
       default:
-        return 'bg-gray-100 text-gray-700 border-gray-200'
+        return 'bg-emerald-100 text-emerald-800 border-emerald-200'
     }
   }
+
+  const allIngredients = data.all_ingredients_breakdown || []
+  const filteredIngredients = allIngredients.filter((ing) => {
+    if (filter === 'all') return true
+    return ing.safety_rating === filter
+  })
+
+  const safeCount = data.hazard_summary?.safe_count ?? allIngredients.filter((i) => i.safety_rating === 'safe').length
+  const cautionCount =
+    data.hazard_summary?.moderate_hazard_count ?? allIngredients.filter((i) => i.safety_rating === 'caution').length
+  const hazardousCount =
+    data.hazard_summary?.high_hazard_count ?? allIngredients.filter((i) => i.safety_rating === 'hazardous').length
 
   return (
     <div className="space-y-4 animate-fade-in-up">
@@ -44,7 +61,7 @@ export default function CareResultsCard({ data, onReset }: CareResultsCardProps)
           {/* Clean Score Circle */}
           <div
             className={`w-16 h-16 rounded-2xl flex flex-col items-center justify-center border shrink-0 font-black shadow-xs ${getScoreColor(
-              data.clean_score,
+              data.clean_score
             )}`}
           >
             <span className="text-2xl leading-none">{data.clean_score}</span>
@@ -89,7 +106,158 @@ export default function CareResultsCard({ data, onReset }: CareResultsCardProps)
             </span>
           </div>
         </div>
+
+        {/* Chemical Count Summary Row */}
+        {allIngredients.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between text-[11px] font-bold">
+            <span className="text-gray-500">Label Chemicals ({allIngredients.length}):</span>
+            <div className="flex items-center gap-1.5">
+              <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                🟢 {safeCount} Safe
+              </span>
+              <span className="px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200">
+                🟡 {cautionCount} Caution
+              </span>
+              <span className="px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200">
+                🔴 {hazardousCount} High
+              </span>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* FULL CHEMICAL INGREDIENTS BREAKDOWN (LIKE FOOD DNA) */}
+      {allIngredients.length > 0 && (
+        <div className="rounded-3xl bg-white shadow-card border border-gray-100 p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🧪</span>
+              <div>
+                <h3 className="text-xs font-black uppercase tracking-wider text-gray-900">
+                  Label Chemical Breakdown
+                </h3>
+                <p className="text-[10px] text-gray-400 font-medium">
+                  Tap any chemical to see its function & skin impact
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Filter Pills */}
+          <div className="flex rounded-xl bg-gray-100 p-1 gap-1 text-[10px] font-bold">
+            <button
+              type="button"
+              onClick={() => setFilter('all')}
+              className={`flex-1 py-1 rounded-lg transition-all ${
+                filter === 'all' ? 'bg-white text-gray-950 shadow-xs' : 'text-gray-500'
+              }`}
+            >
+              All ({allIngredients.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilter('hazardous')}
+              className={`flex-1 py-1 rounded-lg transition-all ${
+                filter === 'hazardous' ? 'bg-white text-rose-700 shadow-xs font-black' : 'text-gray-500'
+              }`}
+            >
+              🔴 High ({hazardousCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilter('caution')}
+              className={`flex-1 py-1 rounded-lg transition-all ${
+                filter === 'caution' ? 'bg-white text-amber-700 shadow-xs font-black' : 'text-gray-500'
+              }`}
+            >
+              🟡 Caution ({cautionCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilter('safe')}
+              className={`flex-1 py-1 rounded-lg transition-all ${
+                filter === 'safe' ? 'bg-white text-emerald-700 shadow-xs font-black' : 'text-gray-500'
+              }`}
+            >
+              🟢 Safe ({safeCount})
+            </button>
+          </div>
+
+          {/* Chemical List */}
+          <div className="space-y-2 pt-1 max-h-96 overflow-y-auto pr-0.5">
+            {filteredIngredients.map((ing, idx) => {
+              const isExpanded = expandedChemical === ing.name
+              return (
+                <div
+                  key={idx}
+                  onClick={() => setExpandedChemical(isExpanded ? null : ing.name)}
+                  className={`p-3 rounded-2xl border transition-all cursor-pointer ${
+                    ing.safety_rating === 'hazardous'
+                      ? 'bg-rose-50/50 border-rose-200/80 hover:bg-rose-50'
+                      : ing.safety_rating === 'caution'
+                      ? 'bg-amber-50/40 border-amber-200/70 hover:bg-amber-50/70'
+                      : 'bg-gray-50/70 border-gray-200/80 hover:bg-emerald-50/40'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs font-black text-gray-950">{ing.name}</span>
+                        {ing.comedogenic_score >= 3 && (
+                          <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded-md bg-amber-100 text-amber-800">
+                            Clog: {ing.comedogenic_score}/5
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[10px] text-gray-500 font-semibold block mt-0.5">
+                        {ing.function}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1 shrink-0">
+                      <span
+                        className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full border ${getSeverityBadge(
+                          ing.safety_rating
+                        )}`}
+                      >
+                        {ing.safety_rating === 'hazardous'
+                          ? 'High Hazard'
+                          : ing.safety_rating === 'caution'
+                          ? 'Caution'
+                          : 'Safe'}
+                      </span>
+                      <span className="text-xs text-gray-400 font-bold ml-1">
+                        {isExpanded ? '▲' : '▼'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Expandable Explanation */}
+                  {isExpanded && (
+                    <div className="mt-2.5 pt-2 border-t border-gray-200/60 text-xs space-y-1.5 animate-fadeIn">
+                      <p className="text-gray-700 font-medium leading-relaxed">
+                        {ing.explanation}
+                      </p>
+                      {ing.regulatory_flags && ing.regulatory_flags.length > 0 && (
+                        <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                          {ing.regulatory_flags.map((flag, fIdx) => (
+                            <span
+                              key={fIdx}
+                              className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-white border border-gray-200 text-gray-600"
+                            >
+                              🏷️ {flag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Harmful / Irritant Ingredients Alert */}
       {data.harmful_ingredients && data.harmful_ingredients.length > 0 && (
@@ -107,7 +275,7 @@ export default function CareResultsCard({ data, onReset }: CareResultsCardProps)
                   <span className="text-xs font-black text-gray-900">{item.name}</span>
                   <span
                     className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full border ${getSeverityBadge(
-                      item.hazard_severity,
+                      item.hazard_severity
                     )}`}
                   >
                     {item.hazard_severity} Risk
